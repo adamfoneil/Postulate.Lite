@@ -1,50 +1,58 @@
-﻿using System.Data;
+﻿using Postulate.Lite.Core.Interfaces;
+using System;
+using System.Data;
 
-namespace Postulate.Core
+namespace Postulate.Lite.Core
 {
+	public enum SaveAction
+	{
+		Insert,
+		Update
+	}
+
 	public abstract class Record
 	{
-		public virtual bool IsValid(IDbConnection connection)
-		{
-			return true;
-		}
-
-		protected virtual bool AllowSave(IDbConnection connection, string userName)
-		{
-			return true;
-		}
-
-		protected virtual void BeforeSave(IDbConnection connection)
+		public virtual void Validate(IDbConnection connection)
 		{
 			// do nothing by default
 		}
 
-		protected virtual void AfterSave(IDbConnection connection)
+		public virtual void CheckSavePermission(IDbConnection connection, IUser user)
+		{
+			// do nothing by default			
+		}
+
+		public virtual void BeforeSave(IDbConnection connection, IUser user)
 		{
 			// do nothing by default
 		}
 
-		protected virtual bool AllowFind(IDbConnection connection, string userName)
-		{
-			return true;
-		}
-
-		protected virtual void FindReferenced(IDbConnection connection)
+		public virtual void AfterSave(IDbConnection connection, SaveAction action)
 		{
 			// do nothing by default
 		}
 
-		protected virtual bool AllowDelete(IDbConnection connection, string userName)
-		{
-			return true;
-		}
-
-		protected virtual void BeforeDelete(IDbConnection connection)
+		public virtual void CheckFindPermission(IDbConnection connection, IUser user)
 		{
 			// do nothing by default
 		}
 
-		protected virtual void AfterDelete(IDbConnection connection)
+		public virtual void FindReferenced(IDbConnection connection)
+		{
+			// do nothing by default
+		}
+
+		public virtual void CheckDeletePermission(IDbConnection connection, IUser user)
+		{
+			// do nothing by default
+		}
+
+		public virtual void BeforeDelete(IDbConnection connection)
+		{
+			// do nothing by default
+		}
+
+		public virtual void AfterDelete(IDbConnection connection)
 		{
 			// do nothing by default
 		}

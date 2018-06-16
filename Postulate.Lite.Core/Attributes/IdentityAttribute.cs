@@ -1,15 +1,18 @@
 ﻿using System;
 
-namespace Postulate.Core.Attributes
+namespace Postulate.Lite.Core.Attributes
 {
+	/// <summary>
+	/// Indicates which property has the identity value for a record
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 	public class IdentityAttribute : Attribute
 	{
-		public IdentityAttribute(string columnName)
+		public IdentityAttribute(string propertyName)
 		{
-			ColumnName = columnName;
+			PropertyName = propertyName;
 		}
 
-		public string ColumnName { get; }
+		public string PropertyName { get; }
 	}
 }
