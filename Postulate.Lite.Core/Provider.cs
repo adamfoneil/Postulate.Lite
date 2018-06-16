@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Interfaces;
 using System;
 using System.Data;
