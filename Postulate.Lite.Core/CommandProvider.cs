@@ -2,19 +2,15 @@
 using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 
 namespace Postulate.Lite.Core
 {
-	public abstract class Provider<TKey>
+	public abstract class CommandProvider<TKey>
 	{
-		public Provider(IUser user)
-		{
-			User = user;
-		}
-
 		protected abstract string InsertCommand<T>();
 
 		protected abstract string UpdateCommand<T>();
@@ -25,7 +21,20 @@ namespace Postulate.Lite.Core
 
 		protected abstract TKey ConvertIdentity(object value);
 
-		protected IUser User { get; }		
+		protected abstract string ApplyDelimiter(string name);
+
+		protected abstract string TableName<T>();
+
+		protected IEnumerable<ColumnInfo> EditableColumns<TModel>()
+		{
+			var props = typeof(TModel).GetProperties();
+			return props.Where(pi => IsEditable(pi)).Select(pi => new ColumnInfo(pi));
+		}
+
+		private bool IsEditable(PropertyInfo pi)
+		{
+			throw new NotImplementedException();
+		}
 
 		public bool IsNew<TModel>(TModel @object)
 		{
@@ -64,15 +73,25 @@ namespace Postulate.Lite.Core
 		{
 			var identity = t.GetCustomAttributes(typeof(IdentityAttribute), true).OfType<IdentityAttribute>().First();
 			var property = t.GetProperty(identity.PropertyName);
-			return property;
+			if (property != null) return property;
+
+			property = t.GetProperty("Id");
+			if (property != null && property.PropertyType.Equals(typeof(TKey)) && property.CanWrite) return property;
+
+			throw new InvalidOperationException($"Couldn't find an identity property on class {t.Name}");						
 		}
 
-		public TKey Insert<TModel>(IDbConnection connection, TModel @object)
+		protected abstract Dictionary<Type, string> SupportedTypes(int length, int precision, int scale);
+
+		public TKey Insert<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
 			var record = @object as Record;
 			record?.Validate(connection);
-			record?.CheckSavePermission(connection, User);
-			record?.BeforeSave(connection, User);
+			if (user != null)
+			{
+				record?.CheckSavePermission(connection, user);
+				record?.BeforeSave(connection, user);
+			}
 
 			string cmd = InsertCommand<TModel>();
 			TKey result = connection.QuerySingleOrDefault<TKey>(cmd, @object);
@@ -83,12 +102,15 @@ namespace Postulate.Lite.Core
 			return result;
 		}
 
-		public void Update<TModel>(IDbConnection connection, TModel @object)
+		public void Update<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
 			var record = @object as Record;
 			record?.Validate(connection);
-			record?.CheckSavePermission(connection, User);
-			record?.BeforeSave(connection, User);
+			if (user != null)
+			{
+				record?.CheckSavePermission(connection, user);
+				record?.BeforeSave(connection, user);
+			}
 
 			string cmd = UpdateCommand<TModel>();
 			connection.Execute(cmd, @object);
@@ -96,28 +118,40 @@ namespace Postulate.Lite.Core
 			record?.AfterSave(connection, SaveAction.Update);
 		}
 
-		public TKey Save<TModel>(IDbConnection connection, TModel @object)
+		public TKey Save<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
 			if (IsNew(@object))
 			{
-				return Insert(connection, @object);
+				return Insert(connection, @object, user);
 			}
 			{
-				Update(connection, @object);
+				Update(connection, @object, user);
 				return GetIdentity(@object);
 			}
 		}
 
-		public TModel Find<TModel>(IDbConnection connection, TKey identity)
+		public TModel Find<TModel>(IDbConnection connection, TKey identity, IUser user = null)
 		{
 			string cmd = FindCommand<TModel>();
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });
 
 			var record = result as Record;
-			record?.CheckFindPermission(connection, User);
-
-
+			if (user != null)
+			{
+				record?.CheckFindPermission(connection, user);
+			}
+			
 			return result;
+		}
+
+		public void Delete<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		{
+			var deleteMe = Find<TModel>(connection, identity, user);
+			var record = deleteMe as Record;
+			if (user != null) record?.CheckDeletePermission(connection, user);
+
+			string cmd = DeleteCommand<TModel>();
+			connection.Execute(cmd, new { id = identity });
 		}
 	}
 }
