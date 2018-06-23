@@ -62,6 +62,24 @@ namespace Tests
 			}
 		}
 
+		[TestMethod]
+		public void UpdateEmployee()
+		{
+			InsertEmployees();
+
+			const string name = "Django";
+
+			using (var cn = GetConnection())
+			{
+				var e = cn.Find<Employee>(5);
+				e.FirstName = name;
+				cn.Save(e);
+
+				e = cn.Find<Employee>(5);
+				Assert.IsTrue(e.FirstName.Equals(name));
+			}
+		}
+
 		private void DropTable(IDbConnection cn, string tableName)
 		{
 			try
