@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Postulate.Lite.SqlServer;
 using Tests.Models;
 
-namespace Tests
+namespace Tests.SqlServer
 {
 	[TestClass]
 	public class Crud
@@ -78,6 +78,12 @@ namespace Tests
 				e = cn.Find<Employee>(5);
 				Assert.IsTrue(e.FirstName.Equals(name));
 			}
+		}
+
+		[TestMethod]
+		public void DeleteEmployee()
+		{
+
 		}
 
 		private void DropTable(IDbConnection cn, string tableName)
