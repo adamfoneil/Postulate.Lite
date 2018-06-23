@@ -1,4 +1,5 @@
 ﻿using Postulate.Lite.Core;
+using Postulate.Lite.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,15 +25,16 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string InsertCommand<T>()
 		{
-			var columns = EditableColumns<T>();
+			var columns = EditableColumns<T>(SaveAction.Insert);
 			string columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
 			string valueList = string.Join(", ", columns.Select(c => $"@{c.ColumnName}"));
-			return $"INSERT INTO {TableName<T>()} ({columnList}) VALUES ({valueList});";
+			return $"INSERT INTO {TableName<T>()} ({columnList}) OUTPUT [inserted].[{typeof(T).GetIdentityName()}] VALUES ({valueList});";
 		}
 
 		protected override string UpdateCommand<T>()
 		{
-			throw new NotImplementedException();
+			var columns = EditableColumns<T>(SaveAction.Update);
+			return $"UPDATE {TableName<T>()} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 		protected override string DeleteCommand<T>()
 		{

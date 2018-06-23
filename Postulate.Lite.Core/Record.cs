@@ -4,10 +4,11 @@ using System.Data;
 
 namespace Postulate.Lite.Core
 {
+	[Flags]
 	public enum SaveAction
 	{
-		Insert,
-		Update
+		Insert = 1,
+		Update = 2
 	}
 
 	public abstract class Record

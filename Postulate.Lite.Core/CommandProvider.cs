@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Postulate.Lite.Core.Attributes;
+using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -25,15 +26,20 @@ namespace Postulate.Lite.Core
 
 		protected abstract string TableName<T>();
 
-		protected IEnumerable<ColumnInfo> EditableColumns<TModel>()
+		protected IEnumerable<ColumnInfo> EditableColumns<TModel>(SaveAction action)
 		{
-			var props = typeof(TModel).GetProperties();
-			return props.Where(pi => IsEditable(pi)).Select(pi => new ColumnInfo(pi));
+			string identity = typeof(TModel).GetIdentityName().ToLower();
+			var props = typeof(TModel).GetProperties().Where(pi => !pi.GetColumnName().Equals(identity)).ToArray();
+			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi));
 		}
 
-		private bool IsEditable(PropertyInfo pi)
+		private bool IsEditable(PropertyInfo pi, SaveAction action)
 		{
-			throw new NotImplementedException();
+			var calcAttr = pi.GetCustomAttribute<CalculatedAttribute>();
+			if (calcAttr != null) return false;
+
+			var colInfo = new ColumnInfo(pi);
+			return ((colInfo.SaveActions & action) == action);
 		}
 
 		public bool IsNew<TModel>(TModel @object)
@@ -45,7 +51,7 @@ namespace Postulate.Lite.Core
 		{
 			if (IsNew(@object))
 			{
-				var identityProp = GetIdentityProperty(typeof(TModel));
+				var identityProp = typeof(TModel).GetIdentityProperty();
 				identityProp.SetValue(value, @object);
 			}
 			else
@@ -56,29 +62,8 @@ namespace Postulate.Lite.Core
 
 		public TKey GetIdentity<TModel>(TModel @object)
 		{
-			Type t = typeof(TModel);
-
-			try
-			{
-				var property = GetIdentityProperty(t);
-				return ConvertIdentity(property.GetValue(@object));
-			}
-			catch (Exception exc)
-			{
-				throw new Exception($"Couldn't determine record identity {t.Name}: {exc.Message}");
-			}
-		}
-
-		private static PropertyInfo GetIdentityProperty(Type t)
-		{
-			var identity = t.GetCustomAttributes(typeof(IdentityAttribute), true).OfType<IdentityAttribute>().First();
-			var property = t.GetProperty(identity.PropertyName);
-			if (property != null) return property;
-
-			property = t.GetProperty("Id");
-			if (property != null && property.PropertyType.Equals(typeof(TKey)) && property.CanWrite) return property;
-
-			throw new InvalidOperationException($"Couldn't find an identity property on class {t.Name}");						
+			var property = typeof(TModel).GetIdentityProperty();
+			return ConvertIdentity(property.GetValue(@object));
 		}
 
 		protected abstract Dictionary<Type, string> SupportedTypes(int length, int precision, int scale);
@@ -140,7 +125,7 @@ namespace Postulate.Lite.Core
 			{
 				record?.CheckFindPermission(connection, user);
 			}
-			
+
 			return result;
 		}
 

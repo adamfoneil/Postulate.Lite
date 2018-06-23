@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
+﻿using Postulate.Lite.Core.Attributes;
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace Postulate.Lite.Core
@@ -11,15 +12,21 @@ namespace Postulate.Lite.Core
 			PropertyName = propertyInfo.Name;
 			ColumnName = propertyInfo.Name;
 
-			try
+			var colAccess = propertyInfo.GetCustomAttribute<ColumnAccessAttribute>();
+			if (colAccess != null)
 			{
-				var attr = propertyInfo.GetCustomAttributes<ColumnAttribute>(false).OfType<ColumnAttribute>().First();
-				ColumnName = attr.Name;
-				DataType = attr.TypeName;
+				SaveActions = colAccess.Action;
 			}
-			catch
+			else
 			{
-				// do nothing
+				SaveActions = SaveAction.Insert | SaveAction.Update;
+			}
+
+			var colAttr = propertyInfo.GetCustomAttribute<ColumnAttribute>();
+			if (colAttr != null)
+			{
+				if (!string.IsNullOrEmpty(colAttr.Name)) ColumnName = colAttr.Name;
+				if (!string.IsNullOrEmpty(colAttr.TypeName)) DataType = colAttr.TypeName;
 			}
 		}
 
@@ -29,6 +36,7 @@ namespace Postulate.Lite.Core
 
 		public string PropertyName { get; set; }
 		public string ColumnName { get; set; }
-		public string DataType { get; set; }
+		public string DataType { get; set; }		
+		public SaveAction SaveActions { get; set; }
 	}
 }
