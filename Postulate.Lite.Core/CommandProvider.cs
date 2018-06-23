@@ -33,11 +33,17 @@ namespace Postulate.Lite.Core
 
 		protected abstract string IdentityColumnSyntax();
 
-		protected IEnumerable<ColumnInfo> EditableColumns<TModel>(SaveAction action)
+		protected IEnumerable<ColumnInfo> EditableColumns<T>(SaveAction action)
 		{
-			string identity = typeof(TModel).GetIdentityName().ToLower();
-			var props = typeof(TModel).GetProperties().Where(pi => !pi.GetColumnName().ToLower().Equals(identity)).ToArray();
+			string identity = typeof(T).GetIdentityName().ToLower();
+			var props = typeof(T).GetProperties().Where(pi => !pi.GetColumnName().ToLower().Equals(identity)).ToArray();
 			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi)).ToArray();
+		}
+
+		protected IEnumerable<PropertyInfo> MappedColumns<T>()
+		{
+			var type = typeof(T);
+			return type.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
 		}
 
 		private bool IsEditable(PropertyInfo pi, SaveAction action)

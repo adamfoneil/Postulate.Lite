@@ -50,6 +50,18 @@ namespace Tests
 			}
 		}
 
+		[TestMethod]
+		public void FindEmployee()
+		{
+			InsertEmployees();
+
+			using (var cn = GetConnection())
+			{
+				var e = cn.Find<Employee>(5);
+				Assert.IsTrue(e.Id == 5);
+			}
+		}
+
 		private void DropTable(IDbConnection cn, string tableName)
 		{
 			try

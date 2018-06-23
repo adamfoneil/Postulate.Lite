@@ -23,7 +23,10 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string FindCommand<T>()
 		{
-			throw new NotImplementedException();
+			var props = MappedColumns<T>();
+			var columns = props.Select(pi => new ColumnInfo(pi));
+			string identity = typeof(T).GetIdentityName();
+			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName<T>())} WHERE {ApplyDelimiter(identity)}=@id";
 		}
 
 		protected override string InsertCommand<T>()
@@ -89,7 +92,7 @@ namespace Postulate.Lite.SqlServer
 		protected override string CreateTableCommand<T>()
 		{
 			var type = typeof(T);
-			var columns = type.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
+			var columns = MappedColumns<T>();
 			var pkColumns = GetPrimaryKeyColumns(type, columns, out bool identityIsPrimaryKey);
 			var identityName = type.GetIdentityName();
 
