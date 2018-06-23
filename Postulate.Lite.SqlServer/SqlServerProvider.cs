@@ -2,7 +2,9 @@
 using Postulate.Lite.Core.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection;
 
 namespace Postulate.Lite.SqlServer
 {
@@ -10,7 +12,7 @@ namespace Postulate.Lite.SqlServer
 	{
 		protected override string ApplyDelimiter(string name)
 		{
-			return $"[{name}]";
+			return string.Join(".", name.Split('.').Select(part => $"[{name}]"));			
 		}
 
 		protected override int ConvertIdentity(object value)
@@ -27,7 +29,7 @@ namespace Postulate.Lite.SqlServer
 		{
 			var columns = EditableColumns<T>(SaveAction.Insert);
 			string columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
-			string valueList = string.Join(", ", columns.Select(c => $"@{c.ColumnName}"));
+			string valueList = string.Join(", ", columns.Select(c => $"@{c.PropertyName}"));
 			return $"INSERT INTO {ApplyDelimiter(TableName<T>())} ({columnList}) OUTPUT [inserted].[{typeof(T).GetIdentityName()}] VALUES ({valueList});";
 		}
 
@@ -65,7 +67,22 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string TableName<T>()
 		{
-			throw new NotImplementedException();
+			var type = typeof(T);
+			
+			Dictionary<string, string> parts = new Dictionary<string, string>()
+			{
+				{ "schema", string.Empty },
+				{ "name", type.Name }
+			};
+
+			var tblAttr = type.GetCustomAttribute<TableAttribute>();
+			if (tblAttr != null)
+			{
+				if (!string.IsNullOrEmpty(tblAttr.Schema)) parts["schema"] = tblAttr.Schema;
+				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
+			}
+
+			return string.Join(".", parts.Where(kp => !string.IsNullOrEmpty(kp.Value)).Select(kp => kp.Value));
 		}
 	}
 }

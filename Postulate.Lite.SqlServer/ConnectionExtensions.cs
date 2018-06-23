@@ -26,13 +26,13 @@ namespace Postulate.Lite.SqlServer
 		public static void Update<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			var cmd = new SqlServerCommandProvider();
-			cmd.Update<TModel>(connection, @object, user);
+			cmd.Update(connection, @object, user);
 		}
 
 		public static void Delete<TModel>(this IDbConnection connection, int id, IUser user = null)
 		{
 			var cmd = new SqlServerCommandProvider();
-			
+			cmd.Delete<TModel>(connection, id, user);
 		}
 	}
 }

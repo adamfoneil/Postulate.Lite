@@ -30,16 +30,23 @@ namespace Postulate.Lite.Core
 		{
 			string identity = typeof(TModel).GetIdentityName().ToLower();
 			var props = typeof(TModel).GetProperties().Where(pi => !pi.GetColumnName().Equals(identity)).ToArray();
-			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi));
+			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi)).ToArray();
 		}
 
 		private bool IsEditable(PropertyInfo pi, SaveAction action)
 		{
+			if (!IsSupportedType(pi)) return false;
+
 			var calcAttr = pi.GetCustomAttribute<CalculatedAttribute>();
 			if (calcAttr != null) return false;
 
 			var colInfo = new ColumnInfo(pi);
 			return ((colInfo.SaveActions & action) == action);
+		}
+
+		private bool IsSupportedType(PropertyInfo pi)
+		{
+			throw new NotImplementedException();
 		}
 
 		public bool IsNew<TModel>(TModel @object)
@@ -137,6 +144,8 @@ namespace Postulate.Lite.Core
 
 			string cmd = DeleteCommand<TModel>();
 			connection.Execute(cmd, new { id = identity });
+
+			record?.AfterDelete(connection);
 		}
 	}
 }
