@@ -83,7 +83,14 @@ namespace Tests.SqlServer
 		[TestMethod]
 		public void DeleteEmployee()
 		{
+			InsertEmployees();
 
+			using (var cn = GetConnection())
+			{
+				cn.Delete<Employee>(5);
+				int count = cn.QuerySingle<int>("SELECT COUNT(1) FROM [dbo].[Employee]");
+				Assert.IsTrue(count == 9);
+			}
 		}
 
 		private void DropTable(IDbConnection cn, string tableName)
