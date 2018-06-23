@@ -4,6 +4,7 @@ using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -35,18 +36,25 @@ namespace Postulate.Lite.Core
 
 		private bool IsEditable(PropertyInfo pi, SaveAction action)
 		{
-			if (!IsSupportedType(pi)) return false;
+			if (!IsSupportedType(pi.PropertyType)) return false;
 
-			var calcAttr = pi.GetCustomAttribute<CalculatedAttribute>();
-			if (calcAttr != null) return false;
+			var excludeAttr = new[] { typeof(CalculatedAttribute), typeof(NotMappedAttribute) };
+			foreach (var attrType in excludeAttr)
+			{
+				var attr = pi.GetCustomAttribute(attrType);
+				if (attr != null) return false;
+			}
 
 			var colInfo = new ColumnInfo(pi);
 			return ((colInfo.SaveActions & action) == action);
 		}
 
-		private bool IsSupportedType(PropertyInfo pi)
-		{
-			throw new NotImplementedException();
+		private bool IsSupportedType(Type type)
+		{			
+			return
+				SupportedTypes().ContainsKey(type) ||
+				(type.IsEnum && type.GetEnumUnderlyingType().Equals(typeof(int))) ||
+				(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && IsSupportedType(type.GetGenericArguments()[0]));
 		}
 
 		public bool IsNew<TModel>(TModel @object)
@@ -73,7 +81,7 @@ namespace Postulate.Lite.Core
 			return ConvertIdentity(property.GetValue(@object));
 		}
 
-		protected abstract Dictionary<Type, string> SupportedTypes(int length, int precision, int scale);
+		protected abstract Dictionary<Type, string> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
 
 		public TKey Insert<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
