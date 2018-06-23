@@ -1,4 +1,5 @@
 ﻿using Postulate.Lite.Core;
+using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
 using System;
 using System.Collections.Generic;
@@ -83,6 +84,81 @@ namespace Postulate.Lite.SqlServer
 			}
 
 			return string.Join(".", parts.Where(kp => !string.IsNullOrEmpty(kp.Value)).Select(kp => kp.Value));
+		}
+
+		protected override string CreateTableCommand<T>()
+		{
+			var type = typeof(T);
+			var columns = type.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
+			var pkColumns = GetPrimaryKeyColumns(type, columns, out bool identityIsPrimaryKey);
+			var identityName = type.GetIdentityName();
+
+			string constraintName = TableName<T>().Replace(".", "_");
+
+			List<string> members = new List<string>();
+			members.AddRange(columns.Select(pi => SqlColumnSyntax(pi, (identityName.Equals(pi.Name)))));
+			members.Add(PrimaryKeySyntax(constraintName, pkColumns));
+			if (!identityIsPrimaryKey) members.Add(UniqueIdSyntax(constraintName, type.GetIdentityProperty()));
+
+			return 
+				$"CREATE TABLE {ApplyDelimiter(TableName<T>())} (" +
+					string.Join(",\r\n\t", members) +
+				")";
+		}
+
+		private string UniqueIdSyntax(string constraintName, PropertyInfo propertyInfo)
+		{
+			return $"CONSTRAINT [U_{constraintName}] UNIQUE ({string.Join(", ", ApplyDelimiter(propertyInfo.GetColumnName()))})";
+		}
+
+		private string PrimaryKeySyntax(string constraintName, IEnumerable<PropertyInfo> pkColumns)
+		{
+			return $"CONSTRAINT [PK_{constraintName}] PRIMARY KEY ({string.Join(", ", pkColumns.Select(pi => ApplyDelimiter(pi.GetColumnName())))})";
+		}
+
+		private IEnumerable<PropertyInfo> GetPrimaryKeyColumns(Type type, IEnumerable<PropertyInfo> columns, out bool identityIsPrimaryKey)
+		{
+			identityIsPrimaryKey = false;
+			var result = columns.Where(pi => HasAttribute<PrimaryKeyAttribute>(pi));
+
+			if (!result.Any())
+			{
+				identityIsPrimaryKey = true;
+				result = new[] { type.GetIdentityProperty() };
+			}
+
+			return result;
+		}
+
+		protected override string SqlColumnSyntax(PropertyInfo propertyInfo, bool isIdentity)
+		{
+			ColumnInfo col = new ColumnInfo(propertyInfo);
+			string result = ApplyDelimiter(col.ColumnName);
+
+			var calcAttr = propertyInfo.GetCustomAttribute<CalculatedAttribute>();
+			if (calcAttr != null)
+			{
+				result += $" AS {calcAttr.Expression}";
+			}
+			else
+			{				
+				string nullSyntax = (col.AllowNull) ? "NULL" : "NOT NULL";
+
+				string dataType = (col.HasExplicitType()) ? 
+					col.DataType : 
+					SupportedTypes(col.Length, col.Precision, col.Scale)[propertyInfo.PropertyType];				
+
+				if (isIdentity) dataType += " " + IdentityColumnSyntax();
+
+				result += $" {dataType} {nullSyntax}";
+			}
+
+			return result;
+		}
+
+		protected override string IdentityColumnSyntax()
+		{
+			return "identity(1,1) ";
 		}
 	}
 }

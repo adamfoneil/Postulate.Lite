@@ -34,5 +34,11 @@ namespace Postulate.Lite.SqlServer
 			var cmd = new SqlServerCommandProvider();
 			cmd.Delete<TModel>(connection, id, user);
 		}
+
+		public static void CreateTable<TModel>(this IDbConnection connection)
+		{
+			var cmd = new SqlServerCommandProvider();
+			cmd.CreateTable<TModel>(connection);
+		}
 	}
 }

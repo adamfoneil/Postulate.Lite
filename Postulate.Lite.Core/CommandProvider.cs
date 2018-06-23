@@ -21,35 +21,36 @@ namespace Postulate.Lite.Core
 
 		protected abstract string FindCommand<T>();
 
+		protected abstract string CreateTableCommand<T>();
+
 		protected abstract TKey ConvertIdentity(object value);
 
 		protected abstract string ApplyDelimiter(string name);
 
 		protected abstract string TableName<T>();
 
+		protected abstract string SqlColumnSyntax(PropertyInfo propertyInfo, bool isIdentity);
+
+		protected abstract string IdentityColumnSyntax();
+
 		protected IEnumerable<ColumnInfo> EditableColumns<TModel>(SaveAction action)
 		{
 			string identity = typeof(TModel).GetIdentityName().ToLower();
-			var props = typeof(TModel).GetProperties().Where(pi => !pi.GetColumnName().Equals(identity)).ToArray();
+			var props = typeof(TModel).GetProperties().Where(pi => !pi.GetColumnName().ToLower().Equals(identity)).ToArray();
 			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi)).ToArray();
 		}
 
 		private bool IsEditable(PropertyInfo pi, SaveAction action)
 		{
 			if (!IsSupportedType(pi.PropertyType)) return false;
-
-			var excludeAttr = new[] { typeof(CalculatedAttribute), typeof(NotMappedAttribute) };
-			foreach (var attrType in excludeAttr)
-			{
-				var attr = pi.GetCustomAttribute(attrType);
-				if (attr != null) return false;
-			}
-
+			if (!IsMapped(pi)) return false;
+			if (IsCalculated(pi)) return false;
+			
 			var colInfo = new ColumnInfo(pi);
 			return ((colInfo.SaveActions & action) == action);
 		}
 
-		private bool IsSupportedType(Type type)
+		protected bool IsSupportedType(Type type)
 		{			
 			return
 				SupportedTypes().ContainsKey(type) ||
@@ -67,7 +68,7 @@ namespace Postulate.Lite.Core
 			if (IsNew(@object))
 			{
 				var identityProp = typeof(TModel).GetIdentityProperty();
-				identityProp.SetValue(value, @object);
+				identityProp.SetValue(@object, value);
 			}
 			else
 			{
@@ -154,6 +155,28 @@ namespace Postulate.Lite.Core
 			connection.Execute(cmd, new { id = identity });
 
 			record?.AfterDelete(connection);
+		}
+
+		public void CreateTable<TModel>(IDbConnection connection)
+		{
+			string cmd = CreateTableCommand<TModel>();
+			connection.Execute(cmd);
+		}
+
+		protected bool IsMapped(PropertyInfo propertyInfo)
+		{
+			return !HasAttribute<NotMappedAttribute>(propertyInfo);
+		}
+
+		protected bool IsCalculated(PropertyInfo propertyInfo)
+		{
+			return HasAttribute<CalculatedAttribute>(propertyInfo);
+		}
+
+		protected bool HasAttribute<T>(PropertyInfo propertyInfo) where T : Attribute
+		{
+			var attr = propertyInfo.GetCustomAttribute<T>();
+			return (attr != null);
 		}
 	}
 }

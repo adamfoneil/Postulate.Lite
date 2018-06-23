@@ -40,5 +40,15 @@ namespace Postulate.Lite.Core.Extensions
 			ColumnAttribute attr = propertyInfo.GetCustomAttribute<ColumnAttribute>();
 			return (attr != null && !string.IsNullOrEmpty(attr.Name)) ? attr.Name : propertyInfo.Name;
 		}
+
+		public static bool IsNullable(this Type type)
+		{
+			return IsNullableGeneric(type) || type.Equals(typeof(string)) || type.Equals(typeof(byte[]));
+		}
+
+		public static bool IsNullableGeneric(this Type type)
+		{
+			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+		}
 	}
 }

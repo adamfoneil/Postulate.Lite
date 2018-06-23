@@ -46,7 +46,9 @@
   <ItemGroup>
     <Compile Include="Attributes\CalculatedAttribute.cs" />
     <Compile Include="Attributes\ColumnAccessAttribute.cs" />
+    <Compile Include="Attributes\DecimalPrecisionAttribute.cs" />
     <Compile Include="Attributes\IdentityAttribute.cs" />
+    <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
     <Compile Include="ColumnInfo.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Interfaces\IUser.cs" />
