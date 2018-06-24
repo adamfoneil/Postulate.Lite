@@ -6,6 +6,8 @@ I intend to support [Model Merge](https://github.com/adamosoftware/Postulate.Orm
 
 Postulate.Lite will support both SQL Server and MySQL.
 
+Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for more info.
+
 ## Status (as of 6/24/18)
 
 - Nuget package: Not available yet
