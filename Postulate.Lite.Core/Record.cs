@@ -13,6 +13,11 @@ namespace Postulate.Lite.Core
 
 	public abstract class Record
 	{
+		public virtual void LookupForeignKeys(IDbConnection connection)
+		{
+			// do nothing by default
+		}
+
 		public virtual void Validate(IDbConnection connection)
 		{
 			// do nothing by default
