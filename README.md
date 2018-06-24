@@ -12,6 +12,5 @@ Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for 
 
 ## Status (as of 6/24/18)
 
-- Nuget package: Not available yet
-- SQL Server support: basic crud methods
-- My SQL support: none yet
+- SQL Server package: **Postulate.Lite.SqlServer**
+- MySql package: *coming soon*
