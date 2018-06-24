@@ -11,28 +11,77 @@ using System.Reflection;
 
 namespace Postulate.Lite.Core
 {
+	/// <summary>
+	/// Generates SQL commands for Crud methods. As an abstract class, it requires database-specific implementations
+	/// </summary>
+	/// <typeparam name="TKey">Primary key type</typeparam>
 	public abstract class CommandProvider<TKey>
 	{
+		/// <summary>
+		/// Generates a SQL insert statement for a given model class
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>
 		protected abstract string InsertCommand<T>();
 
+		/// <summary>
+		/// Generates a SQL update statement for a given model class
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>
 		protected abstract string UpdateCommand<T>();
 
+		/// <summary>
+		/// Generates a SQL delete statement for a given model class
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>
 		protected abstract string DeleteCommand<T>();
 
+		/// <summary>
+		/// Generates a SQL select statement for a given model class
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>
+		/// <param name="whereClause">WHERE clause to append</param>
 		protected abstract string FindCommand<T>(string whereClause);
 
+		/// <summary>
+		/// Generates a SQL create table statement for a given model class
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>
 		protected abstract string CreateTableCommand<T>();
 
+		/// <summary>
+		/// Returns a type-specific identity value from an object
+		/// </summary>
+		/// <param name="value">Primary key value</param>
 		protected abstract TKey ConvertIdentity(object value);
 
+		/// <summary>
+		/// Encloses a database object identifier in the characters appropriate for a particular database. For example, square braces for SQL Server or backticks for My SQL
+		/// </summary>
 		protected abstract string ApplyDelimiter(string name);
 
+		/// <summary>
+		/// Gets the database table name for a given model class
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>
 		protected abstract string TableName<T>();
 
+		/// <summary>
+		/// Generates the syntax for column definition with a CREATE TABLE statement
+		/// </summary>
 		protected abstract string SqlColumnSyntax(PropertyInfo propertyInfo, bool isIdentity);
 
+		/// <summary>
+		/// Returns the portion of the column definition syntax within a CREATE TABLE statement that causes the identity column to be autoincrementing.
+		/// For example SQL Server can use identity(1,1) and My SQL uses auto_increment
+		/// </summary>
 		protected abstract string IdentityColumnSyntax();
 
+		/// <summary>
+		/// Returns the properties of a model class that may be affected by an INSERT or UPDATE statement.
+		/// For example calculated and identity columns are omitted.
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>
+		/// <param name="action">Indicates whether an insert or update is in effect</param>
 		protected IEnumerable<ColumnInfo> EditableColumns<T>(SaveAction action)
 		{
 			string identity = typeof(T).GetIdentityName().ToLower();
@@ -40,6 +89,10 @@ namespace Postulate.Lite.Core
 			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi)).ToArray();
 		}
 
+		/// <summary>
+		/// Returns the properties of a model class that are mapped to database columns
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>
 		protected IEnumerable<PropertyInfo> MappedColumns<T>()
 		{
 			var type = typeof(T);
@@ -51,24 +104,35 @@ namespace Postulate.Lite.Core
 			if (!IsSupportedType(pi.PropertyType)) return false;
 			if (!IsMapped(pi)) return false;
 			if (IsCalculated(pi)) return false;
-			
+
 			var colInfo = new ColumnInfo(pi);
 			return ((colInfo.SaveActions & action) == action);
 		}
 
+		/// <summary>
+		/// Determines whether a given Type is reflected in a database table
+		/// </summary>
 		protected bool IsSupportedType(Type type)
-		{			
+		{
 			return
 				SupportedTypes().ContainsKey(type) ||
 				(type.IsEnum && type.GetEnumUnderlyingType().Equals(typeof(int))) ||
 				(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && IsSupportedType(type.GetGenericArguments()[0]));
 		}
 
+		/// <summary>
+		/// Returns true if the given model object has not been saved in the database yet
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
 		public bool IsNew<TModel>(TModel @object)
 		{
 			return GetIdentity(@object).Equals(default(TKey));
 		}
 
+		/// <summary>
+		/// After a database insert, applies the generated identity value to the model object
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
 		protected void SetIdentity<TModel>(TModel @object, TKey value)
 		{
 			if (IsNew(@object))
@@ -82,14 +146,28 @@ namespace Postulate.Lite.Core
 			}
 		}
 
+		/// <summary>
+		/// Returns the identity value of a given model object
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
 		public TKey GetIdentity<TModel>(TModel @object)
 		{
 			var property = typeof(TModel).GetIdentityProperty();
 			return ConvertIdentity(property.GetValue(@object));
 		}
 
+		/// <summary>
+		/// Specifies the types and corresponding SQL syntax for CLR types supported in your ORM mapping
+		/// </summary>
 		protected abstract Dictionary<Type, string> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
 
+		/// <summary>
+		/// Performs a SQL insert and returns the generated identity value
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
+		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public TKey Insert<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
 			var record = @object as Record;
@@ -109,6 +187,13 @@ namespace Postulate.Lite.Core
 			return result;
 		}
 
+		/// <summary>
+		/// Performs a SQL update
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
+		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public void Update<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
 			var record = @object as Record;
@@ -125,6 +210,13 @@ namespace Postulate.Lite.Core
 			record?.AfterSave(connection, SaveAction.Update);
 		}
 
+		/// <summary>
+		/// Performs a SQL insert or update for a given model object. If an insert is done, the generated identity value is returned
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
+		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public TKey Save<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
 			if (IsNew(@object))
@@ -138,6 +230,14 @@ namespace Postulate.Lite.Core
 			}
 		}
 
+		/// <summary>
+		/// Gets a model object for a given identity value
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
+		/// <param name="identity">Primary key value</param>
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
+		/// <returns></returns>
 		public TModel Find<TModel>(IDbConnection connection, TKey identity, IUser user = null)
 		{
 			string identityCol = typeof(TModel).GetIdentityName();
@@ -146,6 +246,13 @@ namespace Postulate.Lite.Core
 			return FindInner(connection, result, user);
 		}
 
+		/// <summary>
+		/// Gets a model object based on arbitrary criteria.
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
+		/// <param name="criteria">Object specifying the criteria to search for</param>
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>		
 		public TModel FindWhere<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
 		{
 			string whereClause = WhereClauseFromObject(criteria);
@@ -183,6 +290,13 @@ namespace Postulate.Lite.Core
 			return result;
 		}
 
+		/// <summary>
+		/// Deletes a model object for a given identity value
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
+		/// <param name="identity">Primary key value</param>
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public void Delete<TModel>(IDbConnection connection, TKey identity, IUser user = null)
 		{
 			var deleteMe = Find<TModel>(connection, identity, user);
@@ -193,24 +307,39 @@ namespace Postulate.Lite.Core
 			connection.Execute(cmd, new { id = identity });
 
 			record?.AfterDelete(connection);
-		}
+		}		
 
+		/// <summary>
+		/// Creates a database table for a given model class
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
 		public void CreateTable<TModel>(IDbConnection connection)
 		{
 			string cmd = CreateTableCommand<TModel>();
 			connection.Execute(cmd);
 		}
 
+		/// <summary>
+		/// Returns true if the property is mapped to a database table column
+		/// </summary>
 		protected bool IsMapped(PropertyInfo propertyInfo)
 		{
 			return !HasAttribute<NotMappedAttribute>(propertyInfo);
 		}
 
+		/// <summary>
+		/// Returns true if the property has a [Calculated] attribute
+		/// </summary>
 		protected bool IsCalculated(PropertyInfo propertyInfo)
 		{
 			return HasAttribute<CalculatedAttribute>(propertyInfo);
 		}
 
+		/// <summary>
+		/// Returns true if the property has the specified attribute
+		/// </summary>
+		/// <typeparam name="T">Attribute class type</typeparam>
 		protected bool HasAttribute<T>(PropertyInfo propertyInfo) where T : Attribute
 		{
 			var attr = propertyInfo.GetCustomAttribute<T>();
