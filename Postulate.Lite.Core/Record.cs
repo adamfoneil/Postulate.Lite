@@ -28,7 +28,7 @@ namespace Postulate.Lite.Core
 			// do nothing by default			
 		}
 
-		public virtual void BeforeSave(IDbConnection connection, IUser user)
+		public virtual void BeforeSave(IDbConnection connection, SaveAction action, IUser user)
 		{
 			// do nothing by default
 		}

@@ -180,7 +180,7 @@ namespace Postulate.Lite.Core
 			if (user != null)
 			{
 				record?.CheckSavePermission(connection, user);
-				record?.BeforeSave(connection, user);
+				record?.BeforeSave(connection, SaveAction.Insert, user);
 			}
 
 			string cmd = InsertCommand<TModel>();
@@ -206,7 +206,7 @@ namespace Postulate.Lite.Core
 			if (user != null)
 			{
 				record?.CheckSavePermission(connection, user);
-				record?.BeforeSave(connection, user);
+				record?.BeforeSave(connection, SaveAction.Update, user);
 			}
 
 			string cmd = UpdateCommand<TModel>();
