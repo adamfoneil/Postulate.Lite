@@ -8,6 +8,6 @@ Postulate.Lite will support both SQL Server and MySQL.
 
 ## Status (as of 6/24/18)
 
-Nuget package: Not available yet
-SQL Server support: basic crud methods
-My SQL support: none yet
+- Nuget package: Not available yet
+- SQL Server support: basic crud methods
+- My SQL support: none yet
