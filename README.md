@@ -10,7 +10,17 @@ Postulate.Lite will support both SQL Server and MySQL.
 
 Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for more info.
 
-## Status (as of 6/24/18)
+## Nuget
 
 - SQL Server package: **Postulate.Lite.SqlServer**
 - MySql package: *coming soon*
+
+## How to Use
+
+- Create any number of model classes that correspond to your database tables. They can be POCO, but added functionality is available if you inherit from [Postulate.Lite.Core.Record](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Record.cs). The only design requirement for Postulate.Lite model classes is that either they have an [[Identity]](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Attributes/IdentityAttribute.cs) attribute that defines the primary key property, or they have a property called **Id** with no particular attribute decoration.
+
+- Open your `IDbConnection` object in whatever way is appropriate for your application, normally within a `using` block.
+
+- Use any of Postulate.Lite Crud extension methods of `IDbConnection` defined in [ConnectionExtension](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/ConnectionExtensions.cs): Find, FindWhere, Save, Insert, Update, Delete. They all accept a `TModel` generic argument corresponding to your model class.
+
+- All of the Crud methods accept an `IUser` optional argument you can use to pass the current user name and access to the user's local time. This argument takes effect if your model class is based on `Record` (see above), which offers a number of overrides for checking permissions and executing row-level events, among other things.
