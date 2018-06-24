@@ -24,3 +24,39 @@ Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for 
 - Use any of Postulate.Lite Crud extension methods of `IDbConnection` defined in [ConnectionExtensions](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/ConnectionExtensions.cs): Find, FindWhere, Save, Insert, Update, Delete. They all accept a `TModel` generic argument corresponding to your model class.
 
 - All of the Crud methods accept an `IUser` optional argument you can use to pass the current user name and access to the user's local time. This argument takes effect if your model class is based on `Record` (see above), which offers a number of overrides for checking permissions and executing row-level events, among other things.
+
+## Examples
+
+A simple find using the [Find](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider.cs#L246) method:
+
+```
+using (var cn = GetConnection())
+{
+  var e = cn.Find<Employee>(2322);
+  Console.WriteLine(e.FirstName);
+}
+```
+
+Find using criteria with the [FindWhere](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider.cs#L262) method:
+```
+using (var cn = GetConnection())
+{
+  var e = cn.FindWhere(new Employee() { OrganizationId = 12, Number = 3988 });
+  Console.WriteLine(e.FirstName);
+}
+```
+
+Create and save a record with the [Save](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider.cs#L225) method.
+```
+using (var cn = GetConnection())
+{
+  var e = new Employee()
+  {
+    FirstName = "Thomas",
+    LastName = "Whoever",
+    HireDate = new DateTime(2012, 1, 1)
+  };
+  cn.Save<Employee>(e);
+  Console.WriteLine(e.Id.ToString());
+}
+```
