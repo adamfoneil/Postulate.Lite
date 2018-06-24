@@ -21,6 +21,6 @@ Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for 
 
 - Open your `IDbConnection` object in whatever way is appropriate for your application, normally within a `using` block.
 
-- Use any of Postulate.Lite Crud extension methods of `IDbConnection` defined in [ConnectionExtension](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/ConnectionExtensions.cs): Find, FindWhere, Save, Insert, Update, Delete. They all accept a `TModel` generic argument corresponding to your model class.
+- Use any of Postulate.Lite Crud extension methods of `IDbConnection` defined in [ConnectionExtensions](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/ConnectionExtensions.cs): Find, FindWhere, Save, Insert, Update, Delete. They all accept a `TModel` generic argument corresponding to your model class.
 
 - All of the Crud methods accept an `IUser` optional argument you can use to pass the current user name and access to the user's local time. This argument takes effect if your model class is based on `Record` (see above), which offers a number of overrides for checking permissions and executing row-level events, among other things.
