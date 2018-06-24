@@ -13,10 +13,36 @@ namespace Tests.SqlServer
 	[TestClass]
 	public class Crud
 	{
-		private IDbConnection GetConnection()
+		private static IDbConnection GetConnection()
 		{
 			string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 			return new SqlConnection(connectionString);
+		}
+
+		private static IDbConnection GetMasterConnection()
+		{
+			string masterConnection = ConfigurationManager.ConnectionStrings["MasterConnection"].ConnectionString;
+			return new SqlConnection(masterConnection);
+		}
+
+		[ClassInitialize]
+		public static void InitDb(TestContext context)
+		{
+			try { DropDb(); } catch {  /* do nothing */ }
+
+			using (var cn = GetMasterConnection())
+			{
+				cn.Execute("CREATE DATABASE [PostulateLite]");				
+			}
+		}
+
+		[ClassCleanup]
+		public static void DropDb()
+		{
+			using (var cn = GetMasterConnection())
+			{
+				cn.Execute("DROP DATABASE [PostulateLite]");
+			}
 		}
 
 		[TestMethod]
