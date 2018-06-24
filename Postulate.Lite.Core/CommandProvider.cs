@@ -19,7 +19,7 @@ namespace Postulate.Lite.Core
 
 		protected abstract string DeleteCommand<T>();
 
-		protected abstract string FindCommand<T>();
+		protected abstract string FindCommand<T>(string whereClause);
 
 		protected abstract string CreateTableCommand<T>();
 
@@ -131,6 +131,7 @@ namespace Postulate.Lite.Core
 			{
 				return Insert(connection, @object, user);
 			}
+			else
 			{
 				Update(connection, @object, user);
 				return GetIdentity(@object);
@@ -139,9 +140,40 @@ namespace Postulate.Lite.Core
 
 		public TModel Find<TModel>(IDbConnection connection, TKey identity, IUser user = null)
 		{
-			string cmd = FindCommand<TModel>();
+			string identityCol = typeof(TModel).GetIdentityName();
+			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });
+			return FindInner(connection, result, user);
+		}
 
+		public TModel FindWhere<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		{
+			string whereClause = WhereClauseFromObject(criteria);
+			string cmd = FindCommand<TModel>(whereClause);
+			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);
+			return FindInner(connection, result, user);
+		}
+
+		private string WhereClauseFromObject<TModel>(TModel criteria)
+		{
+			var props = typeof(TModel).GetProperties().Where(pi => HasValue(pi, criteria));
+			return string.Join(" AND ", props.Select(pi => $"{ApplyDelimiter(pi.GetColumnName())}=@{pi.Name}"));
+		}
+
+		private bool HasValue(PropertyInfo pi, object @object)
+		{
+			var value = pi.GetValue(@object);
+			if (value != null)
+			{
+				if (value.Equals(string.Empty)) return false;
+				return true;
+			}
+
+			return false;
+		}
+
+		private static TModel FindInner<TModel>(IDbConnection connection, TModel result, IUser user)
+		{
 			var record = result as Record;
 			if (user != null)
 			{

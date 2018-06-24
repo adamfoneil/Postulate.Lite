@@ -21,12 +21,11 @@ namespace Postulate.Lite.SqlServer
 			return Convert.ToInt32(value);
 		}
 
-		protected override string FindCommand<T>()
+		protected override string FindCommand<T>(string whereClause)
 		{
 			var props = MappedColumns<T>();
 			var columns = props.Select(pi => new ColumnInfo(pi));
-			string identity = typeof(T).GetIdentityName();
-			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName<T>())} WHERE {ApplyDelimiter(identity)}=@id";
+			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName<T>())} WHERE {whereClause}";
 		}
 
 		protected override string InsertCommand<T>()

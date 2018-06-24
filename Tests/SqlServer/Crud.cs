@@ -29,6 +29,9 @@ namespace Tests.SqlServer
 			}
 		}
 
+		/// <summary>
+		/// Drops employee table, creates 10 random employees
+		/// </summary>
 		[TestMethod]
 		public void InsertEmployees()
 		{
@@ -90,6 +93,18 @@ namespace Tests.SqlServer
 				cn.Delete<Employee>(5);
 				int count = cn.QuerySingle<int>("SELECT COUNT(1) FROM [dbo].[Employee]");
 				Assert.IsTrue(count == 9);
+			}
+		}
+
+		[TestMethod]
+		public void FindWhereEmployee()
+		{
+			InsertEmployees();
+
+			using (var cn = GetConnection())
+			{
+				var e = cn.FindWhere(new Employee() { Id = 3 });
+				Assert.IsTrue(e.Id == 3);
 			}
 		}
 

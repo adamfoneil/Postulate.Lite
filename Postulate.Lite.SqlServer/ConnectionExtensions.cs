@@ -10,6 +10,11 @@ namespace Postulate.Lite.SqlServer
 			return new SqlServerCommandProvider().Find<TModel>(connection, id, user);
 		}
 
+		public static TModel FindWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
+		{
+			return new SqlServerCommandProvider().FindWhere<TModel>(connection, criteria, user);
+		}
+
 		public static int Save<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{			
 			return new SqlServerCommandProvider().Save(connection, @object, user);
