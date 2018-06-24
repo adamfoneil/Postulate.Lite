@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using AdamOneilSoftware;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,20 +29,17 @@ namespace Tests.SqlServer
 		[ClassInitialize]
 		public static void InitDb(TestContext context)
 		{
-			try { DropDb(); } catch {  /* do nothing */ }
-
-			using (var cn = GetMasterConnection())
+			try
 			{
-				cn.Execute("CREATE DATABASE [PostulateLite]");				
+				using (var cn = GetMasterConnection())
+				{
+					cn.Execute("CREATE DATABASE [PostulateLite]");
+				}
 			}
-		}
-
-		[ClassCleanup]
-		public static void DropDb()
-		{
-			using (var cn = GetMasterConnection())
+			catch (Exception exc)
 			{
-				cn.Execute("DROP DATABASE [PostulateLite]");
+				Console.WriteLine("InitDb: " + exc.Message);
+				// do nothing, db already exists or something else out of scope is wrong
 			}
 		}
 
@@ -63,12 +61,26 @@ namespace Tests.SqlServer
 		{
 			using (var cn = GetConnection())
 			{
+				DropTable(cn, "Organization");
+				cn.CreateTable<Organization>();
+
 				DropTable(cn, "Employee");
 				cn.CreateTable<Employee>();
 
 				var tdg = new TestDataGenerator();
-				tdg.Generate<Employee>(10, (record) =>
+				tdg.Generate<Organization>(5, (record) =>
 				{
+					record.Name = tdg.Random(Source.UniqueWidget);
+				}, (records) =>
+				{
+					foreach (var record in records) cn.Save(record);
+				});
+
+				var orgIds = cn.Query<int>("SELECT [Id] FROM [Organization]").ToArray();
+
+				tdg.Generate<Employee>(100, (record) =>
+				{
+					record.OrganizationId = tdg.Random(orgIds);
 					record.FirstName = tdg.Random(Source.FirstName);
 					record.LastName = tdg.Random(Source.LastName);
 					record.Email = $"{record.FirstName}.{record.LastName}@nowhere.org";					
@@ -87,7 +99,7 @@ namespace Tests.SqlServer
 			using (var cn = GetConnection())
 			{
 				var e = cn.Find<Employee>(5);
-				Assert.IsTrue(e.Id == 5);
+				Assert.IsTrue(e.Id == 5);				
 			}
 		}
 
@@ -118,7 +130,7 @@ namespace Tests.SqlServer
 			{
 				cn.Delete<Employee>(5);
 				int count = cn.QuerySingle<int>("SELECT COUNT(1) FROM [dbo].[Employee]");
-				Assert.IsTrue(count == 9);
+				Assert.IsTrue(count == 99);
 			}
 		}
 
@@ -129,8 +141,19 @@ namespace Tests.SqlServer
 
 			using (var cn = GetConnection())
 			{
+				// there has to be an Id = 3 in there, I'm sure
 				var e = cn.FindWhere(new Employee() { Id = 3 });
 				Assert.IsTrue(e.Id == 3);
+			}
+		}
+
+		[TestMethod]
+		public void ForeignKeyLookup()
+		{
+			using (var cn = GetConnection())
+			{
+				var e = cn.Find<Employee>(10);
+				Assert.IsTrue(e.Organization != null);
 			}
 		}
 

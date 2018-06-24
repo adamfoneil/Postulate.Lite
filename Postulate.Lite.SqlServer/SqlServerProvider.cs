@@ -23,9 +23,10 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string FindCommand<T>(string whereClause)
 		{
+			var type = typeof(T);
 			var props = MappedColumns<T>();
 			var columns = props.Select(pi => new ColumnInfo(pi));
-			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName<T>())} WHERE {whereClause}";
+			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName<T>())} WHERE {whereClause}";			
 		}
 
 		protected override string InsertCommand<T>()
@@ -71,7 +72,6 @@ namespace Postulate.Lite.SqlServer
 		protected override string TableName<T>()
 		{
 			var type = typeof(T);
-			
 			Dictionary<string, string> parts = new Dictionary<string, string>()
 			{
 				{ "schema", string.Empty },

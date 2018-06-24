@@ -43,6 +43,12 @@ namespace Postulate.Lite.Core
 				Precision = precisionAttr.Precision;
 				Scale = precisionAttr.Scale;
 			}
+
+			var pkAttr = propertyInfo.GetCustomAttribute<PrimaryKeyAttribute>();
+			if (pkAttr != null)
+			{
+				AllowNull = false;
+			}
 		}
 
 		public ColumnInfo()

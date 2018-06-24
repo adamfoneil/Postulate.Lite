@@ -96,6 +96,11 @@ namespace Postulate.Lite.Core
 		protected IEnumerable<PropertyInfo> MappedColumns<T>()
 		{
 			var type = typeof(T);
+			return MappedColumnsFromType(type);
+		}
+
+		protected IEnumerable<PropertyInfo> MappedColumnsFromType(Type type)
+		{
 			return type.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
 		}
 
@@ -243,6 +248,7 @@ namespace Postulate.Lite.Core
 			string identityCol = typeof(TModel).GetIdentityName();
 			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });
+			(result as Record)?.LookupForeignKeys(connection);
 			return FindInner(connection, result, user);
 		}
 
@@ -258,6 +264,7 @@ namespace Postulate.Lite.Core
 			string whereClause = WhereClauseFromObject(criteria);
 			string cmd = FindCommand<TModel>(whereClause);
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);
+			(result as Record)?.LookupForeignKeys(connection);
 			return FindInner(connection, result, user);
 		}
 
@@ -272,6 +279,8 @@ namespace Postulate.Lite.Core
 			var value = pi.GetValue(@object);
 			if (value != null)
 			{
+				var defaultValue = Activator.CreateInstance(pi.PropertyType);
+				if (value.Equals(defaultValue)) return false;
 				if (value.Equals(string.Empty)) return false;
 				return true;
 			}
@@ -340,10 +349,14 @@ namespace Postulate.Lite.Core
 		/// Returns true if the property has the specified attribute
 		/// </summary>
 		/// <typeparam name="T">Attribute class type</typeparam>
-		protected bool HasAttribute<T>(PropertyInfo propertyInfo) where T : Attribute
+		protected static bool HasAttribute<T>(PropertyInfo propertyInfo, Func<T, bool> criteria = null) where T : Attribute
 		{
 			var attr = propertyInfo.GetCustomAttribute<T>();
-			return (attr != null);
+			if (attr != null)
+			{
+				return criteria?.Invoke(attr) ?? true;
+			}
+			return false;
 		}
 	}
 }

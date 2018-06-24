@@ -53,6 +53,7 @@
     <Compile Include="Attributes\DecimalPrecisionAttribute.cs" />
     <Compile Include="Attributes\IdentityAttribute.cs" />
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
+    <Compile Include="Attributes\ReferencesAttribute.cs" />
     <Compile Include="ColumnInfo.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Interfaces\IUser.cs" />
