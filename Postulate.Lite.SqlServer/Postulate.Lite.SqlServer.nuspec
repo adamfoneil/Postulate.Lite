@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Postulate.Lite.SqlServer</id>
+    <version>$version$</version>
+    <title>Postulate Lite for SQL Server</title>
+    <authors>Adam O'Neil</authors>
+    <owners>Adam O'Neil</owners>    
+    <projectUrl>https://github.com/adamosoftware/Postulate.Lite</projectUrl>  
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Lightweight ORM for SQL Server made with Dapper</description>    
+    <copyright>Copyright Adam O'Neil 2018</copyright>
+    <tags>dapper orm sqlserver</tags>
+  </metadata>
+</package>
