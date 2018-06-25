@@ -2,13 +2,13 @@
 using System;
 using System.Data;
 
-namespace Postulate.Lite.SqlServer.Long
+namespace Postulate.Lite.SqlServer.IntKey
 {
 	public static class ConnectionExtensions
 	{
-		private static SqlServerCommandProvider<long> GetProvider()
+		private static SqlServerCommandProvider<int> GetProvider()
 		{
-			return new SqlServerCommandProvider<long>((obj) => Convert.ToInt64(obj), "identity(1,1)");
+			return new SqlServerCommandProvider<int>((obj) => Convert.ToInt32(obj), "identity(1,1)");
 		}
 
 		public static TModel Find<TModel>(this IDbConnection connection, int id, IUser user = null)
@@ -21,12 +21,12 @@ namespace Postulate.Lite.SqlServer.Long
 			return GetProvider().FindWhere(connection, criteria, user);
 		}
 
-		public static long Save<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		public static int Save<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			return GetProvider().Save(connection, @object, user);
 		}
 
-		public static long Insert<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		public static int Insert<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			return GetProvider().Insert(connection, @object, user);
 		}
@@ -36,7 +36,7 @@ namespace Postulate.Lite.SqlServer.Long
 			GetProvider().Update(connection, @object, user);
 		}
 
-		public static void Delete<TModel>(this IDbConnection connection, long id, IUser user = null)
+		public static void Delete<TModel>(this IDbConnection connection, int id, IUser user = null)
 		{
 			GetProvider().Delete<TModel>(connection, id, user);
 		}

@@ -2,16 +2,16 @@
 using System;
 using System.Data;
 
-namespace Postulate.Lite.SqlServer.Int
+namespace Postulate.Lite.SqlServer.GuidKey
 {
 	public static class ConnectionExtensions
 	{
-		private static SqlServerCommandProvider<int> GetProvider()
+		private static SqlServerCommandProvider<Guid> GetProvider()
 		{
-			return new SqlServerCommandProvider<int>((obj) => Convert.ToInt32(obj), "identity(1,1)");
+			return new SqlServerCommandProvider<Guid>((obj) => Guid.Parse(obj.ToString()), "DEFAULT newid()");
 		}
 
-		public static TModel Find<TModel>(this IDbConnection connection, int id, IUser user = null)
+		public static TModel Find<TModel>(this IDbConnection connection, Guid id, IUser user = null)
 		{
 			return GetProvider().Find<TModel>(connection, id, user);
 		}
@@ -21,12 +21,12 @@ namespace Postulate.Lite.SqlServer.Int
 			return GetProvider().FindWhere(connection, criteria, user);
 		}
 
-		public static int Save<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		public static Guid Save<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			return GetProvider().Save(connection, @object, user);
 		}
 
-		public static int Insert<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		public static Guid Insert<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			return GetProvider().Insert(connection, @object, user);
 		}
@@ -36,7 +36,7 @@ namespace Postulate.Lite.SqlServer.Int
 			GetProvider().Update(connection, @object, user);
 		}
 
-		public static void Delete<TModel>(this IDbConnection connection, int id, IUser user = null)
+		public static void Delete<TModel>(this IDbConnection connection, Guid id, IUser user = null)
 		{
 			GetProvider().Delete<TModel>(connection, id, user);
 		}

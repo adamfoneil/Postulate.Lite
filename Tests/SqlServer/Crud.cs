@@ -1,7 +1,7 @@
 ﻿using AdamOneilSoftware;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Postulate.Lite.SqlServer.Int;
+using Postulate.Lite.SqlServer.IntKey;
 using System;
 using System.Configuration;
 using System.Data;
@@ -44,7 +44,7 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
-		public void DropAndCreateTable()
+		public void DropAndCreateIntTable()
 		{
 			using (var cn = GetConnection())
 			{
@@ -172,6 +172,26 @@ namespace Tests.SqlServer
 			{
 				var e = cn.Find<Employee>(10);
 				Assert.IsTrue(e.Organization != null);
+			}
+		}
+
+		[TestMethod]
+		public void DropAndCreateLong()
+		{
+			using (var cn = GetConnection())
+			{
+				DropTable(cn, "Employee");
+				Postulate.Lite.SqlServer.LongKey.ConnectionExtensions.CreateTable<EmployeeLong>(cn);
+			}
+		}
+
+		[TestMethod]
+		public void DropAndCreateGuid()
+		{
+			using (var cn = GetConnection())
+			{
+				DropTable(cn, "Employee");
+				Postulate.Lite.SqlServer.GuidKey.ConnectionExtensions.CreateTable<EmployeeGuid>(cn);
 			}
 		}
 
