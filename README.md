@@ -60,3 +60,7 @@ using (var cn = GetConnection())
   Console.WriteLine(e.Id.ToString());
 }
 ```
+
+## Extending Postulate.Lite
+
+To implement Postulate.Lite for a particular database, inherit from abstract class [CommandProvider&lt;TKey&gt;](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider.cs) and implement its various abstract methods that generate SQL for Crud actions. The `TKey` generic argument specifies the identity (primary key) type used with your modeal classes. The [default SQL Server implementation](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/SqlServerProvider.cs) assumes an `int` primary key type. To implement `long` or `Guid` primary key types, you'd need to derive a new class from `CommandProvider` with your desired key type.
