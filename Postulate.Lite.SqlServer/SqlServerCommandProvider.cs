@@ -9,16 +9,15 @@ using System.Reflection;
 
 namespace Postulate.Lite.SqlServer
 {
-	public class SqlServerCommandProvider : CommandProvider<int>
+	public class SqlServerCommandProvider<TKey> : CommandProvider<TKey>
 	{
+		public SqlServerCommandProvider(Func<object, TKey> identityConverter, string identitySyntax) : base(identityConverter, identitySyntax)
+		{
+		}
+
 		protected override string ApplyDelimiter(string name)
 		{
 			return string.Join(".", name.Split('.').Select(part => $"[{name}]"));			
-		}
-
-		protected override int ConvertIdentity(object value)
-		{
-			return Convert.ToInt32(value);
 		}
 
 		protected override string FindCommand<T>(string whereClause)
@@ -156,11 +155,6 @@ namespace Postulate.Lite.SqlServer
 			}
 
 			return result;
-		}
-
-		protected override string IdentityColumnSyntax()
-		{
-			return "identity(1,1) ";
 		}
 	}
 }

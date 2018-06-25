@@ -1,12 +1,12 @@
-﻿using System;
+﻿using AdamOneilSoftware;
+using Dapper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Postulate.Lite.SqlServer.IntKey;
+using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using AdamOneilSoftware;
-using Dapper;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Postulate.Lite.SqlServer;
 using Tests.Models;
 
 namespace Tests.SqlServer
@@ -44,8 +44,8 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
-		public void DropAndCreateTable()
-		{			
+		public void DropAndCreateIntTable()
+		{
 			using (var cn = GetConnection())
 			{
 				DropTable(cn, "Employee");
@@ -83,7 +83,7 @@ namespace Tests.SqlServer
 					record.OrganizationId = tdg.Random(orgIds);
 					record.FirstName = tdg.Random(Source.FirstName);
 					record.LastName = tdg.Random(Source.LastName);
-					record.Email = $"{record.FirstName}.{record.LastName}@nowhere.org";					
+					record.Email = $"{record.FirstName}.{record.LastName}@nowhere.org";
 				}, (records) =>
 				{
 					foreach (var record in records) cn.Save(record);
@@ -99,7 +99,7 @@ namespace Tests.SqlServer
 			using (var cn = GetConnection())
 			{
 				var e = cn.Find<Employee>(5);
-				Assert.IsTrue(e.Id == 5);				
+				Assert.IsTrue(e.Id == 5);
 			}
 		}
 
@@ -172,6 +172,26 @@ namespace Tests.SqlServer
 			{
 				var e = cn.Find<Employee>(10);
 				Assert.IsTrue(e.Organization != null);
+			}
+		}
+
+		[TestMethod]
+		public void DropAndCreateLong()
+		{
+			using (var cn = GetConnection())
+			{
+				DropTable(cn, "Employee");
+				Postulate.Lite.SqlServer.LongKey.ConnectionExtensions.CreateTable<EmployeeLong>(cn);
+			}
+		}
+
+		[TestMethod]
+		public void DropAndCreateGuid()
+		{
+			using (var cn = GetConnection())
+			{
+				DropTable(cn, "Employee");
+				Postulate.Lite.SqlServer.GuidKey.ConnectionExtensions.CreateTable<EmployeeGuid>(cn);
 			}
 		}
 
