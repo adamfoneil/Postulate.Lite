@@ -49,9 +49,9 @@
     <Compile Include="GuidKey\ConnectionExtensions.cs" />
     <Compile Include="IntKey\ConnectionExtensions.cs" />
     <Compile Include="LongKey\ConnectionExtensions.cs" />
-    <Compile Include="SqlServerCommandProvider_Crud.cs" />
+    <Compile Include="SqlServerProvider_Crud.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlServerCommandProvider_Merge.cs" />
+    <Compile Include="SqlServerProvider_Merge.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Postulate.Lite.Core\Postulate.Lite.Core.csproj">

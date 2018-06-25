@@ -1,4 +1,5 @@
-﻿using Postulate.Lite.Core.Extensions;
+﻿using Postulate.Lite.Core;
+using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Reflection;
 
 namespace Postulate.Lite.SqlServer
 {
-	public partial class SqlServerCommandProvider<TKey>
+	public partial class SqlServerCommandProvider<TKey> : CommandProvider<TKey>
 	{
 		protected override string CreateTableCommand(Type modelType)
 		{
@@ -56,6 +57,16 @@ namespace Postulate.Lite.SqlServer
 		protected override string DropTableCommand(TableInfo tableInfo)
 		{
 			throw new NotImplementedException();
-		}		
+		}
+
+		protected override string DropPrimaryKeyCommand(Type modelType)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override string AddPrimaryKeyCommand(Type modelType)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

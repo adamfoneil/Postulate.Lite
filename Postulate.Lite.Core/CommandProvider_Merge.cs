@@ -8,8 +8,7 @@ namespace Postulate.Lite.Core
 	{
 		/// <summary>
 		/// Generates a SQL create table statement for a given model class
-		/// </summary>
-		/// <typeparam name="T">Model class type</typeparam>
+		/// </summary>		
 		protected abstract string CreateTableCommand(Type modelType);
 
 		/// <summary>
@@ -21,6 +20,16 @@ namespace Postulate.Lite.Core
 		/// Generates a SQL command to add a foreign key to a column
 		/// </summary>
 		protected abstract string AddForeignKeyCommand(PropertyInfo propertyInfo);
+
+		/// <summary>
+		/// Generates a SQL command to drop a table's primary key
+		/// </summary>
+		protected abstract string DropPrimaryKeyCommand(Type modelType);
+
+		/// <summary>
+		/// Generates a SQL command to add a primary key to a table
+		/// </summary>
+		protected abstract string AddPrimaryKeyCommand(Type modelType);
 
 		/// <summary>
 		/// Generates a SQL command to remove a foreign key from a column
