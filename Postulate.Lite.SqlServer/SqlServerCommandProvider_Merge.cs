@@ -1,4 +1,5 @@
 ﻿using Postulate.Lite.Core.Extensions;
+using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,9 +28,34 @@ namespace Postulate.Lite.SqlServer
 				")";
 		}
 
-		protected override string CreateForeignKeyCommand(PropertyInfo propertyInfo)
+		protected override string AddForeignKeyCommand(PropertyInfo propertyInfo)
 		{
 			throw new NotImplementedException();
 		}
+
+		protected override string AddColumnCommand(PropertyInfo propertyInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override string AlterColumnCommand(PropertyInfo propertyInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override string DropColumnCommand(ColumnInfo columnInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override string DropForeignKeyCommand(ForeignKeyInfo columnInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override string DropTableCommand(TableInfo tableInfo)
+		{
+			throw new NotImplementedException();
+		}		
 	}
 }

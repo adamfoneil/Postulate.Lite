@@ -1,6 +1,7 @@
 ﻿using Postulate.Lite.Core;
 using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
+using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;

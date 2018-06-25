@@ -4,12 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
-namespace Postulate.Lite.Core
+namespace Postulate.Lite.Core.Metadata
 {
 	public class ColumnInfo
-	{
+	{		
 		public ColumnInfo(PropertyInfo propertyInfo)
 		{
+			PropertyInfo = PropertyInfo;
 			PropertyName = propertyInfo.Name;
 			ColumnName = propertyInfo.Name;
 			AllowNull = propertyInfo.PropertyType.IsNullable();
@@ -55,6 +56,8 @@ namespace Postulate.Lite.Core
 		{
 		}
 
+		public string TableSchema { get; set; }
+		public string TableName { get; set; }
 		public string PropertyName { get; set; }
 		public string ColumnName { get; set; }
 		public string DataType { get; set; }
@@ -63,6 +66,8 @@ namespace Postulate.Lite.Core
 		public int Scale { get; set; }
 		public bool AllowNull { get; set; }
 		public SaveAction SaveActions { get; set; }
+
+		public PropertyInfo PropertyInfo { get; private set; }
 
 		public bool HasExplicitType()
 		{
