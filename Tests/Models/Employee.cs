@@ -1,6 +1,6 @@
 ﻿using Postulate.Lite.Core;
 using Postulate.Lite.Core.Attributes;
-using Postulate.Lite.SqlServer;
+using Postulate.Lite.SqlServer.Int;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,7 +10,7 @@ namespace Tests.Models
 {
 	[Identity(nameof(Id))]
 	public class Employee : Record
-	{		
+	{
 		[References(typeof(Organization))]
 		public int OrganizationId { get; set; }
 

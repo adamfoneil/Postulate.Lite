@@ -17,6 +17,15 @@ namespace Postulate.Lite.Core
 	/// <typeparam name="TKey">Primary key type</typeparam>
 	public abstract class CommandProvider<TKey>
 	{
+		private readonly Func<object, TKey> _identityConverter;
+		private readonly string _identitySyntax;
+
+		public CommandProvider(Func<object, TKey> identityConverter, string identitySyntax)
+		{
+			_identityConverter = identityConverter;
+			_identitySyntax = identitySyntax;
+		}
+
 		/// <summary>
 		/// Generates a SQL insert statement for a given model class
 		/// </summary>
@@ -52,7 +61,10 @@ namespace Postulate.Lite.Core
 		/// Returns a type-specific identity value from an object
 		/// </summary>
 		/// <param name="value">Primary key value</param>
-		protected abstract TKey ConvertIdentity(object value);
+		protected TKey ConvertIdentity(object value)
+		{
+			return _identityConverter.Invoke(value);
+		}
 
 		/// <summary>
 		/// Encloses a database object identifier in the characters appropriate for a particular database. For example, square braces for SQL Server or backticks for My SQL
@@ -74,7 +86,10 @@ namespace Postulate.Lite.Core
 		/// Returns the portion of the column definition syntax within a CREATE TABLE statement that causes the identity column to be autoincrementing.
 		/// For example SQL Server can use identity(1,1) and My SQL uses auto_increment
 		/// </summary>
-		protected abstract string IdentityColumnSyntax();
+		protected string IdentityColumnSyntax()
+		{
+			return _identitySyntax;
+		}
 
 		/// <summary>
 		/// Returns the properties of a model class that may be affected by an INSERT or UPDATE statement.

@@ -46,8 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConnectionExtensions.cs" />
-    <Compile Include="SqlServerProvider.cs" />
+    <Compile Include="Guid\ConnectionExtensions.cs" />
+    <Compile Include="Int\ConnectionExtensions.cs" />
+    <Compile Include="Long\ConnectionExtensions.cs" />
+    <Compile Include="SqlServerCommandProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
