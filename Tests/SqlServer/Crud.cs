@@ -135,6 +135,24 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
+		public void SaveEmployee()
+		{
+			var e = new Employee()
+			{
+				OrganizationId = 1,
+				FirstName = "Adam",
+				LastName = "O'Neil",
+				HireDate = new DateTime(2012, 1, 1)
+			};
+
+			using (var cn = GetConnection())
+			{
+				cn.Save(e);
+				cn.Delete<Employee>(e.Id);
+			}
+		}
+
+		[TestMethod]
 		public void FindWhereEmployee()
 		{
 			InsertEmployees();
