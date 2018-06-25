@@ -10,6 +10,8 @@ namespace Postulate.Lite.SqlServer
 {
 	public partial class SqlServerCommandProvider<TKey> : CommandProvider<TKey>
 	{
+		public override string CommentPrefix => "--";
+
 		protected override string CreateTableCommand(Type modelType)
 		{
 			var columns = MappedColumns(modelType);

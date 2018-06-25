@@ -13,7 +13,7 @@ using System.Reflection;
 namespace Postulate.Lite.Core
 {
 	/// <summary>
-	/// Generates SQL commands for Crud methods. As an abstract class, it requires database-specific implementations
+	/// Generates SQL commands for Crud and Merge methods. As an abstract class, it requires database-specific implementations
 	/// </summary>
 	/// <typeparam name="TKey">Primary key type</typeparam>
 	public abstract partial class CommandProvider<TKey>

@@ -6,49 +6,53 @@ namespace Postulate.Lite.Core
 {
 	public abstract partial class CommandProvider<TKey>
 	{
+		public abstract string CommentPrefix { get; }
+
 		/// <summary>
 		/// Generates a SQL create table statement for a given model class
 		/// </summary>		
-		protected abstract string CreateTableCommand(Type modelType);
+		public abstract string CreateTableCommand(Type modelType);
 
 		/// <summary>
 		/// Generatea a SQL command to drop a table from a database
 		/// </summary>
-		protected abstract string DropTableCommand(TableInfo tableInfo);
+		public abstract string DropTableCommand(TableInfo tableInfo);
 
 		/// <summary>
 		/// Generates a SQL command to add a foreign key to a column
 		/// </summary>
-		protected abstract string AddForeignKeyCommand(PropertyInfo propertyInfo);
+		public abstract string AddForeignKeyCommand(PropertyInfo propertyInfo);
+
+		public abstract string AddForeignKeyCommand(ForeignKeyInfo foreignkeyInfo);
 
 		/// <summary>
 		/// Generates a SQL command to drop a table's primary key
 		/// </summary>
-		protected abstract string DropPrimaryKeyCommand(Type modelType);
+		public abstract string DropPrimaryKeyCommand(Type modelType);
 
 		/// <summary>
 		/// Generates a SQL command to add a primary key to a table
 		/// </summary>
-		protected abstract string AddPrimaryKeyCommand(Type modelType);
+		public abstract string AddPrimaryKeyCommand(Type modelType);
 
 		/// <summary>
 		/// Generates a SQL command to remove a foreign key from a column
 		/// </summary>
-		protected abstract string DropForeignKeyCommand(ForeignKeyInfo columnInfo);
+		public abstract string DropForeignKeyCommand(ForeignKeyInfo columnInfo);
 
 		/// <summary>
 		/// Generates a SQL command to add a column to a table
 		/// </summary>
-		protected abstract string AddColumnCommand(PropertyInfo propertyInfo);
+		public abstract string AddColumnCommand(PropertyInfo propertyInfo);
 
 		/// <summary>
 		/// Generates a SQL command to alter the type, nullability, or size of a column
 		/// </summary>
-		protected abstract string AlterColumnCommand(PropertyInfo propertyInfo);
+		public abstract string AlterColumnCommand(PropertyInfo propertyInfo);
 
 		/// <summary>
 		/// Generates a SQL command to remove a column from a table
 		/// </summary>
-		protected abstract string DropColumnCommand(ColumnInfo columnInfo);
+		public abstract string DropColumnCommand(ColumnInfo columnInfo);
 	}
 }
