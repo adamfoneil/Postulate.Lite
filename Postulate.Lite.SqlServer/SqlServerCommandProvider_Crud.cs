@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Postulate.Lite.SqlServer
 {
-	public class SqlServerCommandProvider<TKey> : CommandProvider<TKey>
+	public partial class SqlServerCommandProvider<TKey> : CommandProvider<TKey>
 	{
 		public SqlServerCommandProvider(Func<object, TKey> identityConverter, string identitySyntax) : base(identityConverter, identitySyntax)
 		{
@@ -23,9 +23,9 @@ namespace Postulate.Lite.SqlServer
 		protected override string FindCommand<T>(string whereClause)
 		{
 			var type = typeof(T);
-			var props = MappedColumns<T>();
+			var props = MappedColumns(type);
 			var columns = props.Select(pi => new ColumnInfo(pi));
-			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName<T>())} WHERE {whereClause}";			
+			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {whereClause}";			
 		}
 
 		protected override string InsertCommand<T>()
@@ -33,18 +33,18 @@ namespace Postulate.Lite.SqlServer
 			var columns = EditableColumns<T>(SaveAction.Insert);
 			string columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
 			string valueList = string.Join(", ", columns.Select(c => $"@{c.PropertyName}"));
-			return $"INSERT INTO {ApplyDelimiter(TableName<T>())} ({columnList}) OUTPUT [inserted].[{typeof(T).GetIdentityName()}] VALUES ({valueList});";
+			return $"INSERT INTO {ApplyDelimiter(TableName(typeof(T)))} ({columnList}) OUTPUT [inserted].[{typeof(T).GetIdentityName()}] VALUES ({valueList});";
 		}
 
 		protected override string UpdateCommand<T>()
 		{
 			var columns = EditableColumns<T>(SaveAction.Update);
-			return $"UPDATE {ApplyDelimiter(TableName<T>())} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
+			return $"UPDATE {ApplyDelimiter(TableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
 		protected override string DeleteCommand<T>()
 		{
-			return $"DELETE {ApplyDelimiter(TableName<T>())} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
+			return $"DELETE {ApplyDelimiter(TableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
 		protected override Dictionary<Type, string> SupportedTypes(int length, int precision, int scale)
@@ -68,16 +68,15 @@ namespace Postulate.Lite.SqlServer
 			};
 		}
 
-		protected override string TableName<T>()
-		{
-			var type = typeof(T);
+		protected override string TableName(Type modelType)
+		{			
 			Dictionary<string, string> parts = new Dictionary<string, string>()
 			{
 				{ "schema", string.Empty },
-				{ "name", type.Name }
+				{ "name", modelType.Name }
 			};
 
-			var tblAttr = type.GetCustomAttribute<TableAttribute>();
+			var tblAttr = modelType.GetCustomAttribute<TableAttribute>();
 			if (tblAttr != null)
 			{
 				if (!string.IsNullOrEmpty(tblAttr.Schema)) parts["schema"] = tblAttr.Schema;
@@ -85,26 +84,6 @@ namespace Postulate.Lite.SqlServer
 			}
 
 			return string.Join(".", parts.Where(kp => !string.IsNullOrEmpty(kp.Value)).Select(kp => kp.Value));
-		}
-
-		protected override string CreateTableCommand<T>()
-		{
-			var type = typeof(T);
-			var columns = MappedColumns<T>();
-			var pkColumns = GetPrimaryKeyColumns(type, columns, out bool identityIsPrimaryKey);
-			var identityName = type.GetIdentityName();
-
-			string constraintName = TableName<T>().Replace(".", "_");
-
-			List<string> members = new List<string>();
-			members.AddRange(columns.Select(pi => SqlColumnSyntax(pi, (identityName.Equals(pi.Name)))));
-			members.Add(PrimaryKeySyntax(constraintName, pkColumns));
-			if (!identityIsPrimaryKey) members.Add(UniqueIdSyntax(constraintName, type.GetIdentityProperty()));
-
-			return 
-				$"CREATE TABLE {ApplyDelimiter(TableName<T>())} (" +
-					string.Join(",\r\n\t", members) +
-				")";
 		}
 
 		private string UniqueIdSyntax(string constraintName, PropertyInfo propertyInfo)
