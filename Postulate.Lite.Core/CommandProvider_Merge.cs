@@ -1,5 +1,7 @@
 ﻿using Postulate.Lite.Core.Metadata;
 using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Reflection;
 
 namespace Postulate.Lite.Core
@@ -38,7 +40,7 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Generates a SQL command to remove a foreign key from a column
 		/// </summary>
-		public abstract string DropForeignKeyCommand(ForeignKeyInfo columnInfo);
+		public abstract string DropForeignKeyCommand(ForeignKeyInfo foreignKeyInfo);
 
 		/// <summary>
 		/// Generates a SQL command to add a column to a table
@@ -54,5 +56,7 @@ namespace Postulate.Lite.Core
 		/// Generates a SQL command to remove a column from a table
 		/// </summary>
 		public abstract string DropColumnCommand(ColumnInfo columnInfo);
+
+		public abstract IEnumerable<ForeignKeyInfo> GetDependentForeignKeys(IDbConnection connection, TableInfo tableInfo);
 	}
 }

@@ -18,8 +18,9 @@ namespace Postulate.Lite.Core.Merge
 
 		public override IEnumerable<string> SqlCommands<TKey>(CommandProvider<TKey> commandProvider, IDbConnection connection)
 		{
-			DropTable drop = new DropTable(TableInfo);
-			var rebuildFKs = drop.GetDependentForeignKeys(connection);
+			var rebuildFKs = commandProvider.GetDependentForeignKeys(connection, TableInfo);
+
+			DropTable drop = new DropTable(TableInfo, rebuildFKs);
 			foreach (var cmd in drop.SqlCommands(commandProvider, connection)) yield return cmd;
 
 			CreateTable create = new CreateTable(ModelType);

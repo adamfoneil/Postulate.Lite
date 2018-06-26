@@ -56,7 +56,7 @@ namespace Postulate.Lite.Core.Metadata
 		{
 		}
 
-		public string TableSchema { get; set; }
+		public string Schema { get; set; }
 		public string TableName { get; set; }
 		public string PropertyName { get; set; }
 		public string ColumnName { get; set; }
