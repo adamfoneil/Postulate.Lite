@@ -1,7 +1,6 @@
 ﻿using Dapper;
 using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -38,7 +37,7 @@ namespace Postulate.Lite.Core
 			return await connection.QuerySingleAsync<TResult>(ResolvedSql, queryParams);
 		}
 
-		public async Task<IEnumerable<TResult>> ExecuteAssync(IDbConnection connection)
+		public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection)
 		{
 			ResolvedSql = ResolveQuery(this, out DynamicParameters queryParams);
 			return await connection.QueryAsync<TResult>(ResolvedSql, queryParams);
@@ -112,7 +111,7 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Returns the properties of a query object based on parameters defined in a 
+		/// Returns the properties of a query object based on parameters defined in a
 		/// SQL statement as well as properties with Where and Case attributes
 		/// </summary>
 		private static IEnumerable<PropertyInfo> GetProperties(object query, string sql, out IEnumerable<string> builtInParams)
@@ -129,6 +128,5 @@ namespace Postulate.Lite.Core
 
 			return queryProps;
 		}
-
 	}
 }
