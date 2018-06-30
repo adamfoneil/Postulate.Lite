@@ -368,7 +368,7 @@ namespace Postulate.Lite.Core
 		/// </summary>
 		protected bool IsMapped(PropertyInfo propertyInfo)
 		{
-			return !HasAttribute<NotMappedAttribute>(propertyInfo);
+			return !propertyInfo.HasAttribute<NotMappedAttribute>();
 		}
 
 		/// <summary>
@@ -376,21 +376,7 @@ namespace Postulate.Lite.Core
 		/// </summary>
 		protected bool IsCalculated(PropertyInfo propertyInfo)
 		{
-			return HasAttribute<CalculatedAttribute>(propertyInfo);
-		}
-
-		/// <summary>
-		/// Returns true if the property has the specified attribute
-		/// </summary>
-		/// <typeparam name="T">Attribute class type</typeparam>
-		protected static bool HasAttribute<T>(PropertyInfo propertyInfo, Func<T, bool> criteria = null) where T : Attribute
-		{
-			var attr = propertyInfo.GetCustomAttribute<T>();
-			if (attr != null)
-			{
-				return criteria?.Invoke(attr) ?? true;
-			}
-			return false;
+			return propertyInfo.HasAttribute<CalculatedAttribute>();
 		}
 	}
 }

@@ -6,6 +6,7 @@ using System;
 using System.Data;
 using System.Linq;
 using Tests.Models;
+using Tests.Queries;
 
 namespace Tests
 {
@@ -154,5 +155,24 @@ namespace Tests
 				Assert.IsTrue(e.Id == 5);
 			}
 		}
+
+		protected void EmployeeQueryLastNameBase()
+		{
+			InsertEmployeesBase();
+
+			var qry = new EmployeesByLastName(GetEmployeeQueryByLastNameSyntax()) { LastName = "a%" };
+
+			using (var cn = GetConnection())
+			{
+				var results = qry.Execute(cn);
+				Assert.IsTrue(results.All(r => r.LastName.ToLower().StartsWith("a")));
+			}
+		}
+
+		/// <summary>
+		/// Query EmployeeInt table with single param WHERE LastName LIKE @lastName
+		/// </summary>
+		/// <returns></returns>
+		protected abstract string GetEmployeeQueryByLastNameSyntax();
 	}
 }

@@ -93,5 +93,16 @@ namespace Tests.MySql
 		{
 			FindEmployeeBase();
 		}
+
+		[TestMethod]
+		public void EmployeeQueryLastName()
+		{
+			EmployeeQueryLastNameBase();
+		}
+
+		protected override string GetEmployeeQueryByLastNameSyntax()
+		{
+			return "SELECT * FROM `EmployeeInt` WHERE `LastName` LIKE @lastName";
+		}
 	}
 }

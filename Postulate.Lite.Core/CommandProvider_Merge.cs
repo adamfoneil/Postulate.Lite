@@ -65,7 +65,7 @@ namespace Postulate.Lite.Core
 		protected IEnumerable<PropertyInfo> GetPrimaryKeyColumns(Type type, IEnumerable<PropertyInfo> columns, out bool identityIsPrimaryKey)
 		{
 			identityIsPrimaryKey = false;
-			var result = columns.Where(pi => HasAttribute<PrimaryKeyAttribute>(pi));
+			var result = columns.Where(pi => pi.HasAttribute<PrimaryKeyAttribute>());
 
 			if (!result.Any())
 			{

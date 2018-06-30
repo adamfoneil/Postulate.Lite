@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="Models\Organization.cs" />
     <Compile Include="MySqlCrud.cs" />
+    <Compile Include="Queries\EmployeesByLastName.cs" />
     <Compile Include="SqlServerCrud.cs" />
     <Compile Include="Models\Employee.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

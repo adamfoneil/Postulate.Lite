@@ -118,5 +118,16 @@ namespace Tests.SqlServer
 				Postulate.Lite.SqlServer.GuidKey.ConnectionExtensions.CreateTable<EmployeeGuid>(cn);
 			}
 		}
+
+		[TestMethod]
+		public void EmployeeQueryLastName()
+		{
+			EmployeeQueryLastNameBase();
+		}
+
+		protected override string GetEmployeeQueryByLastNameSyntax()
+		{
+			return "SELECT * FROM [EmployeeInt] WHERE [LastName] LIKE @lastName";
+		}
 	}
 }

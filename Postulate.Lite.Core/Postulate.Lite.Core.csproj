@@ -49,11 +49,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\CalculatedAttribute.cs" />
+    <Compile Include="Attributes\CaseAttribute.cs" />
     <Compile Include="Attributes\ColumnAccessAttribute.cs" />
     <Compile Include="Attributes\DecimalPrecisionAttribute.cs" />
     <Compile Include="Attributes\IdentityAttribute.cs" />
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
     <Compile Include="Attributes\ReferencesAttribute.cs" />
+    <Compile Include="Attributes\WhereAttribute.cs" />
+    <Compile Include="Extensions\PropertyInfoExtensions.cs" />
+    <Compile Include="Extensions\StringInternal.cs" />
     <Compile Include="Merge\Action.cs" />
     <Compile Include="Merge\AddColumn.cs" />
     <Compile Include="Merge\CreateTable.cs" />
@@ -67,6 +71,7 @@
     <Compile Include="CommandProvider_Crud.cs" />
     <Compile Include="Merge\Engine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Query.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Metadata\TableInfo.cs" />
   </ItemGroup>
