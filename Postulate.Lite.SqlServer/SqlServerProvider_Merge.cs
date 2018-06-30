@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Postulate.Lite.SqlServer
 {
-	public partial class SqlServerCommandProvider<TKey> : CommandProvider<TKey>
+	public partial class SqlServerProvider<TKey> : CommandProvider<TKey>
 	{
 		public override string CommentPrefix => "--";
 

@@ -6,9 +6,9 @@ namespace Postulate.Lite.SqlServer.GuidKey
 {
 	public static class ConnectionExtensions
 	{
-		private static SqlServerCommandProvider<Guid> GetProvider()
+		private static SqlServerProvider<Guid> GetProvider()
 		{
-			return new SqlServerCommandProvider<Guid>((obj) => Guid.Parse(obj.ToString()), "DEFAULT newid()");
+			return new SqlServerProvider<Guid>((obj) => Guid.Parse(obj.ToString()), "DEFAULT newid()");
 		}
 
 		public static TModel Find<TModel>(this IDbConnection connection, Guid id, IUser user = null)

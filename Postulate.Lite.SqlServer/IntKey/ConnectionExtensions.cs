@@ -6,9 +6,9 @@ namespace Postulate.Lite.SqlServer.IntKey
 {
 	public static class ConnectionExtensions
 	{
-		private static SqlServerCommandProvider<int> GetProvider()
+		private static SqlServerProvider<int> GetProvider()
 		{
-			return new SqlServerCommandProvider<int>((obj) => Convert.ToInt32(obj), "identity(1,1)");
+			return new SqlServerProvider<int>((obj) => Convert.ToInt32(obj), "identity(1,1)");
 		}
 
 		public static TModel Find<TModel>(this IDbConnection connection, int id, IUser user = null)

@@ -10,9 +10,9 @@ using System.Reflection;
 
 namespace Postulate.Lite.SqlServer
 {
-	public partial class SqlServerCommandProvider<TKey> : CommandProvider<TKey>
+	public partial class SqlServerProvider<TKey> : CommandProvider<TKey>
 	{
-		public SqlServerCommandProvider(Func<object, TKey> identityConverter, string identitySyntax) : base(identityConverter, identitySyntax)
+		public SqlServerProvider(Func<object, TKey> identityConverter, string identitySyntax) : base(identityConverter, identitySyntax)
 		{
 		}
 
