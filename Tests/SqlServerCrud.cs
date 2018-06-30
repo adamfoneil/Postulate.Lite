@@ -1,5 +1,4 @@
-﻿using AdamOneilSoftware;
-using Dapper;
+﻿using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Postulate.Lite.Core;
 using Postulate.Lite.SqlServer;
@@ -8,7 +7,6 @@ using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using Tests.Models;
 
 namespace Tests.SqlServer
@@ -29,7 +27,7 @@ namespace Tests.SqlServer
 
 		private static IDbConnection GetMasterConnection()
 		{
-			string masterConnection = ConfigurationManager.ConnectionStrings["MasterConnection"].ConnectionString;
+			string masterConnection = ConfigurationManager.ConnectionStrings["SqlServerMaster"].ConnectionString;
 			return new SqlConnection(masterConnection);
 		}
 
