@@ -9,7 +9,7 @@ using System.Data;
 namespace Tests.Models
 {
 	[Identity(nameof(Id))]
-	public class Employee : Record
+	public class EmployeeInt : Record
 	{
 		[References(typeof(Organization))]
 		public int OrganizationId { get; set; }

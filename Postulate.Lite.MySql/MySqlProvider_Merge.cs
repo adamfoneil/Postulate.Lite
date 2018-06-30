@@ -1,8 +1,10 @@
 ﻿using Postulate.Lite.Core;
+using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 
 namespace Postulate.Lite.MySql
@@ -13,7 +15,29 @@ namespace Postulate.Lite.MySql
 
 		public override string CreateTableCommand(Type modelType)
 		{
-			throw new NotImplementedException();
+			var columns = MappedColumns(modelType);
+			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
+			var identityName = modelType.GetIdentityName();
+
+			List<string> members = new List<string>();
+			members.AddRange(columns.Select(pi => SqlColumnSyntax(pi, (identityName.Equals(pi.Name)))));
+			members.Add(PrimaryKeySyntax(pkColumns));
+			if (!identityIsPrimaryKey) members.Add(UniqueIdSyntax(modelType.GetIdentityProperty()));
+
+			return
+				$"CREATE TABLE {ApplyDelimiter(TableName(modelType))} (" +
+					string.Join(",\r\n\t", members) +
+				")";
+		}
+
+		private string UniqueIdSyntax(PropertyInfo propertyInfo)
+		{
+			return $"UNIQUE ({string.Join(", ", ApplyDelimiter(propertyInfo.GetColumnName()))})";
+		}
+
+		private string PrimaryKeySyntax(IEnumerable<PropertyInfo> pkColumns)
+		{
+			return $"PRIMARY KEY ({string.Join(", ", pkColumns.Select(pi => ApplyDelimiter(pi.GetColumnName())))})";
 		}
 
 		public override string DropColumnCommand(ColumnInfo columnInfo)

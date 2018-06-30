@@ -1,7 +1,10 @@
-﻿using Postulate.Lite.Core.Metadata;
+﻿using Postulate.Lite.Core.Attributes;
+using Postulate.Lite.Core.Extensions;
+using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 
 namespace Postulate.Lite.Core
@@ -58,5 +61,19 @@ namespace Postulate.Lite.Core
 		public abstract string DropColumnCommand(ColumnInfo columnInfo);
 
 		public abstract IEnumerable<ForeignKeyInfo> GetDependentForeignKeys(IDbConnection connection, TableInfo tableInfo);
+
+		protected IEnumerable<PropertyInfo> GetPrimaryKeyColumns(Type type, IEnumerable<PropertyInfo> columns, out bool identityIsPrimaryKey)
+		{
+			identityIsPrimaryKey = false;
+			var result = columns.Where(pi => HasAttribute<PrimaryKeyAttribute>(pi));
+
+			if (!result.Any())
+			{
+				identityIsPrimaryKey = true;
+				result = new[] { type.GetIdentityProperty() };
+			}
+
+			return result;
+		}
 	}
 }

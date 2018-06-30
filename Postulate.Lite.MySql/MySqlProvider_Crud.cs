@@ -1,4 +1,5 @@
 ﻿using Postulate.Lite.Core;
+using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Metadata;
 using System;
@@ -20,11 +21,6 @@ namespace Postulate.Lite.MySql
 			return $"`{name}`";
 		}
 
-		protected override string DeleteCommand<T>()
-		{
-			return $"DELETE FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
-		}
-
 		protected override string FindCommand<T>(string whereClause)
 		{
 			var type = typeof(T);
@@ -41,9 +37,41 @@ namespace Postulate.Lite.MySql
 			return $"INSERT INTO {ApplyDelimiter(TableName(typeof(T)))} ({columnList}) VALUES ({valueList}); SELECT LAST_INSERT_ID()";
 		}
 
+		protected override string UpdateCommand<T>()
+		{
+			var columns = EditableColumns<T>(SaveAction.Update);
+			return $"UPDATE {ApplyDelimiter(TableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
+		}
+
+		protected override string DeleteCommand<T>()
+		{
+			return $"DELETE FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
+		}
+
 		protected override string SqlColumnSyntax(PropertyInfo propertyInfo, bool isIdentity)
 		{
-			throw new NotImplementedException();
+			ColumnInfo col = new ColumnInfo(propertyInfo);
+			string result = ApplyDelimiter(col.ColumnName);
+
+			var calcAttr = propertyInfo.GetCustomAttribute<CalculatedAttribute>();
+			if (calcAttr != null)
+			{
+				result += $" AS {calcAttr.Expression}";
+			}
+			else
+			{
+				string nullSyntax = (col.AllowNull) ? "NULL" : "NOT NULL";
+
+				string dataType = (col.HasExplicitType()) ?
+					col.DataType :
+					SupportedTypes(col.Length, col.Precision, col.Scale)[propertyInfo.PropertyType];
+
+				if (isIdentity) dataType += " " + IdentityColumnSyntax();
+
+				result += $" {dataType} {nullSyntax}";
+			}
+
+			return result;
 		}
 
 		protected override Dictionary<Type, string> SupportedTypes(int length = 0, int precision = 0, int scale = 0)
@@ -77,12 +105,6 @@ namespace Postulate.Lite.MySql
 			}
 
 			return result;
-		}
-
-		protected override string UpdateCommand<T>()
-		{
-			var columns = EditableColumns<T>(SaveAction.Update);
-			return $"UPDATE {ApplyDelimiter(TableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 	}
 }

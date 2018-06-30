@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntKey\ConnectionExtensions.cs" />
     <Compile Include="MySqlProvider_Crud.cs" />
     <Compile Include="MySqlProvider_Merge.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -97,20 +97,6 @@ namespace Postulate.Lite.SqlServer
 			return $"CONSTRAINT [PK_{constraintName}] PRIMARY KEY ({string.Join(", ", pkColumns.Select(pi => ApplyDelimiter(pi.GetColumnName())))})";
 		}
 
-		private IEnumerable<PropertyInfo> GetPrimaryKeyColumns(Type type, IEnumerable<PropertyInfo> columns, out bool identityIsPrimaryKey)
-		{
-			identityIsPrimaryKey = false;
-			var result = columns.Where(pi => HasAttribute<PrimaryKeyAttribute>(pi));
-
-			if (!result.Any())
-			{
-				identityIsPrimaryKey = true;
-				result = new[] { type.GetIdentityProperty() };
-			}
-
-			return result;
-		}
-
 		protected override string SqlColumnSyntax(PropertyInfo propertyInfo, bool isIdentity)
 		{
 			ColumnInfo col = new ColumnInfo(propertyInfo);
