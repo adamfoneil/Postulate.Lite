@@ -13,7 +13,7 @@ Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for 
 ## Nuget
 
 - SQL Server package: **Postulate.Lite.SqlServer**
-- MySql package: *coming soon*
+- MySql package: **Postulate.Lite.MySql**
 
 ## How to Use
 
