@@ -63,5 +63,35 @@ namespace Tests.MySql
 		{
 			DeleteEmployeeBase();
 		}
+
+		[TestMethod]
+		public void UpdateEmployee()
+		{
+			UpdateEmployeeBase();
+		}
+
+		[TestMethod]
+		public void SaveEmployee()
+		{
+			SaveEmployeeBase();
+		}
+
+		[TestMethod]
+		public void ForeignKeyLookup()
+		{
+			ForeignKeyLookupBase();
+		}
+
+		[TestMethod]
+		public void FindWhereEmployee()
+		{
+			FindWhereEmployeeBase();
+		}
+
+		[TestMethod]
+		public void FindEmployee()
+		{
+			FindEmployeeBase();
+		}
 	}
 }

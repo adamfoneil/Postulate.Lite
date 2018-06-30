@@ -66,31 +66,13 @@ namespace Tests.SqlServer
 		[TestMethod]
 		public void FindEmployee()
 		{
-			InsertEmployees();
-
-			using (var cn = GetConnection())
-			{
-				var e = cn.Find<EmployeeInt>(5);
-				Assert.IsTrue(e.Id == 5);
-			}
+			FindEmployeeBase();
 		}
 
 		[TestMethod]
 		public void UpdateEmployee()
 		{
-			InsertEmployees();
-
-			const string name = "Django";
-
-			using (var cn = GetConnection())
-			{
-				var e = cn.Find<EmployeeInt>(5);
-				e.FirstName = name;
-				cn.Save(e);
-
-				e = cn.Find<EmployeeInt>(5);
-				Assert.IsTrue(e.FirstName.Equals(name));
-			}
+			UpdateEmployeeBase();
 		}
 
 		[TestMethod]
@@ -102,42 +84,19 @@ namespace Tests.SqlServer
 		[TestMethod]
 		public void SaveEmployee()
 		{
-			var e = new EmployeeInt()
-			{
-				OrganizationId = 1,
-				FirstName = "Adam",
-				LastName = "O'Neil",
-				HireDate = new DateTime(2012, 1, 1)
-			};
-
-			using (var cn = GetConnection())
-			{
-				cn.Save(e);
-				cn.Delete<EmployeeInt>(e.Id);
-			}
+			SaveEmployeeBase();
 		}
 
 		[TestMethod]
 		public void FindWhereEmployee()
 		{
-			InsertEmployees();
-
-			using (var cn = GetConnection())
-			{
-				// there has to be an Id = 3 in there, I'm sure
-				var e = cn.FindWhere(new EmployeeInt() { Id = 3 });
-				Assert.IsTrue(e.Id == 3);
-			}
+			FindWhereEmployeeBase();
 		}
 
 		[TestMethod]
 		public void ForeignKeyLookup()
 		{
-			using (var cn = GetConnection())
-			{
-				var e = cn.Find<EmployeeInt>(10);
-				Assert.IsTrue(e.Organization != null);
-			}
+			ForeignKeyLookupBase();
 		}
 
 		[TestMethod]
