@@ -2,6 +2,7 @@
 using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Interfaces;
+using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,10 +13,10 @@ using System.Reflection;
 namespace Postulate.Lite.Core
 {
 	/// <summary>
-	/// Generates SQL commands for Crud methods. As an abstract class, it requires database-specific implementations
+	/// Generates SQL commands for Crud and Merge methods. As an abstract class, it requires database-specific implementations
 	/// </summary>
 	/// <typeparam name="TKey">Primary key type</typeparam>
-	public abstract class CommandProvider<TKey>
+	public abstract partial class CommandProvider<TKey>
 	{
 		private readonly Func<object, TKey> _identityConverter;
 		private readonly string _identitySyntax;
@@ -52,12 +53,6 @@ namespace Postulate.Lite.Core
 		protected abstract string FindCommand<T>(string whereClause);
 
 		/// <summary>
-		/// Generates a SQL create table statement for a given model class
-		/// </summary>
-		/// <typeparam name="T">Model class type</typeparam>
-		protected abstract string CreateTableCommand<T>();
-
-		/// <summary>
 		/// Returns a type-specific identity value from an object
 		/// </summary>
 		/// <param name="value">Primary key value</param>
@@ -75,7 +70,7 @@ namespace Postulate.Lite.Core
 		/// Gets the database table name for a given model class
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
-		protected abstract string TableName<T>();
+		protected abstract string TableName(Type modelType);
 
 		/// <summary>
 		/// Generates the syntax for column definition with a CREATE TABLE statement
@@ -108,15 +103,9 @@ namespace Postulate.Lite.Core
 		/// Returns the properties of a model class that are mapped to database columns
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
-		protected IEnumerable<PropertyInfo> MappedColumns<T>()
+		protected IEnumerable<PropertyInfo> MappedColumns(Type modelType)
 		{
-			var type = typeof(T);
-			return MappedColumnsFromType(type);
-		}
-
-		protected IEnumerable<PropertyInfo> MappedColumnsFromType(Type type)
-		{
-			return type.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
+			return modelType.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
 		}
 
 		private bool IsEditable(PropertyInfo pi, SaveAction action)
@@ -250,6 +239,18 @@ namespace Postulate.Lite.Core
 			}
 		}
 
+		public bool Exists<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		{
+			var record = Find<TModel>(connection, identity, user);
+			return (record != null);
+		}
+
+		public bool ExistsWhere<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		{
+			var record = FindWhere(connection, criteria, user);
+			return (record != null);
+		}
+
 		/// <summary>
 		/// Gets a model object for a given identity value
 		/// </summary>
@@ -263,8 +264,26 @@ namespace Postulate.Lite.Core
 			string identityCol = typeof(TModel).GetIdentityName();
 			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });
-			(result as Record)?.LookupForeignKeys(connection);
+			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
+		}
+
+		private void LookupForeignKeys<TModel>(IDbConnection connection, TModel result)
+		{
+			if (typeof(TKey) == typeof(int))
+			{
+				(result as Record)?.LookupIntForeignKeys(connection, this as CommandProvider<int>);
+			}
+
+			if (typeof(TKey) == typeof(long))
+			{
+				(result as Record)?.LookupLongForeignKeys(connection, this as CommandProvider<long>);
+			}
+
+			if (typeof(TKey) == typeof(Guid))
+			{
+				(result as Record)?.LookupGuidForeignKeys(connection, this as CommandProvider<Guid>);
+			}
 		}
 
 		/// <summary>
@@ -279,7 +298,7 @@ namespace Postulate.Lite.Core
 			string whereClause = WhereClauseFromObject(criteria);
 			string cmd = FindCommand<TModel>(whereClause);
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);
-			(result as Record)?.LookupForeignKeys(connection);
+			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
 		}
 
@@ -308,7 +327,7 @@ namespace Postulate.Lite.Core
 			var record = result as Record;
 			if (user != null)
 			{
-				record?.CheckFindPermission(connection, user);
+				record?.CheckFindPermission(connection, user);				
 			}
 
 			return result;
@@ -340,7 +359,7 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		public void CreateTable<TModel>(IDbConnection connection)
 		{
-			string cmd = CreateTableCommand<TModel>();
+			string cmd = CreateTableCommand(typeof(TModel));
 			connection.Execute(cmd);
 		}
 

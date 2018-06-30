@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Postulate.Lite.MySql</id>
+    <version>$version$</version>
+    <title>Postulate Lite for MySQL</title>
+    <authors>Adam O'Neil</authors>
+    <owners>Adam O'Neil</owners>    
+    <projectUrl>https://github.com/adamosoftware/Postulate.Lite</projectUrl>
+    <licenseUrl>https://github.com/adamosoftware/Postulate.Lite/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Lightweight ORM for MySQL made with Dapper</description>    
+    <copyright>Copyright Adam O'Neil 2018</copyright>
+    <tags>dapper, orm, mysql</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations" targetFramework="net40"/>
+    </frameworkAssemblies>
+  </metadata>
+</package>

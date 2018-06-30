@@ -1,28 +1,33 @@
-﻿using AdamOneilSoftware;
-using Dapper;
+﻿using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Postulate.Lite.Core;
+using Postulate.Lite.SqlServer;
 using Postulate.Lite.SqlServer.IntKey;
 using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using Tests.Models;
 
 namespace Tests.SqlServer
 {
 	[TestClass]
-	public class Crud
+	public class SqlServerCrud : CrudBase
 	{
-		private static IDbConnection GetConnection()
+		protected override IDbConnection GetConnection()
 		{
-			string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+			string connectionString = ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString;
 			return new SqlConnection(connectionString);
+		}
+
+		protected override CommandProvider<int> GetIntProvider()
+		{
+			return new SqlServerProvider<int>((obj) => Convert.ToInt32(obj), "identity(1,1)");
 		}
 
 		private static IDbConnection GetMasterConnection()
 		{
-			string masterConnection = ConfigurationManager.ConnectionStrings["MasterConnection"].ConnectionString;
+			string masterConnection = ConfigurationManager.ConnectionStrings["SqlServerMaster"].ConnectionString;
 			return new SqlConnection(masterConnection);
 		}
 
@@ -44,13 +49,9 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
-		public void DropAndCreateIntTable()
+		public void DropAndCreateTable()
 		{
-			using (var cn = GetConnection())
-			{
-				DropTable(cn, "Employee");
-				cn.CreateTable<Employee>();
-			}
+			DropAndCreateTableBase();
 		}
 
 		/// <summary>
@@ -59,36 +60,7 @@ namespace Tests.SqlServer
 		[TestMethod]
 		public void InsertEmployees()
 		{
-			using (var cn = GetConnection())
-			{
-				DropTable(cn, "Organization");
-				cn.CreateTable<Organization>();
-
-				DropTable(cn, "Employee");
-				cn.CreateTable<Employee>();
-
-				var tdg = new TestDataGenerator();
-				tdg.Generate<Organization>(5, (record) =>
-				{
-					record.Name = tdg.Random(Source.UniqueWidget);
-				}, (records) =>
-				{
-					foreach (var record in records) cn.Save(record);
-				});
-
-				var orgIds = cn.Query<int>("SELECT [Id] FROM [Organization]").ToArray();
-
-				tdg.Generate<Employee>(100, (record) =>
-				{
-					record.OrganizationId = tdg.Random(orgIds);
-					record.FirstName = tdg.Random(Source.FirstName);
-					record.LastName = tdg.Random(Source.LastName);
-					record.Email = $"{record.FirstName}.{record.LastName}@nowhere.org";
-				}, (records) =>
-				{
-					foreach (var record in records) cn.Save(record);
-				});
-			}
+			InsertEmployeesBase();
 		}
 
 		[TestMethod]
@@ -98,7 +70,7 @@ namespace Tests.SqlServer
 
 			using (var cn = GetConnection())
 			{
-				var e = cn.Find<Employee>(5);
+				var e = cn.Find<EmployeeInt>(5);
 				Assert.IsTrue(e.Id == 5);
 			}
 		}
@@ -112,11 +84,11 @@ namespace Tests.SqlServer
 
 			using (var cn = GetConnection())
 			{
-				var e = cn.Find<Employee>(5);
+				var e = cn.Find<EmployeeInt>(5);
 				e.FirstName = name;
 				cn.Save(e);
 
-				e = cn.Find<Employee>(5);
+				e = cn.Find<EmployeeInt>(5);
 				Assert.IsTrue(e.FirstName.Equals(name));
 			}
 		}
@@ -124,20 +96,13 @@ namespace Tests.SqlServer
 		[TestMethod]
 		public void DeleteEmployee()
 		{
-			InsertEmployees();
-
-			using (var cn = GetConnection())
-			{
-				cn.Delete<Employee>(5);
-				int count = cn.QuerySingle<int>("SELECT COUNT(1) FROM [dbo].[Employee]");
-				Assert.IsTrue(count == 99);
-			}
+			DeleteEmployeeBase();
 		}
 
 		[TestMethod]
 		public void SaveEmployee()
 		{
-			var e = new Employee()
+			var e = new EmployeeInt()
 			{
 				OrganizationId = 1,
 				FirstName = "Adam",
@@ -148,7 +113,7 @@ namespace Tests.SqlServer
 			using (var cn = GetConnection())
 			{
 				cn.Save(e);
-				cn.Delete<Employee>(e.Id);
+				cn.Delete<EmployeeInt>(e.Id);
 			}
 		}
 
@@ -160,7 +125,7 @@ namespace Tests.SqlServer
 			using (var cn = GetConnection())
 			{
 				// there has to be an Id = 3 in there, I'm sure
-				var e = cn.FindWhere(new Employee() { Id = 3 });
+				var e = cn.FindWhere(new EmployeeInt() { Id = 3 });
 				Assert.IsTrue(e.Id == 3);
 			}
 		}
@@ -170,7 +135,7 @@ namespace Tests.SqlServer
 		{
 			using (var cn = GetConnection())
 			{
-				var e = cn.Find<Employee>(10);
+				var e = cn.Find<EmployeeInt>(10);
 				Assert.IsTrue(e.Organization != null);
 			}
 		}
@@ -192,18 +157,6 @@ namespace Tests.SqlServer
 			{
 				DropTable(cn, "Employee");
 				Postulate.Lite.SqlServer.GuidKey.ConnectionExtensions.CreateTable<EmployeeGuid>(cn);
-			}
-		}
-
-		private void DropTable(IDbConnection cn, string tableName)
-		{
-			try
-			{
-				cn.Execute($"DROP TABLE [{tableName}]");
-			}
-			catch
-			{
-				// ignore error
 			}
 		}
 	}

@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /Docs/Postulate.Lite.Core.GeneratedXmlDoc.md
+/Tests/MySql.config
+/Tests/Connections.config

@@ -2,23 +2,13 @@
 using System;
 using System.Data;
 
-namespace Postulate.Lite.SqlServer.IntKey
+namespace Postulate.Lite.MySql.IntKey
 {
 	public static class ConnectionExtensions
 	{
-		private static SqlServerProvider<int> GetProvider()
+		private static MySqlProvider<int> GetProvider()
 		{
-			return new SqlServerProvider<int>((obj) => Convert.ToInt32(obj), "identity(1,1)");
-		}
-
-		public static bool Exists<TModel>(this IDbConnection connection, int id, IUser user = null)
-		{
-			return GetProvider().Exists<TModel>(connection, id, user);
-		}
-
-		public static bool ExistsWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
-		{
-			return GetProvider().ExistsWhere<TModel>(connection, criteria, user);
+			return new MySqlProvider<int>((obj) => Convert.ToInt32(obj), "auto_increment");
 		}
 
 		public static TModel Find<TModel>(this IDbConnection connection, int id, IUser user = null)
