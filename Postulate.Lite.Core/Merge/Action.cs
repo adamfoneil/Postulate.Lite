@@ -30,11 +30,11 @@ namespace Postulate.Lite.Core.Merge
 		public Action(ObjectType objectType, ActionType actionType)
 		{
 			ObjectType = objectType;
-			ActionType = actionType;			
+			ActionType = actionType;
 		}
 
 		public ObjectType ObjectType { get; private set; }
-		public ActionType ActionType { get; private set; }		
+		public ActionType ActionType { get; private set; }
 
 		public virtual IEnumerable<string> ValidationErrors(IDbConnection connection)
 		{

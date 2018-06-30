@@ -12,7 +12,7 @@ namespace Postulate.Lite.Core.Merge
 			DependentForeignKeys = dependentForeignKeys;
 		}
 
-		public TableInfo TableInfo { get; private set; }		
+		public TableInfo TableInfo { get; private set; }
 
 		public IEnumerable<ForeignKeyInfo> DependentForeignKeys { get; private set; }
 

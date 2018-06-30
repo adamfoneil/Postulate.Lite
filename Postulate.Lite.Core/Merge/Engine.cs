@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Postulate.Lite.Core.Metadata;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Reflection;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Reflection;
 using System.Text;
-using Postulate.Lite.Core.Metadata;
+using System.Threading.Tasks;
 
 namespace Postulate.Lite.Core.Merge
 {
@@ -13,10 +13,10 @@ namespace Postulate.Lite.Core.Merge
 	{
 		public static Engine<TKey> FromAssembly(CommandProvider<TKey> commandProvider, Assembly assembly, string @namespace = "")
 		{
-			var types = assembly.GetTypes().Where(t => 
+			var types = assembly.GetTypes().Where(t =>
 					!t.Name.StartsWith("<>") &&
 					!t.IsAbstract &&
-					!t.IsInterface && 
+					!t.IsInterface &&
 					t.Namespace.StartsWith(@namespace));
 
 			return new Engine<TKey>(commandProvider, types);

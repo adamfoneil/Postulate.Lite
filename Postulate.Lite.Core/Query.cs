@@ -61,7 +61,7 @@ namespace Postulate.Lite.Core
 			{
 				{ InternalStringExtensions.WhereToken, "WHERE" }, // query has no WHERE clause, so it will be added
 				{ InternalStringExtensions.AndWhereToken, "AND" } // query already contains a WHERE clause, we're just adding to it
-            };
+			};
 
 			string token;
 			if (result.ContainsAny(whereBuilder.Select(kp => kp.Key), out token))

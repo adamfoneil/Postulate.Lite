@@ -7,7 +7,7 @@ using System.Reflection;
 namespace Postulate.Lite.Core.Metadata
 {
 	public class ColumnInfo
-	{		
+	{
 		public ColumnInfo(PropertyInfo propertyInfo)
 		{
 			PropertyInfo = PropertyInfo;

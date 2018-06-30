@@ -5,6 +5,6 @@ namespace Postulate.Lite.Core.Interfaces
 	public interface IUser
 	{
 		string UserName { get; }
-		DateTime GetLocalTime();
+		DateTime LocalTime { get; }
 	}
 }

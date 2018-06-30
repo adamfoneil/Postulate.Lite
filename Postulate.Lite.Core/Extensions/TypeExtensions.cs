@@ -25,7 +25,7 @@ namespace Postulate.Lite.Core.Extensions
 				catch (Exception exc)
 				{
 					throw new Exception($"Couldn't find identity property on model type {type.Name}: {exc.Message}");
-				}				
+				}
 			}
 		}
 

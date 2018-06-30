@@ -15,7 +15,7 @@ namespace Postulate.Lite.Core
 
 		/// <summary>
 		/// Generates a SQL create table statement for a given model class
-		/// </summary>		
+		/// </summary>
 		public abstract string CreateTableCommand(Type modelType);
 
 		/// <summary>

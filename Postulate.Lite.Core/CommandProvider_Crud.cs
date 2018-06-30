@@ -292,7 +292,7 @@ namespace Postulate.Lite.Core
 		/// <typeparam name="TModel">Model class type</typeparam>
 		/// <param name="connection">Open connection</param>
 		/// <param name="criteria">Object specifying the criteria to search for</param>
-		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>		
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public TModel FindWhere<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
 		{
 			string whereClause = WhereClauseFromObject(criteria);
@@ -327,7 +327,7 @@ namespace Postulate.Lite.Core
 			var record = result as Record;
 			if (user != null)
 			{
-				record?.CheckFindPermission(connection, user);				
+				record?.CheckFindPermission(connection, user);
 			}
 
 			return result;
@@ -350,7 +350,7 @@ namespace Postulate.Lite.Core
 			connection.Execute(cmd, new { id = identity });
 
 			record?.AfterDelete(connection);
-		}		
+		}
 
 		/// <summary>
 		/// Creates a database table for a given model class
