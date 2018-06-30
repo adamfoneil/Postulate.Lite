@@ -239,6 +239,18 @@ namespace Postulate.Lite.Core
 			}
 		}
 
+		public bool Exists<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		{
+			var record = Find<TModel>(connection, identity, user);
+			return (record != null);
+		}
+
+		public bool ExistsWhere<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		{
+			var record = FindWhere(connection, criteria, user);
+			return (record != null);
+		}
+
 		/// <summary>
 		/// Gets a model object for a given identity value
 		/// </summary>
@@ -252,8 +264,26 @@ namespace Postulate.Lite.Core
 			string identityCol = typeof(TModel).GetIdentityName();
 			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });
-			(result as Record)?.LookupForeignKeys(connection);
+			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
+		}
+
+		private void LookupForeignKeys<TModel>(IDbConnection connection, TModel result)
+		{
+			if (typeof(TKey) == typeof(int))
+			{
+				(result as Record)?.LookupIntForeignKeys(connection, this as CommandProvider<int>);
+			}
+
+			if (typeof(TKey) == typeof(long))
+			{
+				(result as Record)?.LookupLongForeignKeys(connection, this as CommandProvider<long>);
+			}
+
+			if (typeof(TKey) == typeof(Guid))
+			{
+				(result as Record)?.LookupGuidForeignKeys(connection, this as CommandProvider<Guid>);
+			}
 		}
 
 		/// <summary>
@@ -268,7 +298,7 @@ namespace Postulate.Lite.Core
 			string whereClause = WhereClauseFromObject(criteria);
 			string cmd = FindCommand<TModel>(whereClause);
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);
-			(result as Record)?.LookupForeignKeys(connection);
+			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
 		}
 
@@ -297,7 +327,7 @@ namespace Postulate.Lite.Core
 			var record = result as Record;
 			if (user != null)
 			{
-				record?.CheckFindPermission(connection, user);
+				record?.CheckFindPermission(connection, user);				
 			}
 
 			return result;

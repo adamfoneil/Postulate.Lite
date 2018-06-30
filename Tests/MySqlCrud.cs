@@ -33,5 +33,11 @@ namespace Tests.MySql
 		{
 			InsertEmployeesBase();
 		}
+
+		[TestMethod]
+		public void DeleteEmployee()
+		{
+			DeleteEmployeeBase();
+		}
 	}
 }

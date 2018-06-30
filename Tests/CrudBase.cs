@@ -1,5 +1,6 @@
 ﻿using AdamOneilSoftware;
 using Dapper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Postulate.Lite.Core;
 using System.Data;
 using System.Linq;
@@ -67,6 +68,19 @@ namespace Tests
 				{
 					foreach (var record in records) provider.Save(cn, record);
 				});
+			}
+		}
+
+		protected void DeleteEmployeeBase()
+		{
+			var provider = GetIntProvider();
+
+			using (var cn = GetConnection())
+			{
+				var emp = new EmployeeInt() { FirstName = "Whoever", LastName = "Nobody" };
+				provider.Save(cn, emp);
+				provider.Delete<EmployeeInt>(cn, emp.Id);				
+				Assert.IsTrue(!provider.Exists<EmployeeInt>(cn, emp.Id));
 			}
 		}
 	}

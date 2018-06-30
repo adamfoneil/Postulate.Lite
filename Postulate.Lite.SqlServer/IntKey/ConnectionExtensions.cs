@@ -11,6 +11,16 @@ namespace Postulate.Lite.SqlServer.IntKey
 			return new SqlServerProvider<int>((obj) => Convert.ToInt32(obj), "identity(1,1)");
 		}
 
+		public static bool Exists<TModel>(this IDbConnection connection, int id, IUser user = null)
+		{
+			return GetProvider().Exists<TModel>(connection, id, user);
+		}
+
+		public static bool ExistsWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
+		{
+			return GetProvider().ExistsWhere<TModel>(connection, criteria, user);
+		}
+
 		public static TModel Find<TModel>(this IDbConnection connection, int id, IUser user = null)
 		{
 			return GetProvider().Find<TModel>(connection, id, user);

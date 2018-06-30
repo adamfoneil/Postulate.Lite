@@ -1,7 +1,7 @@
 ﻿using Postulate.Lite.Core;
 using Postulate.Lite.Core.Attributes;
-using Postulate.Lite.SqlServer.IntKey;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
@@ -34,9 +34,9 @@ namespace Tests.Models
 
 		public int Id { get; set; }
 
-		public override void LookupForeignKeys(IDbConnection connection)
+		public override void LookupIntForeignKeys(IDbConnection connection, CommandProvider<int> commandProvider)
 		{
-			Organization = connection.Find<Organization>(OrganizationId);
+			Organization = commandProvider.Find<Organization>(connection, OrganizationId);
 		}
 	}
 
@@ -67,9 +67,9 @@ namespace Tests.Models
 
 		public long Id { get; set; }
 
-		public override void LookupForeignKeys(IDbConnection connection)
+		public override void LookupLongForeignKeys(IDbConnection connection, CommandProvider<long> commandProvider)
 		{
-			Organization = connection.Find<Organization>(OrganizationId);
+			Organization = commandProvider.Find<Organization>(connection, OrganizationId);
 		}
 	}
 
@@ -99,10 +99,5 @@ namespace Tests.Models
 		public bool IsActive { get; set; } = true;
 
 		public Guid Id { get; set; }
-
-		public override void LookupForeignKeys(IDbConnection connection)
-		{
-			Organization = connection.Find<Organization>(OrganizationId);
-		}
 	}
 }

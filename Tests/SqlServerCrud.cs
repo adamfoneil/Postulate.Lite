@@ -98,14 +98,7 @@ namespace Tests.SqlServer
 		[TestMethod]
 		public void DeleteEmployee()
 		{
-			InsertEmployees();
-
-			using (var cn = GetConnection())
-			{
-				cn.Delete<EmployeeInt>(5);
-				int count = cn.QuerySingle<int>("SELECT COUNT(1) FROM [dbo].[EmployeeInt]");
-				Assert.IsTrue(count == 99);
-			}
+			DeleteEmployeeBase();
 		}
 
 		[TestMethod]

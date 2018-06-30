@@ -13,9 +13,19 @@ namespace Postulate.Lite.Core
 
 	public abstract class Record
 	{
-		public virtual void LookupForeignKeys(IDbConnection connection)
+		public virtual void LookupIntForeignKeys(IDbConnection connection, CommandProvider<int> commandProvider)
 		{
-			// do nothing by default
+			// do nothing
+		}
+
+		public virtual void LookupLongForeignKeys(IDbConnection connection, CommandProvider<long> commandProvider)
+		{
+			// do nothing
+		}
+
+		public virtual void LookupGuidForeignKeys(IDbConnection connection, CommandProvider<Guid> commandProvider)
+		{
+			// do nothing
 		}
 
 		public virtual void Validate(IDbConnection connection)
@@ -25,7 +35,7 @@ namespace Postulate.Lite.Core
 
 		public virtual void CheckSavePermission(IDbConnection connection, IUser user)
 		{
-			// do nothing by default			
+			// do nothing by default
 		}
 
 		public virtual void BeforeSave(IDbConnection connection, SaveAction action, IUser user)
