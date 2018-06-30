@@ -19,11 +19,13 @@ Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for 
 
 - Create any number of model classes that correspond to your database tables. They can be POCO, but added functionality is available if you inherit from [Postulate.Lite.Core.Record](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Record.cs). The only design requirement for Postulate.Lite model classes is that either they have an [[Identity]](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Attributes/IdentityAttribute.cs) attribute that defines the primary key property, or they have a property called **Id** with no particular attribute decoration.
 
+- For Sql Server, Postulate.Lite supports `int`, `Guid`, and `long` identity types. MySql currently supports `int`. When creating your model classes, decide on an identity type and be consistent across all your model classes.
+
 - Open your `IDbConnection` object in whatever way is appropriate for your application, normally within a `using` block.
 
-- Use any of Postulate.Lite Crud extension methods of `IDbConnection` defined in [ConnectionExtensions](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/ConnectionExtensions.cs): Find, FindWhere, Save, Insert, Update, Delete. They all accept a `TModel` generic argument corresponding to your model class.
+- Use any of the Postulate.Lite Crud extension methods of `IDbConnection`: Find, FindWhere, Save, Insert, Update, Delete, Exists, and ExistsWhere. They all accept a `TModel` generic argument corresponding to your model class. In the SQL Server package, there are three different namespaces with a static `ConnectionExtensions` class that provides the crud methods: [Postulate.Lite.SqlServer.IntKey](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/IntKey/ConnectionExtensions.cs), [LongKey](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/LongKey/ConnectionExtensions.cs), and [GuidKey](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/GuidKey/ConnectionExtensions.cs), so use the namespace appropriate to the identity type you chose above.
 
-- All of the Crud methods accept an `IUser` optional argument you can use to pass the current user name and access to the user's local time. This argument takes effect if your model class is based on `Record` (see above), which offers a number of overrides for checking permissions and executing row-level events, among other things.
+- All of the Crud methods accept an `IUser` optional argument you can use to pass the current user name and access to the user's local time. This argument takes effect if your model class is based on `Record` (see above), which offers a number of overrides for checking permissions and executing row-level events, looking up foreign keys, among other things.
 
 ## Examples
 
