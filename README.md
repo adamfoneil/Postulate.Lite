@@ -29,7 +29,7 @@ Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for 
 
 ## Examples
 
-A simple find using the [Find](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider.cs#L246) method:
+A simple find using the [Find](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L262) method:
 
 ```
 using (var cn = GetConnection())
@@ -39,7 +39,7 @@ using (var cn = GetConnection())
 }
 ```
 
-Find using criteria with the [FindWhere](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider.cs#L262) method:
+Find using criteria with the [FindWhere](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L296) method:
 ```
 using (var cn = GetConnection())
 {
@@ -48,7 +48,7 @@ using (var cn = GetConnection())
 }
 ```
 
-Create and save a record with the [Save](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider.cs#L225) method.
+Create and save a record with the [Save](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L229) method.
 ```
 using (var cn = GetConnection())
 {
@@ -65,4 +65,4 @@ using (var cn = GetConnection())
 
 ## Extending Postulate.Lite
 
-To implement Postulate.Lite for a particular database, inherit from abstract class [CommandProvider&lt;TKey&gt;](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider.cs) and implement its various abstract methods that generate SQL for Crud actions. The `TKey` generic argument specifies the identity (primary key) type used with your modeal classes. The [default SQL Server implementation](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/SqlServerProvider.cs) assumes an `int` primary key type. To implement `long` or `Guid` primary key types, you'd need to derive a new class from `CommandProvider` with your desired key type.
+To implement Postulate.Lite for a particular database, inherit from abstract class [CommandProvider&lt;TKey&gt;](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs) and implement its various abstract methods that generate SQL for Crud actions. The `TKey` generic argument specifies the identity (primary key) type used with your modeal classes. The [default SQL Server implementation](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.MySql/MySqlProvider_Crud.cs) assumes an `int` primary key type. To implement `long` or `Guid` primary key types, you'd need to derive a new class from `CommandProvider` with your desired key type.
