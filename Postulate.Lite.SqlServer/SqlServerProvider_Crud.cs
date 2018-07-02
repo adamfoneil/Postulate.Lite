@@ -18,7 +18,7 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string ApplyDelimiter(string name)
 		{
-			return string.Join(".", name.Split('.').Select(part => $"[{name}]"));			
+			return string.Join(".", name.Split('.').Select(part => $"[{part}]"));			
 		}
 
 		protected override string FindCommand<T>(string whereClause)
