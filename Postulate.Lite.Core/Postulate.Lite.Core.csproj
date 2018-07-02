@@ -56,11 +56,14 @@
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
     <Compile Include="Attributes\ReferencesAttribute.cs" />
     <Compile Include="Attributes\WhereAttribute.cs" />
+    <Compile Include="Extensions\ConnectionExtensions.cs" />
     <Compile Include="Extensions\PropertyInfoExtensions.cs" />
     <Compile Include="Extensions\StringInternal.cs" />
     <Compile Include="Merge\Action.cs" />
     <Compile Include="Merge\AddColumn.cs" />
+    <Compile Include="Merge\CreateSchema.cs" />
     <Compile Include="Merge\CreateTable.cs" />
+    <Compile Include="Merge\DropColumn.cs" />
     <Compile Include="Merge\DropTable.cs" />
     <Compile Include="Merge\RebuildTable.cs" />
     <Compile Include="Metadata\ColumnInfo.cs" />

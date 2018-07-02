@@ -24,7 +24,7 @@ namespace Postulate.Lite.SqlServer
 		protected override string FindCommand<T>(string whereClause)
 		{
 			var type = typeof(T);
-			var props = MappedColumns(type);
+			var props = GetMappedColumns(type);
 			var columns = props.Select(pi => new ColumnInfo(pi));
 			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {whereClause}";			
 		}
@@ -73,7 +73,7 @@ namespace Postulate.Lite.SqlServer
 		{			
 			Dictionary<string, string> parts = new Dictionary<string, string>()
 			{
-				{ "schema", string.Empty },
+				{ "schema", DefaultSchema },
 				{ "name", modelType.Name }
 			};
 
@@ -84,7 +84,7 @@ namespace Postulate.Lite.SqlServer
 				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
 			}
 
-			return string.Join(".", parts.Where(kp => !string.IsNullOrEmpty(kp.Value)).Select(kp => kp.Value));
+			return string.Join(".", parts.Select(kp => kp.Value));
 		}
 
 		private string UniqueIdSyntax(string constraintName, PropertyInfo propertyInfo)

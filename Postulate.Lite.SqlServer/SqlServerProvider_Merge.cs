@@ -13,10 +13,22 @@ namespace Postulate.Lite.SqlServer
 	public partial class SqlServerProvider<TKey> : CommandProvider<TKey>
 	{
 		public override string CommentPrefix => "--";
+		public override bool SupportsSchemas => true;
+		public override string DefaultSchema => "dbo";
+
+		public override string CreateSchemaCommand(string schemaName)
+		{
+			return $"CREATE SCHEMA [{schemaName}]";
+		}
+
+		public override bool SchemaExists(IDbConnection connection, string schemaName)
+		{
+			return connection.Exists("[sys].[schemas] WHERE [name]=@name", new { name = schemaName });
+		}
 
 		public override string CreateTableCommand(Type modelType)
 		{
-			var columns = MappedColumns(modelType);
+			var columns = GetMappedColumns(modelType);
 			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
 			var identityName = modelType.GetIdentityName();
 

@@ -14,10 +14,24 @@ namespace Postulate.Lite.Core
 		public abstract string CommentPrefix { get; }
 
 		/// <summary>
+		/// Indicates whether the backend supports schemas in the SQL Server sense as a naming group
+		/// </summary>
+		public abstract bool SupportsSchemas { get; }
+
+		/// <summary>
+		/// Allows SQL Server to specify "dbo" as the default schema name for created tables
+		/// </summary>
+		public abstract string DefaultSchema { get; }
+
+		#region command methods
+
+		/// <summary>
 		/// Generates a SQL create table statement for a given model class
 		/// </summary>
 		public abstract string CreateTableCommand(Type modelType);
 
+		public abstract string CreateSchemaCommand(string schemaName);
+		
 		/// <summary>
 		/// Generatea a SQL command to drop a table from a database
 		/// </summary>
@@ -60,8 +74,14 @@ namespace Postulate.Lite.Core
 		/// </summary>
 		public abstract string DropColumnCommand(ColumnInfo columnInfo);
 
+		#endregion
+
+		#region schema inspection
 		public abstract IEnumerable<ForeignKeyInfo> GetDependentForeignKeys(IDbConnection connection, TableInfo tableInfo);
 
+		public abstract bool SchemaExists(IDbConnection connection, string schemaName);
+
+		#endregion
 		protected IEnumerable<PropertyInfo> GetPrimaryKeyColumns(Type type, IEnumerable<PropertyInfo> columns, out bool identityIsPrimaryKey)
 		{
 			identityIsPrimaryKey = false;

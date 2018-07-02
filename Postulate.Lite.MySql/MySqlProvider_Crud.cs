@@ -24,7 +24,7 @@ namespace Postulate.Lite.MySql
 		protected override string FindCommand<T>(string whereClause)
 		{
 			var type = typeof(T);
-			var props = MappedColumns(type);
+			var props = GetMappedColumns(type);
 			var columns = props.Select(pi => new ColumnInfo(pi));
 			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {whereClause}";
 		}

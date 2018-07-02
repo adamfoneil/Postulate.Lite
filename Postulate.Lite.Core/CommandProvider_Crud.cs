@@ -103,7 +103,7 @@ namespace Postulate.Lite.Core
 		/// Returns the properties of a model class that are mapped to database columns
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
-		protected IEnumerable<PropertyInfo> MappedColumns(Type modelType)
+		public IEnumerable<PropertyInfo> GetMappedColumns(Type modelType)
 		{
 			return modelType.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
 		}

@@ -12,10 +12,12 @@ namespace Postulate.Lite.MySql
 	public partial class MySqlProvider<TKey> : CommandProvider<TKey>
 	{
 		public override string CommentPrefix => "# ";
+		public override bool SupportsSchemas => false;
+		public override string DefaultSchema => throw new NotImplementedException();
 
 		public override string CreateTableCommand(Type modelType)
 		{
-			var columns = MappedColumns(modelType);
+			var columns = GetMappedColumns(modelType);
 			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
 			var identityName = modelType.GetIdentityName();
 
@@ -86,6 +88,16 @@ namespace Postulate.Lite.MySql
 		}
 
 		public override string AlterColumnCommand(PropertyInfo propertyInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override string CreateSchemaCommand(string schemaName)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override bool SchemaExists(IDbConnection connection, string schemaName)
 		{
 			throw new NotImplementedException();
 		}

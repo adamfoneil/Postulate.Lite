@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -26,46 +27,98 @@ namespace Postulate.Lite.Core.Merge
 		{
 			CommandProvider = commandProvider;
 			ModelTypes = modelTypes;
+			ModelProperties = modelTypes.SelectMany(t => commandProvider.GetMappedColumns(t)).ToLookup(pi => pi.DeclaringType);
 		}
 
 		public CommandProvider<TKey> CommandProvider { get; private set; }
 		public IEnumerable<Type> ModelTypes { get; private set; }
+		public ILookup<Type, PropertyInfo> ModelProperties { get; private set; }
+		public Stopwatch Stopwatch { get; private set; }
 
 		public async Task<IEnumerable<Action>> CompareAsync(IDbConnection connection)
 		{
+			Stopwatch = Stopwatch.StartNew();
+
 			List<Action> results = new List<Action>();
 
-			var createTables = GetNewTables(ModelTypes, connection);
+			var schemaTables = await GetSchemaTablesAsync(connection);
+			var schemaColumns = await GetSchemaColumnsAsync(connection);
+			var schemaFKs = await GetSchemaForeignKeysAsync(connection);
+
+			if (CommandProvider.SupportsSchemas)
+			{
+				var createSchemas = await GetNewSchemasAsync(ModelTypes, connection);
+				results.AddRange(createSchemas.Select(s => new CreateSchema(s)));
+			}
+
+			var createTables = await GetNewTablesAsync(ModelTypes, connection);
 			results.AddRange(createTables.Select(t => new CreateTable(t)));
 
-			var modifiedTables = GetModifiedEmptyTables(ModelTypes, connection);
-			results.AddRange(modifiedTables.Select(t => new RebuildTable(t)));
+			var rebuiltTables = await GetModifiedEmptyTablesAsync(ModelTypes, connection);
+			results.AddRange(rebuiltTables.Select(t => new RebuildTable(t)));
 
-			var addColumns = GetNewColumns(ModelTypes, createTables.Concat(modifiedTables), connection);
+			var addColumns = await GetNewColumnsAsync(ModelTypes, createTables.Concat(rebuiltTables), connection);
 			results.AddRange(addColumns.Select(pi => new AddColumn(pi)));
 
-			var dropTables = GetDeletedTables(ModelTypes, connection);
+			var dropTables = await GetDeletedTablesAsync(ModelTypes, connection);
 			results.AddRange(dropTables.Select(tbl => new DropTable(tbl)));
+
+			var dropColumns = await GetDeletedColumnsAsync(dropTables, connection);
+			results.AddRange(dropColumns.Select(col => new DropColumn(col)));
+
+			var alterColumns = await GetAlteredColumnsAsync(ModelTypes, connection);
+
+			Stopwatch.Stop();
 
 			return results;
 		}
 
-		private IEnumerable<TableInfo> GetDeletedTables(IEnumerable<Type> modelTypes, IDbConnection connection)
+		private async Task<IEnumerable<string>> GetNewSchemasAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
 		{
 			throw new NotImplementedException();
 		}
 
-		private IEnumerable<PropertyInfo> GetNewColumns(IEnumerable<Type> modelTypes, IEnumerable<Type> omitTypes, IDbConnection connection)
+		private async Task<IEnumerable<ForeignKeyInfo>> GetSchemaForeignKeysAsync(IDbConnection connection)
 		{
 			throw new NotImplementedException();
 		}
 
-		private IEnumerable<Type> GetModifiedEmptyTables(IEnumerable<Type> modelTypes, IDbConnection connection)
+		private async Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection)
 		{
 			throw new NotImplementedException();
 		}
 
-		private IEnumerable<Type> GetNewTables(IEnumerable<Type> modelTypes, IDbConnection connection)
+		private Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection)
+		{
+			throw new NotImplementedException();
+		}
+
+		private async Task<IEnumerable<ColumnInfo>> GetAlteredColumnsAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
+		{
+			throw new NotImplementedException();
+		}
+
+		private async Task<IEnumerable<ColumnInfo>> GetDeletedColumnsAsync(IEnumerable<TableInfo> dropTables, IDbConnection connection)
+		{
+			throw new NotImplementedException();
+		}
+
+		private async Task<IEnumerable<TableInfo>> GetDeletedTablesAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
+		{
+			throw new NotImplementedException();
+		}
+
+		private async Task<IEnumerable<PropertyInfo>> GetNewColumnsAsync(IEnumerable<Type> modelTypes, IEnumerable<Type> omitTypes, IDbConnection connection)
+		{
+			throw new NotImplementedException();
+		}
+
+		private async Task<IEnumerable<Type>> GetModifiedEmptyTablesAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
+		{
+			throw new NotImplementedException();
+		}
+
+		private async Task<IEnumerable<Type>> GetNewTablesAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
 		{
 			throw new NotImplementedException();
 		}
