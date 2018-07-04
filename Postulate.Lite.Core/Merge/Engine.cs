@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Postulate.Lite.Core.Attributes;
-using Postulate.Lite.Core.Metadata;
+using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;

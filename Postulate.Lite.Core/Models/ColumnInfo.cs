@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
-namespace Postulate.Lite.Core.Metadata
+namespace Postulate.Lite.Core.Models
 {
 	public class ColumnInfo
 	{

@@ -1,4 +1,4 @@
-﻿using Postulate.Lite.Core.Metadata;
+﻿using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;

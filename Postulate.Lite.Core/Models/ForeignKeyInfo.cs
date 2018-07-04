@@ -1,4 +1,4 @@
-﻿namespace Postulate.Lite.Core.Metadata
+﻿namespace Postulate.Lite.Core.Models
 {
 	public class ForeignKeyInfo
 	{
