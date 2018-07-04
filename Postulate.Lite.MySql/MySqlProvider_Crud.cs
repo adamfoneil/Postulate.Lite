@@ -5,6 +5,7 @@ using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -19,6 +20,16 @@ namespace Postulate.Lite.MySql
 		protected override string ApplyDelimiter(string name)
 		{
 			return $"`{name}`";
+		}
+
+		protected override TableInfo GetTableInfo(Type modelType)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override bool IsTableEmpty(IDbConnection connection, Type modelType)
+		{
+			throw new NotImplementedException();
 		}
 
 		protected override string FindCommand<T>(string whereClause)

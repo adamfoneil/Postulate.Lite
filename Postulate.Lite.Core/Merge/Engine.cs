@@ -1,4 +1,6 @@
-﻿using Postulate.Lite.Core.Metadata;
+﻿using Dapper;
+using Postulate.Lite.Core.Attributes;
+using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -18,9 +20,17 @@ namespace Postulate.Lite.Core.Merge
 					!t.Name.StartsWith("<>") &&
 					!t.IsAbstract &&
 					!t.IsInterface &&
-					t.Namespace.StartsWith(@namespace));
+					t.Namespace.StartsWith(@namespace));			
 
-			return new Engine<TKey>(commandProvider, types);
+			var result = new Engine<TKey>(commandProvider, types);
+
+			var excludeSchemas = assembly.GetCustomAttributes<MergeExcludeSchemaAttribute>();
+			if (excludeSchemas?.Any() ?? false)
+			{
+				result.ExcludeSchemas = excludeSchemas.Select(a => a.Schema).ToArray();
+			}
+
+			return result;
 		}
 
 		public Engine(CommandProvider<TKey> commandProvider, IEnumerable<Type> modelTypes)
@@ -34,6 +44,11 @@ namespace Postulate.Lite.Core.Merge
 		public IEnumerable<Type> ModelTypes { get; private set; }
 		public ILookup<Type, PropertyInfo> ModelProperties { get; private set; }
 		public Stopwatch Stopwatch { get; private set; }
+
+		/// <summary>
+		/// SQL Server schemas to exclude from merge operations
+		/// </summary>
+		public string[] ExcludeSchemas { get; set; } = new string[] { "changes", "meta", "delete" };
 
 		public async Task<IEnumerable<Action>> CompareAsync(IDbConnection connection)
 		{
@@ -85,12 +100,59 @@ namespace Postulate.Lite.Core.Merge
 
 		private async Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection)
 		{
-			throw new NotImplementedException();
+			return await connection.QueryAsync<ColumnInfo>(
+				$@"SELECT
+	                SCHEMA_NAME([t].[schema_id]) AS [Schema], 
+					[t].[name] AS [TableName], [c].[Name] AS [ColumnName],
+	                TYPE_NAME([c].[system_type_id]) AS [DataType],
+	                [c].[max_length] AS [ByteLength], 
+					[c].[is_nullable] AS [IsNullable],
+	                [c].[precision] AS [Precision], 
+					[c].[scale] as [Scale], [c].[collation_name] AS [Collation], 
+					[c].[is_computed] AS [IsCalculated],
+	                SCHEMA_NAME([parentTbl].[schema_id]) AS [ReferencedSchema], 
+					[parentTbl].[name] AS [ReferencedTable], 
+					[parentCol].[name] AS [ReferencedColumn],
+	                [fk].[name] AS [ForeignKeyConstraint], 
+					[ccol].[definition] AS [Expression]
+                FROM
+	                [sys].[tables] [t] INNER JOIN [sys].[columns] [c] ON [t].[object_id]=[c].[object_id]
+	                LEFT JOIN [sys].[foreign_key_columns] [fkcol] ON
+		                [c].[object_id]=[fkcol].[parent_object_id] AND
+		                [c].[column_id]=[fkcol].[parent_column_id]
+                    LEFT JOIN [sys].[foreign_keys] [fk] ON [fkcol].[constraint_object_id]=[fk].[object_id]
+					LEFT JOIN [sys].[computed_columns] [ccol] ON [c].[object_id]=[ccol].[object_id] AND [c].[name]=[ccol].[name]
+	                LEFT JOIN [sys].[columns] [parentCol] ON
+		                [fkcol].[referenced_object_id]=[parentCol].[object_id] AND
+		                [fkcol].[referenced_column_id]=[parentCol].[column_id]
+	                LEFT JOIN [sys].[tables] [parentTbl] ON
+		                [parentCol].[object_id]=[parentTbl].[object_id]
+                    WHERE                        
+                        ([t].[name] NOT LIKE 'AspNet%' OR [t].[name] LIKE 'AspNetUsers') AND
+                        [t].[name] NOT LIKE '__MigrationHistory'{SchemaCriteria()}");
 		}
 
-		private Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection)
+		private async Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection)
 		{
-			throw new NotImplementedException();
+			return await connection.QueryAsync<TableInfo>(
+				$@"SELECT
+                    SCHEMA_NAME([t].[schema_id]) AS [Schema], [t].[name] AS [Name]
+                FROM
+                    [sys].[tables] [t]
+                WHERE                    
+                    [name] NOT LIKE 'AspNet%' AND
+                    [name] NOT LIKE '__MigrationHistory'{SchemaCriteria()}");
+		}
+
+		private string SchemaCriteria()
+		{
+			string schemaCriteria = string.Empty;
+			if (ExcludeSchemas?.Any() ?? false)
+			{
+				schemaCriteria = $" AND SCHEMA_NAME([t].[schema_id]) NOT IN ({string.Join(", ", ExcludeSchemas.Select(s => $"'{s}'"))})";
+			}
+
+			return schemaCriteria;
 		}
 
 		private async Task<IEnumerable<ColumnInfo>> GetAlteredColumnsAsync(IEnumerable<Type> modelTypes, IDbConnection connection)

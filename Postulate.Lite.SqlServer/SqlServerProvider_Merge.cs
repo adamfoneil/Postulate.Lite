@@ -4,6 +4,7 @@ using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Metadata;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -24,6 +25,29 @@ namespace Postulate.Lite.SqlServer
 		public override bool SchemaExists(IDbConnection connection, string schemaName)
 		{
 			return connection.Exists("[sys].[schemas] WHERE [name]=@name", new { name = schemaName });
+		}
+
+		protected override TableInfo GetTableInfo(Type modelType)
+		{
+			Dictionary<string, string> parts = new Dictionary<string, string>()
+			{
+				{ "schema", DefaultSchema },
+				{ "name", modelType.Name }
+			};
+
+			var tblAttr = modelType.GetCustomAttribute<TableAttribute>();
+			if (tblAttr != null)
+			{
+				if (!string.IsNullOrEmpty(tblAttr.Schema)) parts["schema"] = tblAttr.Schema;
+				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
+			}
+
+			return new TableInfo() { Name = parts["name"], Schema = parts["schema"] };
+		}
+
+		public override bool IsTableEmpty(IDbConnection connection, Type modelType)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override string CreateTableCommand(Type modelType)

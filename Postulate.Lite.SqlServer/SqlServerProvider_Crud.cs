@@ -70,21 +70,9 @@ namespace Postulate.Lite.SqlServer
 		}
 
 		protected override string TableName(Type modelType)
-		{			
-			Dictionary<string, string> parts = new Dictionary<string, string>()
-			{
-				{ "schema", DefaultSchema },
-				{ "name", modelType.Name }
-			};
-
-			var tblAttr = modelType.GetCustomAttribute<TableAttribute>();
-			if (tblAttr != null)
-			{
-				if (!string.IsNullOrEmpty(tblAttr.Schema)) parts["schema"] = tblAttr.Schema;
-				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
-			}
-
-			return string.Join(".", parts.Select(kp => kp.Value));
+		{
+			var tbl = GetTableInfo(modelType);
+			return $"{tbl.Schema}.{tbl.Name}";
 		}
 
 		private string UniqueIdSyntax(string constraintName, PropertyInfo propertyInfo)

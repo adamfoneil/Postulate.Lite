@@ -76,10 +76,16 @@ namespace Postulate.Lite.Core
 
 		#endregion
 
+		#region reflection methods
+		protected abstract TableInfo GetTableInfo(Type modelType);
+		#endregion
+
 		#region schema inspection
 		public abstract IEnumerable<ForeignKeyInfo> GetDependentForeignKeys(IDbConnection connection, TableInfo tableInfo);
 
 		public abstract bool SchemaExists(IDbConnection connection, string schemaName);
+
+		public abstract bool IsTableEmpty(IDbConnection connection, Type modelType);
 
 		#endregion
 		protected IEnumerable<PropertyInfo> GetPrimaryKeyColumns(Type type, IEnumerable<PropertyInfo> columns, out bool identityIsPrimaryKey)

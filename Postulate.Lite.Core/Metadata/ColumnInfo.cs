@@ -66,6 +66,20 @@ namespace Postulate.Lite.Core.Metadata
 		public int Scale { get; set; }
 		public bool AllowNull { get; set; }
 		public SaveAction SaveActions { get; set; }
+		public bool IsCalculated { get; set; }
+		public string Collation { get; set; }
+		public bool IsNullable { get; set; }
+		public string ReferencedSchema { get; set; }
+		public string ReferencedTable { get; set; }
+		public string ReferencedColumn { get; set; }
+		public string ForeignKeyConstraint { get; set; }
+		public string Expression { get; set; }
+		public int ByteLength { get; set; }
+
+		public TableInfo GetTableInfo()
+		{
+			return new TableInfo() { Schema = Schema, Name = TableName };
+		}
 
 		public PropertyInfo PropertyInfo { get; private set; }
 

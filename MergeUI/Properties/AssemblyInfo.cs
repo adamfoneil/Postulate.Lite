@@ -1,17 +1,16 @@
-﻿using Postulate.Lite.Core;
-using Postulate.Lite.Core.Attributes;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Postulate.Lite.Core")]
+[assembly: AssemblyTitle("MergeUI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Adam O'Neil Software")]
-[assembly: AssemblyProduct("Postulate.Lite.Core")]
-[assembly: AssemblyCopyright("Copyright © Adam O'Neil Software 2018")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("MergeUI")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("46baec9f-c26f-4b03-b3b0-efbede6fcbcf")]
+[assembly: Guid("f794e710-9b93-4d96-b8fe-e4e0da3ecdee")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -33,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.9.0")]
-[assembly: AssemblyFileVersion("1.0.9.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
