@@ -12,6 +12,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Postulate.Lite.MySql", "Postulate.Lite.MySql\Postulate.Lite.MySql.csproj", "{00FD3A3B-514F-415E-8F34-500E3DCAC43E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeUI", "MergeUI\MergeUI.csproj", "{F794E710-9B93-4D96-B8FE-E4E0DA3ECDEE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{00FD3A3B-514F-415E-8F34-500E3DCAC43E} = {00FD3A3B-514F-415E-8F34-500E3DCAC43E}
+		{16DF2079-2FF6-4C92-BE93-B237B2BBDBA1} = {16DF2079-2FF6-4C92-BE93-B237B2BBDBA1}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
