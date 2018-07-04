@@ -2,7 +2,7 @@
 
 namespace Postulate.Lite.Core
 {
-	public enum SupportedDatabases
+	public enum Databases
 	{
 		SqlServer,
 		MySql
@@ -15,14 +15,14 @@ namespace Postulate.Lite.Core
 		/// Required by Postulate Merge UI
 		/// </summary>
 		[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
-		public class CommandProviderAttribute : Attribute
+		public class DatabaseTypeAttribute : Attribute
 		{
-			public CommandProviderAttribute(SupportedDatabases databaseType)
+			public DatabaseTypeAttribute(Databases databaseType)
 			{
 				DatabaseType = databaseType;
 			}
 
-			public SupportedDatabases DatabaseType { get; private set; }
+			public Databases DatabaseType { get; private set; }
 		}
 	}
 }

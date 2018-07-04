@@ -51,7 +51,7 @@
     <Compile Include="Attributes\CalculatedAttribute.cs" />
     <Compile Include="Attributes\CaseAttribute.cs" />
     <Compile Include="Attributes\ColumnAccessAttribute.cs" />
-    <Compile Include="Attributes\CommandProviderAttribute.cs" />
+    <Compile Include="Attributes\DatabaseTypeAttribute.cs" />
     <Compile Include="Attributes\DecimalPrecisionAttribute.cs" />
     <Compile Include="Attributes\IdentityAttribute.cs" />
     <Compile Include="Attributes\MergeExcludeSchemaAttribute.cs" />

@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Postulate.Lite.Core;
+using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Metadata;
 using System;
@@ -13,7 +14,7 @@ namespace Postulate.Lite.SqlServer
 {
 	public partial class SqlServerProvider<TKey> : CommandProvider<TKey>
 	{
-		public override string CommentPrefix => "--";
+		public override string CommentPrefix => "-- ";
 		public override bool SupportsSchemas => true;
 		public override string DefaultSchema => "dbo";
 
@@ -27,7 +28,7 @@ namespace Postulate.Lite.SqlServer
 			return connection.Exists("[sys].[schemas] WHERE [name]=@name", new { name = schemaName });
 		}
 
-		protected override TableInfo GetTableInfo(Type modelType)
+		public override TableInfo GetTableInfo(Type modelType)
 		{
 			Dictionary<string, string> parts = new Dictionary<string, string>()
 			{
@@ -42,7 +43,20 @@ namespace Postulate.Lite.SqlServer
 				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
 			}
 
-			return new TableInfo() { Name = parts["name"], Schema = parts["schema"] };
+			return new TableInfo() { Name = parts["name"], Schema = parts["schema"], ModelType = modelType };
+		}
+
+		public override void MapForeignKeyInfo(PropertyInfo pi, ColumnInfo col)
+		{
+			var fkAttr = pi.GetCustomAttribute<ReferencesAttribute>();
+			if (fkAttr != null)
+			{
+				Type referencedType = fkAttr.PrimaryType;
+				TableInfo tbl = GetTableInfo(referencedType);
+				col.ReferencedSchema = tbl.Schema;
+				col.ReferencedTable = tbl.Name;
+				col.ReferencedColumn = referencedType.GetIdentityName();
+			}
 		}
 
 		public override bool IsTableEmpty(IDbConnection connection, Type modelType)

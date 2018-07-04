@@ -22,7 +22,7 @@ namespace Postulate.Lite.MySql
 			return $"`{name}`";
 		}
 
-		protected override TableInfo GetTableInfo(Type modelType)
+		public override TableInfo GetTableInfo(Type modelType)
 		{
 			throw new NotImplementedException();
 		}

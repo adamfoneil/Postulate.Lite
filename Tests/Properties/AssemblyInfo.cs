@@ -1,3 +1,4 @@
+using Postulate.Lite.Core;
 using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.SqlServer;
 using System.Reflection;
@@ -22,4 +23,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // used for testing MergeUI
-[assembly: CommandProvider(typeof(SqlServerProvider<int>))]
+[assembly: DatabaseType(Databases.SqlServer)]

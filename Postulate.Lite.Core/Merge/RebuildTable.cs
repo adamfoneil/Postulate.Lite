@@ -9,14 +9,14 @@ namespace Postulate.Lite.Core.Merge
 	{
 		public RebuildTable(Type modelType) : base(ObjectType.Table, ActionType.Drop)
 		{
-			ModelType = modelType;			
+			ModelType = modelType;
 		}
 
 		public Type ModelType { get; private set; }		
 
 		public override IEnumerable<string> SqlCommands<TKey>(CommandProvider<TKey> commandProvider, IDbConnection connection)
 		{
-			TableInfo tableInfo = TableInfo.FromModelType(ModelType, commandProvider);
+			TableInfo tableInfo = commandProvider.GetTableInfo(ModelType);
 			var rebuildFKs = commandProvider.GetDependentForeignKeys(connection, tableInfo);
 
 			DropTable drop = new DropTable(tableInfo, rebuildFKs);

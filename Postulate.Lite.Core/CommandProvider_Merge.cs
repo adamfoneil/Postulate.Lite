@@ -70,6 +70,11 @@ namespace Postulate.Lite.Core
 		public abstract string AlterColumnCommand(PropertyInfo propertyInfo);
 
 		/// <summary>
+		/// Copies provider-specific information about a foreign key to its corresponding ColumnInfo
+		/// </summary>
+		public abstract void MapForeignKeyInfo(PropertyInfo pi, ColumnInfo col);
+
+		/// <summary>
 		/// Generates a SQL command to remove a column from a table
 		/// </summary>
 		public abstract string DropColumnCommand(ColumnInfo columnInfo);
@@ -77,7 +82,7 @@ namespace Postulate.Lite.Core
 		#endregion
 
 		#region reflection methods
-		protected abstract TableInfo GetTableInfo(Type modelType);
+		public abstract TableInfo GetTableInfo(Type modelType);
 		#endregion
 
 		#region schema inspection

@@ -13,11 +13,11 @@ namespace MergeUI
 	internal class ScriptManager
 	{
 		private string _assemblyFile = null;
-		private SupportedDatabases _databaseType;
+		private Databases _databaseType;
 
 		public Assembly Assembly { get; private set; }
 		public Configuration Configuration { get; private set; }
-		public SupportedDatabases DatabaseType { get; private set; }
+		public Databases DatabaseType { get; private set; }
 
 		private ScriptManager(string fileName)
 		{
@@ -47,11 +47,11 @@ namespace MergeUI
 			}
 		}
 
-		private static SupportedDatabases TryGetDatabaseType(Assembly assembly)
+		private static Databases TryGetDatabaseType(Assembly assembly)
 		{
 			try
 			{
-				CommandProviderAttribute attr = assembly.GetCustomAttribute<CommandProviderAttribute>();
+				DatabaseTypeAttribute attr = assembly.GetCustomAttribute<DatabaseTypeAttribute>();
 				return attr.DatabaseType;
 			}
 			catch (Exception exc)

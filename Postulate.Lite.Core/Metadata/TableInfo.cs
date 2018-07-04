@@ -6,19 +6,28 @@ namespace Postulate.Lite.Core.Metadata
 	{
 		public string Schema { get; set; }
 		public string Name { get; set; }
+		public Type ModelType { get; set; }
+		public long RowCount { get; set; }
 
-		public static TableInfo FromModelType<TKey>(Type modelType, CommandProvider<TKey> commandProvider)
+		public bool IsEmpty()
 		{
-			TableInfo result = new TableInfo() { Name = modelType.Name };
-			if (commandProvider.SupportsSchemas)
-			{
+			return (RowCount == 0);
+		}
 
-			}
-			else
+		public override bool Equals(object obj)
+		{
+			TableInfo test = obj as TableInfo;
+			if (test != null)
 			{
-
+				return test.Schema.ToLower().Equals(Schema.ToLower()) && test.Name.ToLower().Equals(Name.ToLower());
 			}
-			return result;
+
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return Schema.GetHashCode() + Name.GetHashCode();
 		}
 	}
 }

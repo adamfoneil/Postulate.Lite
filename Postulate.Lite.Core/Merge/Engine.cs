@@ -12,6 +12,13 @@ using System.Threading.Tasks;
 
 namespace Postulate.Lite.Core.Merge
 {
+	public enum DifferenceType
+	{
+		Added,
+		Modified,
+		Dropped
+	}
+
 	public class Engine<TKey>
 	{
 		public static Engine<TKey> FromAssembly(CommandProvider<TKey> commandProvider, Assembly assembly, string @namespace = "")
@@ -57,8 +64,14 @@ namespace Postulate.Lite.Core.Merge
 			List<Action> results = new List<Action>();
 
 			var schemaTables = await GetSchemaTablesAsync(connection);
+			var modelTables = ModelTypes.Select(t => CommandProvider.GetTableInfo(t));
 			var schemaColumns = await GetSchemaColumnsAsync(connection);
-			var schemaFKs = await GetSchemaForeignKeysAsync(connection);
+			var modelColumns = ModelTypes.SelectMany(t => CommandProvider.GetMappedColumns(t)).Select(pi =>
+			{
+				var col = new ColumnInfo(pi);
+				CommandProvider.MapForeignKeyInfo(pi, col);
+				return col;
+			});
 
 			if (CommandProvider.SupportsSchemas)
 			{
@@ -66,14 +79,20 @@ namespace Postulate.Lite.Core.Merge
 				results.AddRange(createSchemas.Select(s => new CreateSchema(s)));
 			}
 
-			var createTables = await GetNewTablesAsync(ModelTypes, connection);
-			results.AddRange(createTables.Select(t => new CreateTable(t)));
+			var createTables = GetNewTables(modelTables, schemaTables);
+			results.AddRange(createTables.Select(tbl => new CreateTable(tbl.ModelType)));
 
-			var rebuiltTables = await GetModifiedEmptyTablesAsync(ModelTypes, connection);
-			results.AddRange(rebuiltTables.Select(t => new RebuildTable(t)));
+			// when looking for modified columns, don't include tables that were just created
+			var existingModelColumns = modelColumns.Where(col => !createTables.Contains(col.GetTableInfo()));
 
-			var addColumns = await GetNewColumnsAsync(ModelTypes, createTables.Concat(rebuiltTables), connection);
-			results.AddRange(addColumns.Select(pi => new AddColumn(pi)));
+			if (AnyModifiedColumns(schemaTables, schemaColumns, existingModelColumns,
+				out IEnumerable<ColumnInfo> added, out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted))
+			{
+				
+			}					
+
+			//var addColumns = await GetNewColumnsAsync(ModelTypes, createTables.Concat(rebuiltTables), connection);
+			//results.AddRange(addColumns.Select(pi => new AddColumn(pi)));
 
 			var dropTables = await GetDeletedTablesAsync(ModelTypes, connection);
 			results.AddRange(dropTables.Select(tbl => new DropTable(tbl)));
@@ -88,12 +107,14 @@ namespace Postulate.Lite.Core.Merge
 			return results;
 		}
 
-		private async Task<IEnumerable<string>> GetNewSchemasAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
+		private IEnumerable<TableInfo> GetExistingTables(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)
 		{
-			throw new NotImplementedException();
+			return from mt in modelTables
+				   join st in schemaTables on mt equals st
+				   select mt;
 		}
 
-		private async Task<IEnumerable<ForeignKeyInfo>> GetSchemaForeignKeysAsync(IDbConnection connection)
+		private async Task<IEnumerable<string>> GetNewSchemasAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
 		{
 			throw new NotImplementedException();
 		}
@@ -134,9 +155,12 @@ namespace Postulate.Lite.Core.Merge
 
 		private async Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection)
 		{
+			// row count trick thanks to https://blogs.msdn.microsoft.com/martijnh/2010/07/15/sql-serverhow-to-quickly-retrieve-accurate-row-count-for-table/
+
 			return await connection.QueryAsync<TableInfo>(
 				$@"SELECT
-                    SCHEMA_NAME([t].[schema_id]) AS [Schema], [t].[name] AS [Name]
+                    SCHEMA_NAME([t].[schema_id]) AS [Schema], [t].[name] AS [Name],
+					(SELECT SUM(row_count) FROM sys.dm_db_partition_stats WHERE object_id=[t].[object_id] AND (index_id=0 or index_id=1)) AS [RowCount]
                 FROM
                     [sys].[tables] [t]
                 WHERE                    
@@ -175,14 +199,25 @@ namespace Postulate.Lite.Core.Merge
 			throw new NotImplementedException();
 		}
 
-		private async Task<IEnumerable<Type>> GetModifiedEmptyTablesAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
+		private bool AnyModifiedColumns(
+			IEnumerable<TableInfo> schemaTables, IEnumerable<ColumnInfo> schemaColumns, IEnumerable<ColumnInfo> modelColumns,
+			out IEnumerable<ColumnInfo> added, out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted)
 		{
-			throw new NotImplementedException();
+			added = modelColumns.Where(col => !schemaColumns.Contains(col));			
+
+			deleted = schemaColumns.Where(col => !modelColumns.Contains(col));			
+
+			modified = from mc in modelColumns
+							join sc in schemaColumns on mc equals sc
+							where mc.IsAlteredFrom(sc)
+							select mc;
+
+			return (added.Any() || modified.Any() || deleted.Any());
 		}
 
-		private async Task<IEnumerable<Type>> GetNewTablesAsync(IEnumerable<Type> modelTypes, IDbConnection connection)
+		private IEnumerable<TableInfo> GetNewTables(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)
 		{
-			throw new NotImplementedException();
+			return modelTables.Where(mt => !schemaTables.Contains(mt));
 		}
 
 		public StringBuilder GetScript(IEnumerable<Action> actions, IDbConnection connection)
