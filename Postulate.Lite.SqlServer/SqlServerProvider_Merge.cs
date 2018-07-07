@@ -53,6 +53,7 @@ namespace Postulate.Lite.SqlServer
 			{
 				Type referencedType = fkAttr.PrimaryType;
 				TableInfo tbl = GetTableInfo(referencedType);
+				col.ForeignKeyInfo = new ForeignKeyInfo();
 				col.ReferencedSchema = tbl.Schema;
 				col.ReferencedTable = tbl.Name;
 				col.ReferencedColumn = referencedType.GetIdentityName();

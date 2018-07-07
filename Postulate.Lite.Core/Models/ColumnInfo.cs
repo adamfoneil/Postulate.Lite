@@ -54,6 +54,13 @@ namespace Postulate.Lite.Core.Models
 		{
 		}
 
+		public ColumnInfo(string schema, string tableName, string columnName)
+		{
+			TableInfo.Schema = schema;
+			TableInfo.Name = tableName;
+			ColumnName = columnName;
+		}
+
 		public TableInfo TableInfo { get; set; } = new TableInfo();
 		public string Schema { get { return TableInfo.Schema; } set { TableInfo.Schema = value; } }
 		public string TableName { get { return TableInfo.Name; } set { TableInfo.Name = value; } }
@@ -68,10 +75,13 @@ namespace Postulate.Lite.Core.Models
 		public bool IsCalculated { get; set; }
 		public string Collation { get; set; }
 		public bool IsNullable { get; set; }
-		public string ReferencedSchema { get; set; }
-		public string ReferencedTable { get; set; }
-		public string ReferencedColumn { get; set; }
-		public string ForeignKeyConstraint { get; set; }
+		public ForeignKeyInfo ForeignKeyInfo { get; set; }
+		public string ReferencedSchema { get { return ForeignKeyInfo.Parent.Schema; } set { ForeignKeyInfo.Parent.Schema = value; } }
+		public string ReferencedTable { get { return ForeignKeyInfo.Parent.TableName; } set { ForeignKeyInfo.Parent.TableName = value; } }
+		public string ReferencedColumn { get { return ForeignKeyInfo.Parent.ColumnName; } set { ForeignKeyInfo.Parent.ColumnName = value; } }
+		public string ForeignKeyConstraint { get { return ForeignKeyInfo.ConstraintName; } set { ForeignKeyInfo.ConstraintName = value; } }
+		public bool CascadeDelete { get { return ForeignKeyInfo.CascadeDelete; } set { ForeignKeyInfo.CascadeDelete = value; } }
+		public bool IsForeignKey { get { return ForeignKeyInfo != null; } }
 		public string Expression { get; set; }
 		public int ByteLength { get; set; }
 

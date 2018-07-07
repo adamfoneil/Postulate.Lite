@@ -22,9 +22,14 @@ namespace Tests
 			var schemaTables = Enumerable.Empty<TableInfo>();
 			var schemaColumns = Enumerable.Empty<ColumnInfo>();
 			var actions = engine.Compare(schemaTables, schemaColumns);
-			Assert.IsTrue(actions.Count() == 2 && actions.All(a => a.GetType().Equals(typeof(CreateTable))));
+			Assert.IsTrue(actions.Any(a => (a as CreateTable)?.ModelType.Equals(typeof(EmployeeInt)) ?? false), "Employee table not created");
+			Assert.IsTrue(actions.Any(a => (a as CreateTable)?.ModelType.Equals(typeof(Organization)) ?? false), "Organization table not created.");
+			Assert.IsTrue(actions.Any(a => (a as AddForeignKey)?.ForeignKeyInfo.Parent.Equals(new ColumnInfo("dbo", "Organization", "Id")) ?? false), "Foreign key not created");
 		}
 
+		/// <summary>
+		/// Create the org table when all that exists already is Employee
+		/// </summary>
 		protected void CreateOrgTableBase()
 		{
 			var provider = GetIntProvider();
@@ -35,7 +40,6 @@ namespace Tests
 			Assert.IsTrue(
 				actions.Count() == 1 && 
 				actions.All(a => provider.GetTableInfo((a as CreateTable).ModelType).Equals(new TableInfo("dbo", "Organization"))));
-
-		}
+		}		
 	}
 }

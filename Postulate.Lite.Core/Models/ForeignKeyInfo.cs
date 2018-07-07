@@ -2,8 +2,8 @@
 {
 	public class ForeignKeyInfo
 	{
-		public ColumnInfo Parent { get; set; }
-		public ColumnInfo Child { get; set; }
+		public ColumnInfo Parent { get; set; } = new ColumnInfo();
+		public ColumnInfo Child { get; set; } = new ColumnInfo();
 		public string ConstraintName { get; set; }
 		public bool CascadeDelete { get; set; }
 	}

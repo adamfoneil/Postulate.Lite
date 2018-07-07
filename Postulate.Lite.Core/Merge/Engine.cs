@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Postulate.Lite.Core.Attributes;
+using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -45,20 +46,24 @@ namespace Postulate.Lite.Core.Merge
 			CommandProvider = commandProvider;
 			ModelTypes = modelTypes;
 			ModelTables = modelTypes.Select(t => CommandProvider.GetTableInfo(t));
-			ModelProperties = modelTypes.SelectMany(t => commandProvider.GetMappedColumns(t)).ToLookup(pi => pi.DeclaringType);
-			ModelColumns = ModelTypes.SelectMany(t => CommandProvider.GetMappedColumns(t)).Select(pi =>
+
+			var mappedColumns = modelTypes.SelectMany(t => commandProvider.GetMappedColumns(t));
+
+			ModelProperties = mappedColumns.ToLookup(pi => pi.DeclaringType);
+
+			ModelColumns = mappedColumns.Select(pi =>
 			{
 				var col = new ColumnInfo(pi);
 				CommandProvider.MapProviderSpecificInfo(pi, col);
 				return col;
-			});
+			});		
 		}
 
 		public CommandProvider<TKey> CommandProvider { get; private set; }
 		public IEnumerable<Type> ModelTypes { get; private set; }
 		public IEnumerable<ColumnInfo> ModelColumns { get; private set; }
 		public ILookup<Type, PropertyInfo> ModelProperties { get; private set; }		
-		public IEnumerable<TableInfo> ModelTables { get; private set; }
+		public IEnumerable<TableInfo> ModelTables { get; private set; }		
 		public Stopwatch Stopwatch { get; private set; }
 
 		/// <summary>
@@ -108,6 +113,9 @@ namespace Postulate.Lite.Core.Merge
 			var dropTables = GetDeletedTables(ModelTables, schemaTables);
 			results.AddRange(dropTables.Select(tbl => new DropTable(tbl)));
 
+			var newForeignKeys = ModelColumns.Where(col => createTables.Contains(col.TableInfo) && col.IsForeignKey);
+			results.AddRange(newForeignKeys.Select(col => new AddForeignKey(col.ForeignKeyInfo)));
+			
 
 			return results;
 		}
@@ -156,7 +164,8 @@ namespace Postulate.Lite.Core.Merge
 	                SCHEMA_NAME([parentTbl].[schema_id]) AS [ReferencedSchema], 
 					[parentTbl].[name] AS [ReferencedTable], 
 					[parentCol].[name] AS [ReferencedColumn],
-	                [fk].[name] AS [ForeignKeyConstraint], 
+	                [fk].[name] AS [ForeignKeyConstraint],
+					CONVERT(bit, CASE [fk].[delete_referential_action] WHEN 1 THEN 1 ELSE 0 END) AS [CascadeDelete],
 					[ccol].[definition] AS [Expression]
                 FROM
 	                [sys].[tables] [t] INNER JOIN [sys].[columns] [c] ON [t].[object_id]=[c].[object_id]
