@@ -59,9 +59,7 @@ namespace Postulate.Lite.Core.Merge
 
 		public async Task<IEnumerable<Action>> CompareAsync(IDbConnection connection)
 		{
-			Stopwatch = Stopwatch.StartNew();
-
-			List<Action> results = new List<Action>();
+			Stopwatch = Stopwatch.StartNew();			
 
 			var schemaTables = await GetSchemaTablesAsync(connection);
 			var modelTables = ModelTypes.Select(t => CommandProvider.GetTableInfo(t));
@@ -73,9 +71,20 @@ namespace Postulate.Lite.Core.Merge
 				return col;
 			});
 
+			var results = CompareInner(schemaTables, modelTables, schemaColumns, modelColumns);
+
+			Stopwatch.Stop();
+
+			return results;
+		}
+
+		internal IEnumerable<Action> CompareInner(IEnumerable<TableInfo> schemaTables, IEnumerable<TableInfo> modelTables, IEnumerable<ColumnInfo> schemaColumns, IEnumerable<ColumnInfo> modelColumns)
+		{
+			List<Action> results = new List<Action>();
+
 			if (CommandProvider.SupportsSchemas)
 			{
-				var createSchemas = await GetNewSchemasAsync(ModelTypes, connection);
+				var createSchemas = GetNewSchemas(modelTables, schemaTables);
 				results.AddRange(createSchemas.Select(s => new CreateSchema(s)));
 			}
 
@@ -88,23 +97,27 @@ namespace Postulate.Lite.Core.Merge
 			if (AnyModifiedColumns(schemaTables, schemaColumns, existingModelColumns,
 				out IEnumerable<ColumnInfo> added, out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted))
 			{
-				
-			}					
+
+			}
 
 			//var addColumns = await GetNewColumnsAsync(ModelTypes, createTables.Concat(rebuiltTables), connection);
 			//results.AddRange(addColumns.Select(pi => new AddColumn(pi)));
 
-			var dropTables = await GetDeletedTablesAsync(ModelTypes, connection);
+			var dropTables = GetDeletedTables(modelTables, schemaTables);
 			results.AddRange(dropTables.Select(tbl => new DropTable(tbl)));
 
-			var dropColumns = await GetDeletedColumnsAsync(dropTables, connection);
-			results.AddRange(dropColumns.Select(col => new DropColumn(col)));
-
-			var alterColumns = await GetAlteredColumnsAsync(ModelTypes, connection);
-
-			Stopwatch.Stop();
 
 			return results;
+		}
+
+		private IEnumerable<string> GetNewSchemas(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)
+		{
+			throw new NotImplementedException();
+		}
+
+		private IEnumerable<TableInfo> GetDeletedTables(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)
+		{
+			throw new NotImplementedException();
 		}
 
 		private IEnumerable<TableInfo> GetExistingTables(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)

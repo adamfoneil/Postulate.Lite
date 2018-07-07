@@ -72,6 +72,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MergeBase.cs" />
     <Compile Include="Models\Organization.cs" />
     <Compile Include="MySqlCrud.cs" />
     <Compile Include="Queries\EmployeesByLastName.cs" />
