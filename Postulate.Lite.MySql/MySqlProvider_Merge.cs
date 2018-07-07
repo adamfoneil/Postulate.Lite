@@ -102,7 +102,7 @@ namespace Postulate.Lite.MySql
 			throw new NotImplementedException();
 		}
 
-		public override void MapForeignKeyInfo(PropertyInfo pi, ColumnInfo col)
+		public override void MapProviderSpecificInfo(PropertyInfo pi, ColumnInfo col)
 		{
 			throw new NotImplementedException();
 		}

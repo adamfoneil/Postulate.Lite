@@ -1,7 +1,10 @@
-﻿using Postulate.Lite.Core;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Postulate.Lite.Core;
 using Postulate.Lite.Core.Merge;
+using Postulate.Lite.Core.Models;
 using System;
 using System.Data;
+using System.Linq;
 using Tests.Models;
 
 namespace Tests
@@ -12,10 +15,14 @@ namespace Tests
 
 		protected abstract CommandProvider<int> GetIntProvider();
 
-		protected void CreateSomeTables()
+		protected void CreateTwoTablesBase()
 		{
 			var provider = GetIntProvider();
 			var engine = new Engine<int>(provider, new Type[] { typeof(EmployeeInt), typeof(Organization) });
+			var schemaTables = Enumerable.Empty<TableInfo>();
+			var schemaColumns = Enumerable.Empty<ColumnInfo>();
+			var actions = engine.Compare(schemaTables, schemaColumns);
+			Assert.IsTrue(actions.Count() == 2 && actions.All(a => a.GetType().Equals(typeof(CreateTable))));
 		}
 	}
 }

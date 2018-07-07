@@ -54,8 +54,9 @@ namespace Postulate.Lite.Core.Models
 		{
 		}
 
-		public string Schema { get; set; }
-		public string TableName { get; set; }
+		public TableInfo TableInfo { get; set; } = new TableInfo();
+		public string Schema { get { return TableInfo.Schema; } set { TableInfo.Schema = value; } }
+		public string TableName { get { return TableInfo.Name; } set { TableInfo.Name = value; } }
 		public string PropertyName { get; set; }
 		public string ColumnName { get; set; }
 		public string DataType { get; set; }
@@ -77,12 +78,7 @@ namespace Postulate.Lite.Core.Models
 		public Type GetModelType()
 		{
 			return PropertyInfo.DeclaringType;
-		}
-
-		public TableInfo GetTableInfo()
-		{
-			return new TableInfo() { Schema = Schema, Name = TableName };
-		}
+		}		
 
 		public PropertyInfo PropertyInfo { get; private set; }
 

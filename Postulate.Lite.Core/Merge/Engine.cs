@@ -44,12 +44,21 @@ namespace Postulate.Lite.Core.Merge
 		{
 			CommandProvider = commandProvider;
 			ModelTypes = modelTypes;
+			ModelTables = modelTypes.Select(t => CommandProvider.GetTableInfo(t));
 			ModelProperties = modelTypes.SelectMany(t => commandProvider.GetMappedColumns(t)).ToLookup(pi => pi.DeclaringType);
+			ModelColumns = ModelTypes.SelectMany(t => CommandProvider.GetMappedColumns(t)).Select(pi =>
+			{
+				var col = new ColumnInfo(pi);
+				CommandProvider.MapProviderSpecificInfo(pi, col);
+				return col;
+			});
 		}
 
 		public CommandProvider<TKey> CommandProvider { get; private set; }
 		public IEnumerable<Type> ModelTypes { get; private set; }
-		public ILookup<Type, PropertyInfo> ModelProperties { get; private set; }
+		public IEnumerable<ColumnInfo> ModelColumns { get; private set; }
+		public ILookup<Type, PropertyInfo> ModelProperties { get; private set; }		
+		public IEnumerable<TableInfo> ModelTables { get; private set; }
 		public Stopwatch Stopwatch { get; private set; }
 
 		/// <summary>
@@ -61,38 +70,31 @@ namespace Postulate.Lite.Core.Merge
 		{
 			Stopwatch = Stopwatch.StartNew();			
 
-			var schemaTables = await GetSchemaTablesAsync(connection);
-			var modelTables = ModelTypes.Select(t => CommandProvider.GetTableInfo(t));
+			var schemaTables = await GetSchemaTablesAsync(connection);			
 			var schemaColumns = await GetSchemaColumnsAsync(connection);
-			var modelColumns = ModelTypes.SelectMany(t => CommandProvider.GetMappedColumns(t)).Select(pi =>
-			{
-				var col = new ColumnInfo(pi);
-				CommandProvider.MapForeignKeyInfo(pi, col);
-				return col;
-			});
-
-			var results = CompareInner(schemaTables, modelTables, schemaColumns, modelColumns);
+			
+			var results = Compare(schemaTables, schemaColumns);
 
 			Stopwatch.Stop();
 
 			return results;
 		}
 
-		internal IEnumerable<Action> CompareInner(IEnumerable<TableInfo> schemaTables, IEnumerable<TableInfo> modelTables, IEnumerable<ColumnInfo> schemaColumns, IEnumerable<ColumnInfo> modelColumns)
+		public IEnumerable<Action> Compare(IEnumerable<TableInfo> schemaTables, IEnumerable<ColumnInfo> schemaColumns)
 		{
 			List<Action> results = new List<Action>();
 
 			if (CommandProvider.SupportsSchemas)
 			{
-				var createSchemas = GetNewSchemas(modelTables, schemaTables);
+				var createSchemas = GetNewSchemas(ModelTables, schemaTables);
 				results.AddRange(createSchemas.Select(s => new CreateSchema(s)));
 			}
 
-			var createTables = GetNewTables(modelTables, schemaTables);
+			var createTables = GetNewTables(ModelTables, schemaTables);
 			results.AddRange(createTables.Select(tbl => new CreateTable(tbl.ModelType)));
 
 			// when looking for modified columns, don't include tables that were just created
-			var existingModelColumns = modelColumns.Where(col => !createTables.Contains(col.GetTableInfo()));
+			var existingModelColumns = ModelColumns.Where(col => !createTables.Contains(col.TableInfo));
 
 			if (AnyModifiedColumns(schemaTables, schemaColumns, existingModelColumns,
 				out IEnumerable<ColumnInfo> added, out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted))
@@ -103,7 +105,7 @@ namespace Postulate.Lite.Core.Merge
 			//var addColumns = await GetNewColumnsAsync(ModelTypes, createTables.Concat(rebuiltTables), connection);
 			//results.AddRange(addColumns.Select(pi => new AddColumn(pi)));
 
-			var dropTables = GetDeletedTables(modelTables, schemaTables);
+			var dropTables = GetDeletedTables(ModelTables, schemaTables);
 			results.AddRange(dropTables.Select(tbl => new DropTable(tbl)));
 
 
@@ -112,12 +114,19 @@ namespace Postulate.Lite.Core.Merge
 
 		private IEnumerable<string> GetNewSchemas(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)
 		{
-			throw new NotImplementedException();
+			var modelSchemas = SchemasFromTables(modelTables);
+			var schemaSchemas = SchemasFromTables(schemaTables);
+			return modelSchemas.Where(s => !schemaSchemas.Contains(s) && !s.ToLower().Equals(CommandProvider.DefaultSchema.ToLower()));
+		}
+
+		private static IEnumerable<string> SchemasFromTables(IEnumerable<TableInfo> modelTables)
+		{
+			return modelTables.Select(t => t.Schema).GroupBy(t => t).Select(grp => grp.Key);
 		}
 
 		private IEnumerable<TableInfo> GetDeletedTables(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)
 		{
-			throw new NotImplementedException();
+			return schemaTables.Where(tbl => !modelTables.Contains(tbl));
 		}
 
 		private IEnumerable<TableInfo> GetExistingTables(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)

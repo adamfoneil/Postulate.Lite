@@ -46,7 +46,7 @@ namespace Postulate.Lite.SqlServer
 			return new TableInfo() { Name = parts["name"], Schema = parts["schema"], ModelType = modelType };
 		}
 
-		public override void MapForeignKeyInfo(PropertyInfo pi, ColumnInfo col)
+		public override void MapProviderSpecificInfo(PropertyInfo pi, ColumnInfo col)
 		{
 			var fkAttr = pi.GetCustomAttribute<ReferencesAttribute>();
 			if (fkAttr != null)
@@ -57,6 +57,8 @@ namespace Postulate.Lite.SqlServer
 				col.ReferencedTable = tbl.Name;
 				col.ReferencedColumn = referencedType.GetIdentityName();
 			}
+
+			col.TableInfo = GetTableInfo(pi.DeclaringType);
 		}
 
 		public override bool IsTableEmpty(IDbConnection connection, Type modelType)

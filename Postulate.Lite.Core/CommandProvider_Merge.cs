@@ -72,7 +72,7 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Copies provider-specific information about a foreign key to its corresponding ColumnInfo
 		/// </summary>
-		public abstract void MapForeignKeyInfo(PropertyInfo pi, ColumnInfo col);
+		public abstract void MapProviderSpecificInfo(PropertyInfo pi, ColumnInfo col);
 
 		/// <summary>
 		/// Generates a SQL command to remove a column from a table
