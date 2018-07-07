@@ -24,5 +24,18 @@ namespace Tests
 			var actions = engine.Compare(schemaTables, schemaColumns);
 			Assert.IsTrue(actions.Count() == 2 && actions.All(a => a.GetType().Equals(typeof(CreateTable))));
 		}
+
+		protected void CreateOrgTableBase()
+		{
+			var provider = GetIntProvider();
+			var engine = new Engine<int>(provider, new Type[] { typeof(EmployeeInt), typeof(Organization) });
+			var schemaTables = new TableInfo[] { new TableInfo("dbo", "Employee") };
+			var schemaColumns = Enumerable.Empty<ColumnInfo>();
+			var actions = engine.Compare(schemaTables, schemaColumns);
+			Assert.IsTrue(
+				actions.Count() == 1 && 
+				actions.All(a => provider.GetTableInfo((a as CreateTable).ModelType).Equals(new TableInfo("dbo", "Organization"))));
+
+		}
 	}
 }

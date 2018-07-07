@@ -27,5 +27,11 @@ namespace Tests
 		{
 			CreateTwoTablesBase();
 		}
+
+		[TestMethod]
+		public void CreateOrgTable()
+		{
+			CreateOrgTableBase();
+		}
 	}
 }

@@ -4,6 +4,16 @@ namespace Postulate.Lite.Core.Models
 {
 	public class TableInfo
 	{
+		public TableInfo()
+		{				
+		}
+
+		public TableInfo(string schema, string name)
+		{
+			Schema = schema;
+			Name = name;
+		}
+
 		public string Schema { get; set; }
 		public string Name { get; set; }
 		public Type ModelType { get; set; }

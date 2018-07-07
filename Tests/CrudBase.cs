@@ -32,7 +32,7 @@ namespace Tests
 		{
 			using (var cn = GetConnection())
 			{
-				DropTable(cn, "EmployeeInt");
+				DropTable(cn, "Employee");
 				GetIntProvider().CreateTable<EmployeeInt>(cn);
 			}
 		}
@@ -46,7 +46,7 @@ namespace Tests
 				DropTable(cn, "Organization");
 				provider.CreateTable<Organization>(cn);
 
-				DropTable(cn, "EmployeeInt");
+				DropTable(cn, "Employee");
 				provider.CreateTable<EmployeeInt>(cn);
 
 				var tdg = new TestDataGenerator();

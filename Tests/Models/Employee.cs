@@ -8,6 +8,7 @@ using System.Data;
 namespace Tests.Models
 {
 	[Identity(nameof(Id))]
+	[Table("Employee")]
 	public class EmployeeInt : Record
 	{
 		[References(typeof(Organization))]

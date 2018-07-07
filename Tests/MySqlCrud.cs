@@ -102,7 +102,7 @@ namespace Tests.MySql
 
 		protected override string GetEmployeeQueryByLastNameSyntax()
 		{
-			return "SELECT * FROM `EmployeeInt` WHERE `LastName` LIKE @lastName";
+			return "SELECT * FROM `Employee` WHERE `LastName` LIKE @lastName";
 		}
 	}
 }
