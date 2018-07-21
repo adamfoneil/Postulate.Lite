@@ -49,10 +49,10 @@ namespace Postulate.Lite.SqlServer
 		}
 
 		protected override Dictionary<Type, string> SupportedTypes(int length, int precision, int scale)
-		{
+		{			
 			return new Dictionary<Type, string>()
 			{
-				{ typeof(string), $"nvarchar({length})" },
+				{ typeof(string), $"nvarchar({((length == 0) ? "max" : length.ToString())})" },
 				{ typeof(int), "int" },
 				{ typeof(DateTime), "datetime" },
 				{ typeof(bool), "bit" },

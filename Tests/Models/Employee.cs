@@ -27,6 +27,8 @@ namespace Tests.Models
 		[MaxLength(50)]
 		public string Email { get; set; }
 
+		public string Notes { get; set; }
+
 		[Column(TypeName = "date")]
 		public DateTime? HireDate { get; set; }
 
