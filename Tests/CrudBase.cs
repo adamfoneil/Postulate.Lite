@@ -131,7 +131,7 @@ namespace Tests
 			{
 				var e = await provider.FindAsync<EmployeeInt>(cn, 5);
 				e.FirstName = name;
-				provider.Save(cn, e);
+				await provider.SaveAsync(cn, e);
 
 				e = await provider.FindAsync<EmployeeInt>(cn, 5);
 				Assert.IsTrue(e.FirstName.Equals(name));
