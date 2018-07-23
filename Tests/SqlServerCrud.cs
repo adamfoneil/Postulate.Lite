@@ -54,19 +54,10 @@ namespace Tests.SqlServer
 			DropAndCreateTableBase();
 		}
 
-		/// <summary>
-		/// Drops employee table, creates 10 random employees
-		/// </summary>
 		[TestMethod]
-		public void InsertEmployees()
+		public void DeleteEmployeeAsync()
 		{
-			InsertEmployeesBase();
-		}
-
-		[TestMethod]
-		public void FindEmployee()
-		{
-			FindEmployeeBase();
+			DeleteEmployeeBaseAsync().Wait();
 		}
 
 		[TestMethod]
@@ -76,9 +67,9 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
-		public void DeleteEmployee()
+		public void UpdateEmployeeAsync()
 		{
-			DeleteEmployeeBase();
+			UpdateEmployeeBaseAsync().Wait();
 		}
 
 		[TestMethod]
@@ -88,9 +79,9 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
-		public void FindWhereEmployee()
+		public void SaveEmployeeAsync()
 		{
-			FindWhereEmployeeBase();
+			SaveEmployeeBaseAsync().Wait();
 		}
 
 		[TestMethod]
@@ -100,23 +91,33 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
-		public void DropAndCreateLong()
+		public void ForeignKeyLookupAsync()
 		{
-			using (var cn = GetConnection())
-			{
-				DropTable(cn, "Employee");
-				Postulate.Lite.SqlServer.LongKey.ConnectionExtensions.CreateTable<EmployeeLong>(cn);
-			}
+			ForeignKeyLookupBaseAsync().Wait();
 		}
 
 		[TestMethod]
-		public void DropAndCreateGuid()
+		public void FindWhereEmployee()
 		{
-			using (var cn = GetConnection())
-			{
-				DropTable(cn, "Employee");
-				Postulate.Lite.SqlServer.GuidKey.ConnectionExtensions.CreateTable<EmployeeGuid>(cn);
-			}
+			FindWhereEmployeeBase();
+		}
+
+		[TestMethod]
+		public void FindWhereEmployeeAsync()
+		{
+			FindWhereEmployeeBaseAsync().Wait();
+		}
+
+		[TestMethod]
+		public void FindEmployee()
+		{
+			FindEmployeeBase();
+		}
+
+		[TestMethod]
+		public void FindEmployeeAsync()
+		{
+			FindEmployeeBaseAsync().Wait();
 		}
 
 		[TestMethod]

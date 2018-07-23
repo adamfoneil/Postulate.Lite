@@ -6,6 +6,7 @@ using Postulate.Lite.MySql;
 using System;
 using System.Configuration;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Tests.MySql
 {
@@ -65,9 +66,21 @@ namespace Tests.MySql
 		}
 
 		[TestMethod]
+		public void DeleteEmployeeAsync()
+		{
+			DeleteEmployeeBaseAsync().Wait();
+		}
+
+		[TestMethod]
 		public void UpdateEmployee()
 		{
 			UpdateEmployeeBase();
+		}
+
+		[TestMethod]
+		public void UpdateEmployeeAsync()
+		{
+			UpdateEmployeeBaseAsync().Wait();
 		}
 
 		[TestMethod]
@@ -77,9 +90,21 @@ namespace Tests.MySql
 		}
 
 		[TestMethod]
+		public void SaveEmployeeAsync()
+		{
+			SaveEmployeeBaseAsync().Wait();
+		}
+
+		[TestMethod]
 		public void ForeignKeyLookup()
 		{
 			ForeignKeyLookupBase();
+		}
+
+		[TestMethod]
+		public void ForeignKeyLookupAsync()
+		{
+			ForeignKeyLookupBaseAsync().Wait();
 		}
 
 		[TestMethod]
@@ -89,9 +114,21 @@ namespace Tests.MySql
 		}
 
 		[TestMethod]
+		public void FindWhereEmployeeAsync()
+		{
+			FindWhereEmployeeBaseAsync().Wait();
+		}
+
+		[TestMethod]
 		public void FindEmployee()
 		{
 			FindEmployeeBase();
+		}
+
+		[TestMethod]
+		public void FindEmployeeAsync()
+		{
+			FindEmployeeBaseAsync().Wait();
 		}
 
 		[TestMethod]

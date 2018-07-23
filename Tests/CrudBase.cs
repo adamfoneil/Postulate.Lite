@@ -5,6 +5,7 @@ using Postulate.Lite.Core;
 using System;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Tests.Models;
 using Tests.Queries;
 
@@ -86,6 +87,19 @@ namespace Tests
 			}
 		}
 
+		protected async Task DeleteEmployeeBaseAsync()
+		{
+			var provider = GetIntProvider();
+
+			using (var cn = GetConnection())
+			{
+				var emp = new EmployeeInt() { FirstName = "Whoever", LastName = "Nobody" };
+				await provider.SaveAsync(cn, emp);
+				await provider.DeleteAsync<EmployeeInt>(cn, emp.Id);
+				Assert.IsTrue(!provider.Exists<EmployeeInt>(cn, emp.Id));
+			}
+		}
+
 		protected void UpdateEmployeeBase()
 		{
 			InsertEmployeesBase();
@@ -101,6 +115,25 @@ namespace Tests
 				provider.Save(cn, e);
 
 				e = provider.Find<EmployeeInt>(cn, 5);				
+				Assert.IsTrue(e.FirstName.Equals(name));
+			}
+		}
+
+		protected async Task UpdateEmployeeBaseAsync()
+		{
+			InsertEmployeesBase();
+
+			const string name = "Django";
+
+			var provider = GetIntProvider();
+
+			using (var cn = GetConnection())
+			{
+				var e = await provider.FindAsync<EmployeeInt>(cn, 5);
+				e.FirstName = name;
+				provider.Save(cn, e);
+
+				e = await provider.FindAsync<EmployeeInt>(cn, 5);
 				Assert.IsTrue(e.FirstName.Equals(name));
 			}
 		}
@@ -124,11 +157,39 @@ namespace Tests
 			}
 		}
 
+		protected async Task SaveEmployeeBaseAsync()
+		{
+			var e = new EmployeeInt()
+			{
+				OrganizationId = 1,
+				FirstName = "Adam",
+				LastName = "O'Neil",
+				HireDate = new DateTime(2012, 1, 1)
+			};
+
+			var provider = GetIntProvider();
+
+			using (var cn = GetConnection())
+			{
+				await provider.SaveAsync(cn, e);
+				await provider.DeleteAsync<EmployeeInt>(cn, e.Id);
+			}
+		}
+
 		protected void ForeignKeyLookupBase()
 		{			
 			using (var cn = GetConnection())
 			{
 				var e = GetIntProvider().Find<EmployeeInt>(cn, 10);
+				Assert.IsTrue(e.Organization != null);
+			}
+		}
+
+		protected async Task ForeignKeyLookupBaseAsync()
+		{
+			using (var cn = GetConnection())
+			{
+				var e = await GetIntProvider().FindAsync<EmployeeInt>(cn, 10);
 				Assert.IsTrue(e.Organization != null);
 			}
 		}
@@ -145,6 +206,18 @@ namespace Tests
 			}
 		}
 
+		protected async Task FindWhereEmployeeBaseAsync()
+		{
+			InsertEmployeesBase();
+
+			using (var cn = GetConnection())
+			{
+				// there has to be an Id = 3 in there, I'm sure
+				var e = await GetIntProvider().FindWhereAsync(cn, new EmployeeInt() { Id = 3 });
+				Assert.IsTrue(e.Id == 3);
+			}
+		}
+
 		protected void FindEmployeeBase()
 		{
 			InsertEmployeesBase();
@@ -152,6 +225,17 @@ namespace Tests
 			using (var cn = GetConnection())
 			{
 				var e = GetIntProvider().Find<EmployeeInt>(cn, 5);
+				Assert.IsTrue(e.Id == 5);
+			}
+		}
+
+		protected async Task FindEmployeeBaseAsync()
+		{
+			InsertEmployeesBase();
+
+			using (var cn = GetConnection())
+			{
+				var e = await GetIntProvider().FindAsync<EmployeeInt>(cn, 5);
 				Assert.IsTrue(e.Id == 5);
 			}
 		}
