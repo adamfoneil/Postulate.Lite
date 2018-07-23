@@ -52,6 +52,16 @@ namespace Postulate.Lite.SqlServer.LongKey
 			return await GetProvider().FindWhereAsync(connection, criteria, user);
 		}
 
+		public static long Merge<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		{
+			return GetProvider().Merge(connection, @object, user);
+		}
+
+		public async static Task<long> MergeAsync<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		{
+			return await GetProvider().MergeAsync(connection, @object, user);
+		}
+
 		public static long Save<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			return GetProvider().Save(connection, @object, user);

@@ -52,6 +52,16 @@ namespace Postulate.Lite.MySql.IntKey
 			return await GetProvider().FindWhereAsync(connection, criteria, user);
 		}
 
+		public static int Merge<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		{
+			return GetProvider().Merge(connection, @object, user);
+		}
+
+		public async static Task<int> MergeAsync<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		{
+			return await GetProvider().MergeAsync(connection, @object, user);
+		}
+
 		public static int Save<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			return GetProvider().Save(connection, @object, user);

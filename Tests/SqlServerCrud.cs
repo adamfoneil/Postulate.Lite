@@ -133,6 +133,18 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
+		public void MergeOrg()
+		{
+			MergeOrgBase();
+		}
+
+		[TestMethod]
+		public void MergeOrgAsync()
+		{
+			MergeOrgBaseAsync().Wait();
+		}
+
+		[TestMethod]
 		public void EmployeeQueryLastName()
 		{
 			EmployeeQueryLastNameBase();

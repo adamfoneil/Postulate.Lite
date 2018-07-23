@@ -270,6 +270,74 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
+		/// Attempts to insert @object. If the insert fails, then an update is attempted
+		/// </summary>
+		public TKey Merge<TModel>(IDbConnection connection, TModel @object, out SaveAction action, IUser user = null)
+		{
+			TKey result = default(TKey);
+
+			try
+			{
+				result = Insert(connection, @object, user);
+				action = SaveAction.Insert;
+			}
+			catch 
+			{
+				try
+				{
+					TModel existing = FindByPrimaryKey(connection, @object, user);
+					SetIdentity(@object, GetIdentity(existing));
+					Update(connection, @object, user);
+					result = GetIdentity(@object);
+					action = SaveAction.Update;
+				}
+				catch (Exception exc)
+				{
+					throw new Exception($"Merge failed: {exc.Message}", exc);
+				}
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Attempts to insert @object. If the insert fails, then an update is attempted
+		/// </summary>
+		public TKey Merge<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		{
+			return Merge(connection, @object, out SaveAction action, user);
+		}
+
+		/// <summary>
+		/// Attempts to insert @object. If the insert fails, then an update is attempted
+		/// </summary>
+		public async Task<TKey> MergeAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		{
+			TKey result = default(TKey);
+
+			try
+			{
+				result = await InsertAsync(connection, @object, user);				
+			}
+			catch
+			{
+				try
+				{
+					TModel existing = await FindByPrimaryKeyAsync(connection, @object, user);
+					SetIdentity(@object, GetIdentity(existing));
+					await UpdateAsync(connection, @object, user);
+					result = GetIdentity(@object);					
+				}
+				catch (Exception exc)
+				{
+					throw new Exception($"Merge failed: {exc.Message}", exc);
+				}
+			}
+
+			return result;
+		}
+
+		/// <summary>
 		/// Performs a SQL insert or update for a given model object. If an insert is done, the generated identity value is returned
 		/// </summary>
 		/// <typeparam name="TModel">Model class type</typeparam>
@@ -393,10 +461,7 @@ namespace Postulate.Lite.Core
 		public TModel FindWhere<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
 		{
 			string whereClause = WhereClauseFromObject(criteria);
-			string cmd = FindCommand<TModel>(whereClause);
-			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);
-			LookupForeignKeys(connection, result);
-			return FindInner(connection, result, user);
+			return FindWhereInternal(connection, whereClause, criteria, user);
 		}
 
 		/// <summary>
@@ -413,12 +478,51 @@ namespace Postulate.Lite.Core
 			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);
 			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
+		}		
+
+		private TModel FindByPrimaryKey<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		{
+			string whereClause = PrimaryKeyWhereClauseFromObject(criteria);
+			return FindWhereInternal(connection, whereClause, criteria, user);
+		}
+
+		private async Task<TModel> FindByPrimaryKeyAsync<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		{
+			string whereClause = PrimaryKeyWhereClauseFromObject(criteria);
+			return await FindWhereInternalAsync(connection, whereClause, criteria, user);
+		}
+
+		private TModel FindWhereInternal<TModel>(IDbConnection connection, string whereClause, TModel criteria, IUser user = null)
+		{
+			string cmd = FindCommand<TModel>(whereClause);
+			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);
+			LookupForeignKeys(connection, result);
+			return FindInner(connection, result, user);
+		}
+
+		private async Task<TModel> FindWhereInternalAsync<TModel>(IDbConnection connection, string whereClause, TModel criteria, IUser user = null)
+		{
+			string cmd = FindCommand<TModel>(whereClause);
+			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);
+			LookupForeignKeys(connection, result);
+			return FindInner(connection, result, user);
 		}
 
 		private string WhereClauseFromObject<TModel>(TModel criteria)
 		{
 			var props = typeof(TModel).GetProperties().Where(pi => HasValue(pi, criteria));
-			return string.Join(" AND ", props.Select(pi => $"{ApplyDelimiter(pi.GetColumnName())}=@{pi.Name}"));
+			return WhereClauseFromProperties(props);
+		}
+
+		private string PrimaryKeyWhereClauseFromObject<TModel>(TModel criteria)
+		{
+			var props = typeof(TModel).GetProperties().Where(pi => pi.HasAttribute<PrimaryKeyAttribute>());
+			return WhereClauseFromProperties(props);
+		}
+
+		private string WhereClauseFromProperties(IEnumerable<PropertyInfo> properties)
+		{
+			return string.Join(" AND ", properties.Select(pi => $"{ApplyDelimiter(pi.GetColumnName())}=@{pi.Name}"));
 		}
 
 		private bool HasValue(PropertyInfo pi, object @object)
@@ -426,6 +530,7 @@ namespace Postulate.Lite.Core
 			var value = pi.GetValue(@object);
 			if (value != null)
 			{
+				if (pi.PropertyType.Equals(typeof(string))) return !string.IsNullOrEmpty(value.ToString());
 				var defaultValue = Activator.CreateInstance(pi.PropertyType);
 				if (value.Equals(defaultValue)) return false;
 				if (value.Equals(string.Empty)) return false;

@@ -240,6 +240,41 @@ namespace Tests
 			}
 		}
 
+		protected void MergeOrgBase()
+		{
+			var provider = GetIntProvider();
+			using (var cn = GetConnection())
+			{			
+				var org = new Organization() { Name = "Test" };
+				var check = provider.FindWhere(cn, org);
+				if (check != null) provider.Delete<Organization>(cn, check.Id);
+
+				provider.Save(cn, org);
+
+				var orgMerge = new Organization() { Name = "Test" };
+				provider.Merge(cn, orgMerge, out SaveAction action);
+				Assert.IsTrue(action == SaveAction.Update);
+			}
+		}
+
+		protected async Task MergeOrgBaseAsync()
+		{
+			var provider = GetIntProvider();
+			using (var cn = GetConnection())
+			{
+				var org = new Organization() { Name = "Test" };
+				var check = await provider.FindWhereAsync(cn, org);
+				if (check != null) await provider.DeleteAsync<Organization>(cn, check.Id);
+
+				await provider.SaveAsync(cn, org);
+
+				var orgMerge = new Organization() { Name = "Test" };
+				await provider.MergeAsync(cn, orgMerge);
+				Assert.IsTrue(!provider.IsNew(orgMerge));
+			}
+
+		}
+
 		protected void EmployeeQueryLastNameBase()
 		{
 			InsertEmployeesBase();

@@ -52,6 +52,16 @@ namespace Postulate.Lite.SqlServer.GuidKey
 			return await GetProvider().FindWhereAsync(connection, criteria, user);
 		}
 
+		public static Guid Merge<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		{
+			return GetProvider().Merge(connection, @object, user);
+		}
+
+		public async static Task<Guid> MergeAsync<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
+		{
+			return await GetProvider().MergeAsync(connection, @object, user);
+		}
+
 		public static Guid Save<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			return GetProvider().Save(connection, @object, user);
