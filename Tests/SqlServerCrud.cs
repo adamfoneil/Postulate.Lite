@@ -55,6 +55,18 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
+		public void InsertEmployees()
+		{
+			InsertEmployeesBase();
+		}
+
+		[TestMethod]
+		public void DeleteEmployee()
+		{
+			DeleteEmployeeBase();
+		}
+
+		[TestMethod]
 		public void DeleteEmployeeAsync()
 		{
 			DeleteEmployeeBaseAsync().Wait();
