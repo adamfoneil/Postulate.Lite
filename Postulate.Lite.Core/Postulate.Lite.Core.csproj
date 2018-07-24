@@ -58,6 +58,7 @@
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
     <Compile Include="Attributes\ReferencesAttribute.cs" />
     <Compile Include="Attributes\WhereAttribute.cs" />
+    <Compile Include="CrudException.cs" />
     <Compile Include="Extensions\ConnectionExtensions.cs" />
     <Compile Include="Extensions\PropertyInfoExtensions.cs" />
     <Compile Include="Extensions\StringInternal.cs" />

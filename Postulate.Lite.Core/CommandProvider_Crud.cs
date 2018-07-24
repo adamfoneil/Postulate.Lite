@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -188,8 +189,18 @@ namespace Postulate.Lite.Core
 				record?.BeforeSave(connection, SaveAction.Insert, user);
 			}
 
+			TKey result = default(TKey);
+
 			string cmd = InsertCommand<TModel>();
-			TKey result = connection.QuerySingleOrDefault<TKey>(cmd, @object);
+			try
+			{
+				result = connection.QuerySingleOrDefault<TKey>(cmd, @object);
+			}
+			catch (Exception exc)
+			{
+				throw new CrudException(SaveAction.Insert, exc, cmd, @object);
+			}
+			
 			SetIdentity(@object, result);
 
 			record?.AfterSave(connection, SaveAction.Insert);
@@ -215,11 +226,19 @@ namespace Postulate.Lite.Core
 			}
 
 			string cmd = InsertCommand<TModel>();
-			TKey result = await connection.QuerySingleOrDefaultAsync<TKey>(cmd, @object);
+
+			TKey result = default(TKey);
+			try
+			{
+				result = await connection.QuerySingleOrDefaultAsync<TKey>(cmd, @object);				
+			}
+			catch (Exception exc)
+			{
+				throw new CrudException(SaveAction.Insert, exc, cmd, @object);
+			}
+
 			SetIdentity(@object, result);
-
 			record?.AfterSave(connection, SaveAction.Insert);
-
 			return result;
 		}
 
@@ -241,8 +260,15 @@ namespace Postulate.Lite.Core
 			}
 
 			string cmd = UpdateCommand<TModel>();
-			connection.Execute(cmd, @object);
-
+			try
+			{
+				connection.Execute(cmd, @object);
+			}
+			catch (Exception exc)
+			{
+				throw new CrudException(SaveAction.Update, exc, cmd, @object);
+			}
+			
 			record?.AfterSave(connection, SaveAction.Update);
 		}
 
@@ -264,8 +290,15 @@ namespace Postulate.Lite.Core
 			}
 
 			string cmd = UpdateCommand<TModel>();
-			await connection.ExecuteAsync(cmd, @object);
-
+			try
+			{
+				await connection.ExecuteAsync(cmd, @object);
+			}
+			catch (Exception exc)
+			{
+				throw new CrudException(SaveAction.Update, exc, cmd, @object);
+			}
+			
 			record?.AfterSave(connection, SaveAction.Update);
 		}
 
@@ -281,8 +314,9 @@ namespace Postulate.Lite.Core
 				result = Insert(connection, @object, user);
 				action = SaveAction.Insert;
 			}
-			catch 
+			catch (Exception insertExc)
 			{
+				Debug.WriteLine($"Merge insert error: {insertExc.Message}");
 				try
 				{
 					TModel existing = FindByPrimaryKey(connection, @object, user);
@@ -291,9 +325,9 @@ namespace Postulate.Lite.Core
 					result = GetIdentity(@object);
 					action = SaveAction.Update;
 				}
-				catch (Exception exc)
+				catch (Exception updateExc)
 				{
-					throw new Exception($"Merge failed: {exc.Message}", exc);
+					throw new Exception($"Merge failed: {updateExc.Message}", updateExc);
 				}
 			}
 
@@ -319,18 +353,19 @@ namespace Postulate.Lite.Core
 			{
 				result = await InsertAsync(connection, @object, user);				
 			}
-			catch
+			catch (Exception insertExc)
 			{
+				Debug.WriteLine($"Merge insert error: {insertExc.Message}");
 				try
 				{
 					TModel existing = await FindByPrimaryKeyAsync(connection, @object, user);
 					SetIdentity(@object, GetIdentity(existing));
 					await UpdateAsync(connection, @object, user);
-					result = GetIdentity(@object);					
+					result = GetIdentity(@object);
 				}
-				catch (Exception exc)
+				catch (Exception updateExc)
 				{
-					throw new Exception($"Merge failed: {exc.Message}", exc);
+					throw new Exception($"Merge failed: {updateExc.Message}", updateExc);
 				}
 			}
 
