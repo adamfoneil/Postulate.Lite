@@ -29,12 +29,21 @@ namespace Tests
 			}
 		}
 
-		protected void DropAndCreateTableBase()
+		protected void DropAndCreateEmpTableBase()
 		{
 			using (var cn = GetConnection())
 			{
 				DropTable(cn, "Employee");
 				GetIntProvider().CreateTable<EmployeeInt>(cn);
+			}
+		}
+
+		protected void DropAndCreateOrgTableBase()
+		{
+			using (var cn = GetConnection())
+			{
+				DropTable(cn, "Organization");
+				GetIntProvider().CreateTable<Organization>(cn);
 			}
 		}
 

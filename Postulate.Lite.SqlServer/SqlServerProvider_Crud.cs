@@ -99,9 +99,15 @@ namespace Postulate.Lite.SqlServer
 			{				
 				string nullSyntax = (col.AllowNull) ? "NULL" : "NOT NULL";
 
+				var typeMap = SupportedTypes(col.Length, col.Precision, col.Scale);
+				Type t = propertyInfo.PropertyType;
+				if (t.IsGenericType) t = t.GenericTypeArguments[0];
+				if (t.IsEnum) t = t.GetEnumUnderlyingType();
+				if (!typeMap.ContainsKey(t)) throw new KeyNotFoundException($"Type name {t.Name} not supported.");
+
 				string dataType = (col.HasExplicitType()) ? 
 					col.DataType : 
-					SupportedTypes(col.Length, col.Precision, col.Scale)[propertyInfo.PropertyType];				
+					typeMap[t];				
 
 				if (isIdentity) dataType += " " + IdentityColumnSyntax();
 

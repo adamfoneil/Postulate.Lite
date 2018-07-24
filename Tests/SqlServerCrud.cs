@@ -49,9 +49,15 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
-		public void DropAndCreateTable()
+		public void DropAndCreateEmpTable()
 		{
-			DropAndCreateTableBase();
+			DropAndCreateEmpTableBase();
+		}
+
+		[TestMethod]
+		public void DropAndCreateOrgTable()
+		{
+			DropAndCreateOrgTableBase();
 		}
 
 		[TestMethod]
