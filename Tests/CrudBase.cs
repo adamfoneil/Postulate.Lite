@@ -260,9 +260,12 @@ namespace Tests
 
 				provider.Save(cn, org);
 
-				var orgMerge = new Organization() { Name = "Test" };
+				var orgMerge = new Organization() { Name = "Test", EmployeeCount = 10 };
 				provider.Merge(cn, orgMerge, out SaveAction action);
 				Assert.IsTrue(action == SaveAction.Update);
+
+				var findOrg = provider.Find<Organization>(cn, orgMerge.Id);
+				Assert.IsTrue(findOrg.EmployeeCount == 10);
 			}
 		}
 

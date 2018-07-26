@@ -303,39 +303,26 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Attempts to insert @object. If the insert fails, then an update is attempted
+		/// Searches for an existing record by its primary key, and updates the existing record or inserts the new one
 		/// </summary>
 		public TKey Merge<TModel>(IDbConnection connection, TModel @object, out SaveAction action, IUser user = null)
 		{
-			TKey result = default(TKey);
-
-			try
+			if (IsNew(@object))
 			{
-				result = Insert(connection, @object, user);
-				action = SaveAction.Insert;
+				var existing = FindByPrimaryKey(connection, @object, user);
+				if (existing != null) SetIdentity(@object, GetIdentity(existing));
+				action = (existing != null) ? SaveAction.Update : SaveAction.Insert;
 			}
-			catch (Exception insertExc)
+			else
 			{
-				Debug.WriteLine($"Merge insert error: {insertExc.Message}");
-				try
-				{
-					TModel existing = FindByPrimaryKey(connection, @object, user);
-					SetIdentity(@object, GetIdentity(existing));
-					Update(connection, @object, user);
-					result = GetIdentity(@object);
-					action = SaveAction.Update;
-				}
-				catch (Exception updateExc)
-				{
-					throw new Exception($"Merge failed: {updateExc.Message}", updateExc);
-				}
+				action = SaveAction.Update;
 			}
-
-			return result;
+			
+			return Save(connection, @object, user); 
 		}
 
 		/// <summary>
-		/// Attempts to insert @object. If the insert fails, then an update is attempted
+		/// Searches for an existing record by its primary key, and updates the existing record or inserts the new one
 		/// </summary>
 		public TKey Merge<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
@@ -343,33 +330,17 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Attempts to insert @object. If the insert fails, then an update is attempted
+		/// Searches for an existing record by its primary key, and updates the existing record or inserts the new one
 		/// </summary>
 		public async Task<TKey> MergeAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
-			TKey result = default(TKey);
-
-			try
+			if (IsNew(@object))
 			{
-				result = await InsertAsync(connection, @object, user);				
-			}
-			catch (Exception insertExc)
-			{
-				Debug.WriteLine($"Merge insert error: {insertExc.Message}");
-				try
-				{
-					TModel existing = await FindByPrimaryKeyAsync(connection, @object, user);
-					SetIdentity(@object, GetIdentity(existing));
-					await UpdateAsync(connection, @object, user);
-					result = GetIdentity(@object);
-				}
-				catch (Exception updateExc)
-				{
-					throw new Exception($"Merge failed: {updateExc.Message}", updateExc);
-				}
+				var existing = await FindByPrimaryKeyAsync(connection, @object, user);
+				if (existing != null) SetIdentity(@object, GetIdentity(existing));
 			}
 
-			return result;
+			return await SaveAsync(connection, @object, user);
 		}
 
 		/// <summary>
@@ -552,6 +523,7 @@ namespace Postulate.Lite.Core
 		private string PrimaryKeyWhereClauseFromObject<TModel>(TModel criteria)
 		{
 			var props = typeof(TModel).GetProperties().Where(pi => pi.HasAttribute<PrimaryKeyAttribute>());
+			if (!props.Any()) throw new Exception($"No primary key properties found on {typeof(TModel).Name}");
 			return WhereClauseFromProperties(props);
 		}
 
