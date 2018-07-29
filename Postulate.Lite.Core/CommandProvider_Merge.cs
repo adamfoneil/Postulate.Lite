@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Postulate.Lite.Core
 {
 	public abstract partial class CommandProvider<TKey>
-	{
+	{		
 		public abstract string CommentPrefix { get; }
 
 		/// <summary>
@@ -83,6 +84,7 @@ namespace Postulate.Lite.Core
 
 		#region reflection methods
 		public abstract TableInfo GetTableInfo(Type modelType);
+
 		#endregion
 
 		#region schema inspection
@@ -106,5 +108,11 @@ namespace Postulate.Lite.Core
 
 			return result;
 		}
+
+		protected abstract string SchemaCriteria(string[] excludeSchemas);
+
+		public abstract Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection, string[] excludeSchemas);
+
+		public abstract Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection, string[] excludeSchemas);
 	}
 }

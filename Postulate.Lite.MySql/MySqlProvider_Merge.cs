@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Postulate.Lite.MySql
 {
@@ -14,6 +15,7 @@ namespace Postulate.Lite.MySql
 		public override string CommentPrefix => "# ";
 		public override bool SupportsSchemas => false;
 		public override string DefaultSchema => throw new NotImplementedException();
+		public override string[] ExcludeSchemas => throw new NotImplementedException();
 
 		public override string CreateTableCommand(Type modelType)
 		{
@@ -103,6 +105,16 @@ namespace Postulate.Lite.MySql
 		}
 
 		public override void MapProviderSpecificInfo(PropertyInfo pi, ColumnInfo col)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override string SchemaCriteria()
+		{
+			throw new NotImplementedException();
+		}
+
+		public override Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection)
 		{
 			throw new NotImplementedException();
 		}

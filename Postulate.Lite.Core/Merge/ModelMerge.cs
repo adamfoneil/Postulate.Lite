@@ -1,4 +1,5 @@
-﻿using Postulate.Lite.Core.Models;
+﻿using Postulate.Lite.Core.Attributes;
+using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,14 +11,7 @@ using System.Threading.Tasks;
 
 namespace Postulate.Lite.Core.Merge
 {
-	public enum DifferenceType
-	{
-		Added,
-		Modified,
-		Dropped
-	}
-
-	public abstract class ModelMerge<TKey>
+	public class ModelMerge<TKey>
 	{
 		public ModelMerge(CommandProvider<TKey> commandProvider, IEnumerable<Type> modelTypes)
 		{
@@ -37,6 +31,21 @@ namespace Postulate.Lite.Core.Merge
 			});
 		}
 
+		public static ModelMerge<TKey> FromAssembly(CommandProvider<TKey> commandProvider, Assembly assembly, string @namespace = "")
+		{
+			var types = GetModelTypesFromAssembly(assembly, @namespace);
+
+			var result = new ModelMerge<TKey>(commandProvider, types);
+
+			var excludeSchemas = assembly.GetCustomAttributes<MergeExcludeSchemaAttribute>();
+			if (excludeSchemas?.Any() ?? false)
+			{
+				result.ExcludeSchemas = excludeSchemas.Select(a => a.Schema).ToArray();
+			}
+
+			return result;
+		}
+
 		protected static IEnumerable<Type> GetModelTypesFromAssembly(Assembly assembly, string @namespace = "")
 		{
 			return assembly.GetTypes().Where(t =>
@@ -46,19 +55,24 @@ namespace Postulate.Lite.Core.Merge
 					t.Namespace.StartsWith(@namespace));
 		}
 
+		/// <summary>
+		/// SQL Server schemas to exclude from the merge
+		/// </summary>
+		public string[] ExcludeSchemas { get; set; }
+
 		public CommandProvider<TKey> CommandProvider { get; private set; }
 		public IEnumerable<Type> ModelTypes { get; private set; }
 		public IEnumerable<ColumnInfo> ModelColumns { get; private set; }
 		public ILookup<Type, PropertyInfo> ModelProperties { get; private set; }
 		public IEnumerable<TableInfo> ModelTables { get; private set; }
 		public Stopwatch Stopwatch { get; private set; }
-
+		
 		public async Task<IEnumerable<Action>> CompareAsync(IDbConnection connection)
 		{
 			Stopwatch = Stopwatch.StartNew();
 
-			var schemaTables = await GetSchemaTablesAsync(connection);
-			var schemaColumns = await GetSchemaColumnsAsync(connection);
+			var schemaTables = await CommandProvider.GetSchemaTablesAsync(connection, ExcludeSchemas);
+			var schemaColumns = await CommandProvider.GetSchemaColumnsAsync(connection, ExcludeSchemas);
 
 			var results = Compare(schemaTables, schemaColumns);
 
@@ -124,14 +138,13 @@ namespace Postulate.Lite.Core.Merge
 				   select mt;
 		}
 
+		/*
 		protected abstract Task<IEnumerable<string>> GetNewSchemasAsync(IEnumerable<Type> modelTypes, IDbConnection connection);
 
 		protected abstract Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection);
 
 		protected abstract Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection);
-
-		protected abstract string SchemaCriteria();
-
+	
 		protected abstract Task<IEnumerable<ColumnInfo>> GetAlteredColumnsAsync(IEnumerable<Type> modelTypes, IDbConnection connection);
 
 		protected abstract Task<IEnumerable<ColumnInfo>> GetDeletedColumnsAsync(IEnumerable<TableInfo> dropTables, IDbConnection connection);
@@ -139,6 +152,7 @@ namespace Postulate.Lite.Core.Merge
 		protected abstract Task<IEnumerable<TableInfo>> GetDeletedTablesAsync(IEnumerable<Type> modelTypes, IDbConnection connection);
 
 		protected abstract Task<IEnumerable<PropertyInfo>> GetNewColumnsAsync(IEnumerable<Type> modelTypes, IEnumerable<Type> omitTypes, IDbConnection connection);
+		*/
 
 		private bool AnyModifiedColumns(
 			IEnumerable<TableInfo> schemaTables, IEnumerable<ColumnInfo> schemaColumns, IEnumerable<ColumnInfo> modelColumns,
