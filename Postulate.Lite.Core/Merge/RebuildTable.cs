@@ -7,7 +7,7 @@ namespace Postulate.Lite.Core.Merge
 {
 	public class RebuildTable : Action
 	{
-		public RebuildTable(Type modelType) : base(ObjectType.Table, ActionType.Drop)
+		public RebuildTable(Type modelType) : base(ObjectType.Table, ActionType.Create)
 		{
 			ModelType = modelType;
 		}

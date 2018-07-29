@@ -18,7 +18,7 @@ namespace Tests
 		protected void CreateTwoTablesBase()
 		{
 			var provider = GetIntProvider();
-			var engine = new Engine<int>(provider, new Type[] { typeof(EmployeeInt), typeof(Organization) });
+			var engine = new ModelMerge<int>(provider, new Type[] { typeof(EmployeeInt), typeof(Organization) });
 			var schemaTables = Enumerable.Empty<TableInfo>();
 			var schemaColumns = Enumerable.Empty<ColumnInfo>();
 			var actions = engine.Compare(schemaTables, schemaColumns);
@@ -33,7 +33,7 @@ namespace Tests
 		protected void CreateOrgTableBase()
 		{
 			var provider = GetIntProvider();
-			var engine = new Engine<int>(provider, new Type[] { typeof(EmployeeInt), typeof(Organization) });
+			var engine = new ModelMerge<int>(provider, new Type[] { typeof(EmployeeInt), typeof(Organization) });
 			var schemaTables = new TableInfo[] { new TableInfo("dbo", "Employee") };
 			var schemaColumns = Enumerable.Empty<ColumnInfo>();
 			var actions = engine.Compare(schemaTables, schemaColumns);
