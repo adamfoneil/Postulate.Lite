@@ -14,8 +14,7 @@ namespace Postulate.Lite.MySql
 	{
 		public override string CommentPrefix => "# ";
 		public override bool SupportsSchemas => false;
-		public override string DefaultSchema => throw new NotImplementedException();
-		public override string[] ExcludeSchemas => throw new NotImplementedException();
+		public override string DefaultSchema => throw new NotImplementedException();		
 
 		public override string CreateTableCommand(Type modelType)
 		{
@@ -109,12 +108,17 @@ namespace Postulate.Lite.MySql
 			throw new NotImplementedException();
 		}
 
-		protected override string SchemaCriteria()
+		public override Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection, string[] excludeSchemas)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection)
+		protected override string SchemaCriteria(string[] excludeSchemas)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection, string[] excludeSchemas)
 		{
 			throw new NotImplementedException();
 		}
