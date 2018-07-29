@@ -6,7 +6,7 @@ I wanted to build an ORM that has no particular root type dependency (i.e. [Reco
 
 I intend to support [Model Merge](https://github.com/adamosoftware/Postulate.Orm/wiki/Model-Merge) capability eventually, but at the moment I'm just getting my new core Crud methods working.
 
-Postulate.Lite will support both SQL Server and MySQL.
+Postulate.Lite will support both SQL Server and MySQL. Model merge capability is back-burnured for MySQL, but Crud methods have full parity between both databases.
 
 Please see the [Wiki](https://github.com/adamosoftware/Postulate.Lite/wiki) for more info.
 
