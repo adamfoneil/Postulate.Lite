@@ -116,9 +116,54 @@ namespace Postulate.Lite.Core.Models
 			return Schema.GetHashCode() + TableName.GetHashCode() + ColumnName.GetHashCode();
 		}
 
-		public bool IsAlteredFrom(ColumnInfo sc)
+		public bool IsAlteredFrom(ColumnInfo columnInfo)
 		{
-			throw new NotImplementedException();
+			if (this.Equals(columnInfo))
+			{
+				if (columnInfo.IsCalculated && IsCalculated)
+				{
+					if ($"({Expression})".Equals(columnInfo.Expression)) return false;
+					return !columnInfo.Expression.Equals(Expression);
+				}
+
+				// alter the columnInfo.DataType to reflect the size so it's comparable to how data type is reported by PropertyInfo
+				if (columnInfo.DataType.Contains("var") && !columnInfo.DataType.Contains("("))
+				{
+					int divisor = (columnInfo.DataType.Contains("nvar")) ? 2 : 1;
+					columnInfo.DataType += $"({columnInfo.ByteLength / divisor})";
+				}
+
+				// apply the scale and precision to the data type just like with length
+				if (columnInfo.DataType.Contains("decimal") && !columnInfo.DataType.Contains("("))
+				{
+					columnInfo.DataType += $"({columnInfo.Precision}, {columnInfo.Scale})";
+				}
+
+				if (columnInfo.Length.Equals("max") && columnInfo.DataType.Equals("nvarchar(0)"))
+				{
+					columnInfo.DataType = "nvarchar(max)";
+				}
+
+				if (columnInfo.Length.Equals("max") && columnInfo.DataType.Equals("varbinary(-1)"))
+				{
+					columnInfo.DataType = "varbinary(max)";
+				}
+
+				// then any other property diff is considered an alter
+				if (!DataType?.Replace(" ", string.Empty).Equals(columnInfo.DataType.Replace(" ", string.Empty)) ?? true) return true;
+				if (IsNullable != columnInfo.IsNullable) return true;
+				if (IsCalculated != columnInfo.IsCalculated) return true;
+
+				DecimalPrecisionAttribute scaleAttr = null;
+				if (PropertyInfo?.HasAttribute<DecimalPrecisionAttribute>(out scaleAttr) ?? false)
+				{
+					if (Precision != columnInfo.Precision) return true;
+					if (Scale != columnInfo.Scale) return true;
+				}
+
+				// note -- don't compare the ByteLength property because it's not reported by PropertyInfo
+			}
+			return false;		
 		}
 	}
 }

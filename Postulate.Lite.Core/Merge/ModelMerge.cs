@@ -97,8 +97,11 @@ namespace Postulate.Lite.Core.Merge
 			// when looking for modified columns, don't include tables that were just created
 			var existingModelColumns = ModelColumns.Where(col => !createTables.Contains(col.TableInfo));
 
-			if (AnyModifiedColumns(schemaTables, schemaColumns, existingModelColumns,
-				out IEnumerable<ColumnInfo> added, out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted))
+			var schemaColumnsByTable = schemaColumns.ToLookup(row => row.TableInfo);
+			var modelColumnsByTable = existingModelColumns.ToLookup(row => row.TableInfo);
+
+			if (AnyModifiedColumns(schemaColumns, existingModelColumns, out IEnumerable<ColumnInfo> added,
+				out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted))
 			{
 			}
 
@@ -155,8 +158,8 @@ namespace Postulate.Lite.Core.Merge
 		*/
 
 		private bool AnyModifiedColumns(
-			IEnumerable<TableInfo> schemaTables, IEnumerable<ColumnInfo> schemaColumns, IEnumerable<ColumnInfo> modelColumns,
-			out IEnumerable<ColumnInfo> added, out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted)
+			IEnumerable<ColumnInfo> schemaColumns, IEnumerable<ColumnInfo> modelColumns, out IEnumerable<ColumnInfo> added,
+			out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted)
 		{
 			added = modelColumns.Where(col => !schemaColumns.Contains(col));
 
