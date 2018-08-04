@@ -90,6 +90,18 @@ namespace Tests.MySql
 		}
 
 		[TestMethod]
+		public void UpdateEmployeeColumns()
+		{
+			UpdateEmployeeColumnsBase();
+		}
+
+		[TestMethod]
+		public void UpdateEmployeeColumnsAsync()
+		{
+			UpdateEmployeeColumnsBaseAsync().Wait();
+		}
+
+		[TestMethod]
 		public void SaveEmployee()
 		{
 			SaveEmployeeBase();

@@ -128,6 +128,25 @@ namespace Tests
 			}
 		}
 
+		protected void UpdateEmployeeColumnsBase()
+		{
+			InsertEmployeesBase();
+
+			const string name = "Django";
+
+			var provider = GetIntProvider();
+
+			using (var cn = GetConnection())
+			{
+				var e = provider.Find<EmployeeInt>(cn, 5);
+				e.FirstName = name;
+				provider.Update(cn, e, r => r.FirstName);
+
+				e = provider.Find<EmployeeInt>(cn, 5);
+				Assert.IsTrue(e.FirstName.Equals(name));
+			}
+		}
+
 		protected async Task UpdateEmployeeBaseAsync()
 		{
 			InsertEmployeesBase();
@@ -141,6 +160,25 @@ namespace Tests
 				var e = await provider.FindAsync<EmployeeInt>(cn, 5);
 				e.FirstName = name;
 				await provider.SaveAsync(cn, e);
+
+				e = await provider.FindAsync<EmployeeInt>(cn, 5);
+				Assert.IsTrue(e.FirstName.Equals(name));
+			}
+		}
+
+		protected async Task UpdateEmployeeColumnsBaseAsync()
+		{
+			InsertEmployeesBase();
+
+			const string name = "Django";
+
+			var provider = GetIntProvider();
+
+			using (var cn = GetConnection())
+			{
+				var e = await provider.FindAsync<EmployeeInt>(cn, 5);
+				e.FirstName = name;
+				await provider.UpdateAsync(cn, e, r => r.FirstName);
 
 				e = await provider.FindAsync<EmployeeInt>(cn, 5);
 				Assert.IsTrue(e.FirstName.Equals(name));

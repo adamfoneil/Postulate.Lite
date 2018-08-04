@@ -91,6 +91,18 @@ namespace Tests.SqlServer
 		}
 
 		[TestMethod]
+		public void UpdateEmployeeColumns()
+		{
+			UpdateEmployeeColumnsBase();
+		}
+
+		[TestMethod]
+		public void UpdateEmployeeColumnsAsync()
+		{
+			UpdateEmployeeColumnsBaseAsync().Wait();
+		}
+
+		[TestMethod]
 		public void SaveEmployee()
 		{
 			SaveEmployeeBase();

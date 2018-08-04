@@ -1,6 +1,7 @@
 ﻿using Postulate.Lite.Core.Interfaces;
 using System;
 using System.Data;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Postulate.Lite.MySql.IntKey
@@ -90,6 +91,16 @@ namespace Postulate.Lite.MySql.IntKey
 		public async static Task UpdateAsync<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			await GetProvider().UpdateAsync(connection, @object, user);
+		}
+
+		public static void Update<TModel>(this IDbConnection connection, TModel @object, params Expression<Func<TModel, object>>[] setColumns)
+		{
+			GetProvider().Update(connection, @object, setColumns);
+		}
+
+		public async static Task UpdateAsync<TModel>(this IDbConnection connection, TModel @object, params Expression<Func<TModel, object>>[] setColumns)
+		{
+			await GetProvider().UpdateAsync(connection, @object, setColumns);
 		}
 
 		public static void Delete<TModel>(this IDbConnection connection, int id, IUser user = null)
