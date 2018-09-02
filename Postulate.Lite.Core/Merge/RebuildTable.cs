@@ -7,9 +7,18 @@ namespace Postulate.Lite.Core.Merge
 {
 	public class RebuildTable : Action
 	{
-		public RebuildTable(Type modelType) : base(ObjectType.Table, ActionType.Create)
+		public IEnumerable<ColumnInfo> AddedColumns { get; private set; }
+		public IEnumerable<ColumnInfo> ModifiedColumns { get; private set; }
+		public IEnumerable<ColumnInfo> DeletedColumns { get; private set; }
+
+		public RebuildTable(Type modelType, 
+			IEnumerable<ColumnInfo> added = null, IEnumerable<ColumnInfo> modified = null, IEnumerable<ColumnInfo> deleted = null) : 
+			base(ObjectType.Table, ActionType.Create)
 		{
 			ModelType = modelType;
+			AddedColumns = added;
+			ModifiedColumns = modified;
+			DeletedColumns = deleted;
 		}
 
 		public Type ModelType { get; private set; }		

@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -240,6 +241,66 @@ namespace Postulate.Lite.Core
 			SetIdentity(@object, result);
 			record?.AfterSave(connection, SaveAction.Insert);
 			return result;
+		}
+
+		/// <summary>
+		/// Performs a SQL update on select properties of an object
+		/// </summary>
+		public void Update<TModel>(IDbConnection connection, TModel @object, params Expression<Func<TModel, object>>[] setColumns)
+		{
+			CommandDefinition cmd = GetSetColumnsUpdateCommand(@object, setColumns);
+			connection.Execute(cmd);
+		}
+
+		/// <summary>
+		/// Performs a SQL update on select properties of an object
+		/// </summary>
+		public async Task UpdateAsync<TModel>(IDbConnection connection, TModel @object, params Expression<Func<TModel, object>>[] setColumns)
+		{
+			CommandDefinition cmd = GetSetColumnsUpdateCommand(@object, setColumns);
+			await connection.ExecuteAsync(cmd);
+		}
+
+		private CommandDefinition GetSetColumnsUpdateCommand<TModel>(TModel @object, Expression<Func<TModel, object>>[] setColumns)
+		{
+			var type = typeof(TModel);
+			DynamicParameters dp = new DynamicParameters();
+
+			string setColumnExpr = string.Join(", ", setColumns.Select(e =>
+			{
+				string propName = PropertyNameFromLambda(e);
+				PropertyInfo pi = type.GetProperty(propName);
+				dp.Add(propName, e.Compile().Invoke(@object));
+				return $"{ApplyDelimiter(pi.GetColumnName())}=@{propName}";
+			}));
+			
+			string cmdText = $"UPDATE {ApplyDelimiter(TableName(type))} SET {setColumnExpr} WHERE {ApplyDelimiter(type.GetIdentityName())}=@id";
+			dp.Add("id", GetIdentity(@object));
+
+			return new CommandDefinition(cmdText, dp);
+		}
+
+		private string PropertyNameFromLambda(Expression expression)
+		{
+			// thanks to http://odetocode.com/blogs/scott/archive/2012/11/26/why-all-the-lambdas.aspx
+			// thanks to http://stackoverflow.com/questions/671968/retrieving-property-name-from-lambda-expression
+
+			LambdaExpression le = expression as LambdaExpression;
+			if (le == null) throw new ArgumentException("expression");
+
+			MemberExpression me = null;
+			if (le.Body.NodeType == ExpressionType.Convert)
+			{
+				me = ((UnaryExpression)le.Body).Operand as MemberExpression;
+			}
+			else if (le.Body.NodeType == ExpressionType.MemberAccess)
+			{
+				me = le.Body as MemberExpression;
+			}
+
+			if (me == null) throw new ArgumentException("expression");
+
+			return me.Member.Name;
 		}
 
 		/// <summary>

@@ -227,5 +227,10 @@ namespace Postulate.Lite.SqlServer
                     [name] NOT LIKE 'AspNet%' AND
                     [name] NOT LIKE '__MigrationHistory'{SchemaCriteria(excludeSchemas)}");
 		}
+
+		public override string AddColumnCommand(ColumnInfo columnInfo)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

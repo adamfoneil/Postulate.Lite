@@ -65,6 +65,7 @@
     <Compile Include="Merge\Action.cs" />
     <Compile Include="Merge\AddColumn.cs" />
     <Compile Include="Merge\AddForeignKey.cs" />
+    <Compile Include="Merge\AlterColumn.cs" />
     <Compile Include="Merge\CreateSchema.cs" />
     <Compile Include="Merge\CreateTable.cs" />
     <Compile Include="Merge\DropColumn.cs" />

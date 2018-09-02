@@ -66,6 +66,11 @@ namespace Postulate.Lite.Core
 		public abstract string AddColumnCommand(PropertyInfo propertyInfo);
 
 		/// <summary>
+		/// Generates a SQL command to add a column to a table
+		/// </summary>
+		public abstract string AddColumnCommand(ColumnInfo columnInfo);
+
+		/// <summary>
 		/// Generates a SQL command to alter the type, nullability, or size of a column
 		/// </summary>
 		public abstract string AlterColumnCommand(PropertyInfo propertyInfo);

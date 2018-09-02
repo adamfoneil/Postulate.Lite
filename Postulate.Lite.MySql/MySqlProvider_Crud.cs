@@ -123,5 +123,10 @@ namespace Postulate.Lite.MySql
 
 			return result;
 		}
+
+		public override string AddColumnCommand(ColumnInfo columnInfo)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

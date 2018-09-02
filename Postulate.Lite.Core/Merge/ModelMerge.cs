@@ -64,7 +64,7 @@ namespace Postulate.Lite.Core.Merge
 		public IEnumerable<Type> ModelTypes { get; private set; }
 		public IEnumerable<ColumnInfo> ModelColumns { get; private set; }
 		public ILookup<Type, PropertyInfo> ModelProperties { get; private set; }
-		public IEnumerable<TableInfo> ModelTables { get; private set; }
+		public IEnumerable<TableInfo> ModelTables { get; private set; }		
 		public Stopwatch Stopwatch { get; private set; }
 		
 		public async Task<IEnumerable<Action>> CompareAsync(IDbConnection connection)
@@ -99,10 +99,26 @@ namespace Postulate.Lite.Core.Merge
 
 			var schemaColumnsByTable = schemaColumns.ToLookup(row => row.TableInfo);
 			var modelColumnsByTable = existingModelColumns.ToLookup(row => row.TableInfo);
+			var tablesToTypes = ModelTypes.ToDictionary(t => CommandProvider.GetTableInfo(t));
 
-			if (AnyModifiedColumns(schemaColumns, existingModelColumns, out IEnumerable<ColumnInfo> added,
-				out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted))
+			foreach (TableInfo tbl in schemaColumnsByTable)
 			{
+				if (AnyModifiedColumns(schemaColumnsByTable[tbl], modelColumnsByTable[tbl],
+					out IEnumerable<ColumnInfo> added, out IEnumerable<ColumnInfo> modified, out IEnumerable<ColumnInfo> deleted))
+				{					
+					if (tbl.RowCount == 0)
+					{
+						// empty tables can be dropped and re-created
+						results.Add(new RebuildTable(tablesToTypes[tbl], added, modified, deleted));
+					}
+					else
+					{
+						// must modify columns directly
+						results.AddRange(added.Select(a => new AddColumn(a)));
+						results.AddRange(deleted.Select(d => new DropColumn(d)));
+						results.AddRange(modified.Select(m => new AlterColumn(m)));
+					}
+				}
 			}
 
 			//var addColumns = await GetNewColumnsAsync(ModelTypes, createTables.Concat(rebuiltTables), connection);
@@ -132,30 +148,7 @@ namespace Postulate.Lite.Core.Merge
 		private IEnumerable<TableInfo> GetDeletedTables(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)
 		{
 			return schemaTables.Where(tbl => !modelTables.Contains(tbl));
-		}
-
-		private IEnumerable<TableInfo> GetExistingTables(IEnumerable<TableInfo> modelTables, IEnumerable<TableInfo> schemaTables)
-		{
-			return from mt in modelTables
-				   join st in schemaTables on mt equals st
-				   select mt;
-		}
-
-		/*
-		protected abstract Task<IEnumerable<string>> GetNewSchemasAsync(IEnumerable<Type> modelTypes, IDbConnection connection);
-
-		protected abstract Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection);
-
-		protected abstract Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection);
-	
-		protected abstract Task<IEnumerable<ColumnInfo>> GetAlteredColumnsAsync(IEnumerable<Type> modelTypes, IDbConnection connection);
-
-		protected abstract Task<IEnumerable<ColumnInfo>> GetDeletedColumnsAsync(IEnumerable<TableInfo> dropTables, IDbConnection connection);
-
-		protected abstract Task<IEnumerable<TableInfo>> GetDeletedTablesAsync(IEnumerable<Type> modelTypes, IDbConnection connection);
-
-		protected abstract Task<IEnumerable<PropertyInfo>> GetNewColumnsAsync(IEnumerable<Type> modelTypes, IEnumerable<Type> omitTypes, IDbConnection connection);
-		*/
+		}		
 
 		private bool AnyModifiedColumns(
 			IEnumerable<ColumnInfo> schemaColumns, IEnumerable<ColumnInfo> modelColumns, out IEnumerable<ColumnInfo> added,

@@ -1,12 +1,13 @@
 ﻿using Postulate.Lite.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 
 namespace Postulate.Lite.Core.Merge
 {
-	public class AddColumn : Action
+	public class AlterColumn : Action
 	{
-		public AddColumn(ColumnInfo columnInfo) : base(ObjectType.Column, ActionType.Create)
+		public AlterColumn(ColumnInfo columnInfo) : base(ObjectType.Column, ActionType.Alter)
 		{
 			ColumnInfo = columnInfo;
 		}
@@ -15,7 +16,7 @@ namespace Postulate.Lite.Core.Merge
 
 		public override IEnumerable<string> SqlCommands<TKey>(CommandProvider<TKey> commandProvider, IDbConnection connection)
 		{
-			yield return commandProvider.AddColumnCommand(ColumnInfo);
+			throw new NotImplementedException();
 		}
 	}
 }
