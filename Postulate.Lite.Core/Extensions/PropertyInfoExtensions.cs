@@ -10,24 +10,19 @@ namespace Postulate.Lite.Core.Extensions
 		/// Returns true if the property has the specified attribute
 		/// </summary>
 		/// <typeparam name="T">Attribute class type</typeparam>
-		public static bool HasAttribute<T>(this PropertyInfo propertyInfo, Func<T, bool> criteria = null) where T : Attribute
+		public static bool HasAttribute<T>(this ICustomAttributeProvider provider, Func<T, bool> criteria = null) where T : Attribute
 		{			
-			return HasAttribute<T>(propertyInfo, out T result, criteria);
+			return HasAttribute<T>(provider, out T result, criteria);
 		}
 
-		public static bool HasAttribute<T>(this PropertyInfo propertyInfo, out T result, Func<T, bool> criteria = null) where T : Attribute
+		public static bool HasAttribute<T>(this ICustomAttributeProvider provider, out T result, Func<T, bool> criteria = null) where T : Attribute
 		{
-			result = null;
+			result = GetAttribute<T>(provider);
 
-			var attr = propertyInfo.GetCustomAttribute<T>();
-			if (attr != null)
+			if (result != null)
 			{
-				if (criteria?.Invoke(attr) ?? true)
-				{
-					result = attr;
-					return true;
-				}
-			}
+				if (criteria?.Invoke(result) ?? true) return true;
+			}			
 
 			return false;
 		}
