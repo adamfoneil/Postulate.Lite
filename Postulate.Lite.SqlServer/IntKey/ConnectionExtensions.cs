@@ -10,7 +10,7 @@ namespace Postulate.Lite.SqlServer.IntKey
 	{
 		private static SqlServerProvider<int> GetProvider()
 		{
-			return new SqlServerProvider<int>((obj) => Convert.ToInt32(obj));
+			return new SqlServerProvider<int>((obj) => Convert.ToInt32(obj), "identity(1,1)");
 		}
 
 		public static bool Exists<TModel>(this IDbConnection connection, int id, IUser user = null)

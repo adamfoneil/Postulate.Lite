@@ -70,7 +70,7 @@ namespace Postulate.Lite.SqlServer
 
 		public override string CreateTableCommand(Type modelType)
 		{
-			var columns = GetMappedColumns(modelType);
+			var columns = _integrator.GetMappedColumns(modelType);
 			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
 			var identityName = modelType.GetIdentityName();
 

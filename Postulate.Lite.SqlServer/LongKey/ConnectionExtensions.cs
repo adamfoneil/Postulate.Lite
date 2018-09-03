@@ -10,7 +10,7 @@ namespace Postulate.Lite.SqlServer.LongKey
 	{
 		private static SqlServerProvider<long> GetProvider()
 		{
-			return new SqlServerProvider<long>((obj) => Convert.ToInt64(obj));
+			return new SqlServerProvider<long>((obj) => Convert.ToInt64(obj), "identity(1,1)");
 		}
 
 		public static bool Exists<TModel>(this IDbConnection connection, int id, IUser user = null)

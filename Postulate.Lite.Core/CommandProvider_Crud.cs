@@ -25,10 +25,11 @@ namespace Postulate.Lite.Core
 
 		protected readonly SqlIntegrator _integrator;
 
-		public CommandProvider(Func<object, TKey> identityConverter, SqlIntegrator integrator)
+		public CommandProvider(Func<object, TKey> identityConverter, SqlIntegrator integrator, string identitySyntax)
 		{
 			_identityConverter = identityConverter;
 			_integrator = integrator;
+			_identitySyntax = identitySyntax;
 		}
 
 		/// <summary>
@@ -125,11 +126,6 @@ namespace Postulate.Lite.Core
 			var property = typeof(TModel).GetIdentityProperty();
 			return ConvertIdentity(property.GetValue(@object));
 		}
-
-		/// <summary>
-		/// Specifies the types and corresponding SQL syntax for CLR types supported in your ORM mapping
-		/// </summary>
-		protected abstract Dictionary<Type, string> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
 
 		/// <summary>
 		/// Performs a SQL insert and returns the generated identity value

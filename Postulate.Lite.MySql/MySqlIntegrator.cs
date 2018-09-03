@@ -1,27 +1,29 @@
 ﻿using Postulate.Lite.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Postulate.Lite.SqlServer
+namespace Postulate.Lite.MySql
 {
-	public class SqlServerIntegrator : SqlIntegrator
+	public class MySqlIntegrator : SqlIntegrator
 	{
-		public override Dictionary<Type, string> SupportedTypes(int length, int precision, int scale)
+		public override Dictionary<Type, string> SupportedTypes(int length = 0, int precision = 0, int scale = 0)
 		{
 			return new Dictionary<Type, string>()
 			{
-				{ typeof(string), $"nvarchar({((length == 0) ? "max" : length.ToString())})" },
+				{ typeof(string), $"varchar({length})" },
 				{ typeof(int), "int" },
 				{ typeof(DateTime), "datetime" },
 				{ typeof(bool), "bit" },
 				{ typeof(decimal), $"decimal({scale}, {precision})" },
-				{ typeof(long), $"bigint" },
+				{ typeof(long), "bigint" },
 				{ typeof(short), "smallint" },
 				{ typeof(byte), "tinyint" },
 				{ typeof(TimeSpan), "time" },
 				{ typeof(double), "float" },
 				{ typeof(float), "float" },
-				{ typeof(Guid), "uniqueidentifier" },
 				{ typeof(char), "char(1)" },
 				{ typeof(byte[]), $"varbinary({length})" }
 			};

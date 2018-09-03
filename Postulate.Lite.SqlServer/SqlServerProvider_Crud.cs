@@ -11,7 +11,7 @@ namespace Postulate.Lite.SqlServer
 {
 	public partial class SqlServerProvider<TKey> : CommandProvider<TKey>
 	{
-		public SqlServerProvider(Func<object, TKey> identityConverter) : base(identityConverter, new SqlServerIntegrator())
+		public SqlServerProvider(Func<object, TKey> identityConverter, string identitySyntax) : base(identityConverter, new SqlServerIntegrator(), identitySyntax)
 		{
 		}
 
@@ -77,7 +77,7 @@ namespace Postulate.Lite.SqlServer
 			{
 				string nullSyntax = (col.AllowNull) ? "NULL" : "NOT NULL";
 
-				var typeMap = SupportedTypes(col.Length, col.Precision, col.Scale);
+				var typeMap = _integrator.SupportedTypes(col.Length, col.Precision, col.Scale);
 				Type t = propertyInfo.PropertyType;
 				if (t.IsGenericType) t = t.GenericTypeArguments[0];
 				if (t.IsEnum) t = t.GetEnumUnderlyingType();

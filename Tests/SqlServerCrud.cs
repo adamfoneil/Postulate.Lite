@@ -2,12 +2,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Postulate.Lite.Core;
 using Postulate.Lite.SqlServer;
-using Postulate.Lite.SqlServer.IntKey;
 using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using Tests.Models;
 
 namespace Tests.SqlServer
 {
