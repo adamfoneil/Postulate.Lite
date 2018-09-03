@@ -2,12 +2,9 @@
 using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Interfaces;
-using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -18,15 +15,18 @@ namespace Postulate.Lite.Core
 	/// <summary>
 	/// Generates SQL commands for Crud and Merge methods. As an abstract class, it requires database-specific implementations
 	/// </summary>
-	/// <typeparam name="TKey">Primary key type</typeparam>
+	/// <typeparam name="TKey">Identity column type</typeparam>
 	public abstract partial class CommandProvider<TKey>
 	{
 		private readonly Func<object, TKey> _identityConverter;
 		private readonly string _identitySyntax;
 
-		public CommandProvider(Func<object, TKey> identityConverter, string identitySyntax)
+		protected readonly SqlIntegrator _integrator;
+
+		public CommandProvider(Func<object, TKey> identityConverter, SqlIntegrator integrator, string identitySyntax)
 		{
 			_identityConverter = identityConverter;
+			_integrator = integrator;
 			_identitySyntax = identitySyntax;
 		}
 
@@ -71,7 +71,7 @@ namespace Postulate.Lite.Core
 
 		/// <summary>
 		/// Gets the database table name for a given model class
-		/// </summary>		
+		/// </summary>
 		protected abstract string TableName(Type modelType);
 
 		/// <summary>
@@ -86,48 +86,6 @@ namespace Postulate.Lite.Core
 		protected string IdentityColumnSyntax()
 		{
 			return _identitySyntax;
-		}
-
-		/// <summary>
-		/// Returns the properties of a model class that may be affected by an INSERT or UPDATE statement.
-		/// For example calculated and identity columns are omitted.
-		/// </summary>
-		/// <typeparam name="T">Model class type</typeparam>
-		/// <param name="action">Indicates whether an insert or update is in effect</param>
-		protected IEnumerable<ColumnInfo> EditableColumns<T>(SaveAction action)
-		{
-			string identity = typeof(T).GetIdentityName().ToLower();
-			var props = typeof(T).GetProperties().Where(pi => !pi.GetColumnName().ToLower().Equals(identity)).ToArray();
-			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi)).ToArray();
-		}
-
-		/// <summary>
-		/// Returns the properties of a model class that are mapped to database columns
-		/// </summary>		
-		public IEnumerable<PropertyInfo> GetMappedColumns(Type modelType)
-		{
-			return modelType.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
-		}
-
-		private bool IsEditable(PropertyInfo pi, SaveAction action)
-		{
-			if (!IsSupportedType(pi.PropertyType)) return false;
-			if (!IsMapped(pi)) return false;
-			if (IsCalculated(pi)) return false;
-
-			var colInfo = new ColumnInfo(pi);
-			return ((colInfo.SaveActions & action) == action);
-		}
-
-		/// <summary>
-		/// Determines whether a given Type is reflected in a database table
-		/// </summary>
-		protected bool IsSupportedType(Type type)
-		{
-			return
-				SupportedTypes().ContainsKey(type) ||
-				(type.IsEnum && type.GetEnumUnderlyingType().Equals(typeof(int))) ||
-				(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && IsSupportedType(type.GetGenericArguments()[0]));
 		}
 
 		/// <summary>
@@ -167,11 +125,6 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Specifies the types and corresponding SQL syntax for CLR types supported in your ORM mapping
-		/// </summary>
-		protected abstract Dictionary<Type, string> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
-
-		/// <summary>
 		/// Performs a SQL insert and returns the generated identity value
 		/// </summary>
 		/// <typeparam name="TModel">Model class type</typeparam>
@@ -199,7 +152,7 @@ namespace Postulate.Lite.Core
 			{
 				throw new CrudException(SaveAction.Insert, exc, cmd, @object);
 			}
-			
+
 			SetIdentity(@object, result);
 
 			record?.AfterSave(connection, SaveAction.Insert);
@@ -229,7 +182,7 @@ namespace Postulate.Lite.Core
 			TKey result = default(TKey);
 			try
 			{
-				result = await connection.QuerySingleOrDefaultAsync<TKey>(cmd, @object);				
+				result = await connection.QuerySingleOrDefaultAsync<TKey>(cmd, @object);
 			}
 			catch (Exception exc)
 			{
@@ -271,7 +224,7 @@ namespace Postulate.Lite.Core
 				dp.Add(propName, e.Compile().Invoke(@object));
 				return $"{ApplyDelimiter(pi.GetColumnName())}=@{propName}";
 			}));
-			
+
 			string cmdText = $"UPDATE {ApplyDelimiter(TableName(type))} SET {setColumnExpr} WHERE {ApplyDelimiter(type.GetIdentityName())}=@id";
 			dp.Add("id", GetIdentity(@object));
 
@@ -327,7 +280,7 @@ namespace Postulate.Lite.Core
 			{
 				throw new CrudException(SaveAction.Update, exc, cmd, @object);
 			}
-			
+
 			record?.AfterSave(connection, SaveAction.Update);
 		}
 
@@ -357,7 +310,7 @@ namespace Postulate.Lite.Core
 			{
 				throw new CrudException(SaveAction.Update, exc, cmd, @object);
 			}
-			
+
 			record?.AfterSave(connection, SaveAction.Update);
 		}
 
@@ -376,8 +329,8 @@ namespace Postulate.Lite.Core
 			{
 				action = SaveAction.Update;
 			}
-			
-			return Save(connection, @object, user); 
+
+			return Save(connection, @object, user);
 		}
 
 		/// <summary>
@@ -472,7 +425,7 @@ namespace Postulate.Lite.Core
 		/// <typeparam name="TModel">Model class type</typeparam>
 		/// <param name="connection">Open connection</param>
 		/// <param name="identity">Primary key value</param>
-		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>		
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public TModel Find<TModel>(IDbConnection connection, TKey identity, IUser user = null)
 		{
 			string identityCol = typeof(TModel).GetIdentityName();
@@ -488,7 +441,7 @@ namespace Postulate.Lite.Core
 		/// <typeparam name="TModel">Model class type</typeparam>
 		/// <param name="connection">Open connection</param>
 		/// <param name="identity">Primary key value</param>
-		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>		
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public async Task<TModel> FindAsync<TModel>(IDbConnection connection, TKey identity, IUser user = null)
 		{
 			string identityCol = typeof(TModel).GetIdentityName();
@@ -543,7 +496,7 @@ namespace Postulate.Lite.Core
 			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);
 			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
-		}		
+		}
 
 		private TModel FindByPrimaryKey<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
 		{
@@ -657,22 +610,6 @@ namespace Postulate.Lite.Core
 		{
 			string cmd = CreateTableCommand(typeof(TModel));
 			connection.Execute(cmd);
-		}
-
-		/// <summary>
-		/// Returns true if the property is mapped to a database table column
-		/// </summary>
-		protected bool IsMapped(PropertyInfo propertyInfo)
-		{
-			return !propertyInfo.HasAttribute<NotMappedAttribute>();
-		}
-
-		/// <summary>
-		/// Returns true if the property has a [Calculated] attribute
-		/// </summary>
-		protected bool IsCalculated(PropertyInfo propertyInfo)
-		{
-			return propertyInfo.HasAttribute<CalculatedAttribute>();
 		}
 	}
 }

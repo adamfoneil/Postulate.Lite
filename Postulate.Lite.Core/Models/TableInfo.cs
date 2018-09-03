@@ -5,7 +5,7 @@ namespace Postulate.Lite.Core.Models
 	public class TableInfo
 	{
 		public TableInfo()
-		{				
+		{
 		}
 
 		public TableInfo(string schema, string name)

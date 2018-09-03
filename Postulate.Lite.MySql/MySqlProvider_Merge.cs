@@ -14,11 +14,11 @@ namespace Postulate.Lite.MySql
 	{
 		public override string CommentPrefix => "# ";
 		public override bool SupportsSchemas => false;
-		public override string DefaultSchema => throw new NotImplementedException();		
+		public override string DefaultSchema => throw new NotImplementedException();
 
 		public override string CreateTableCommand(Type modelType)
 		{
-			var columns = GetMappedColumns(modelType);
+			var columns = _integrator.GetMappedColumns(modelType);
 			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
 			var identityName = modelType.GetIdentityName();
 

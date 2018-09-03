@@ -91,7 +91,7 @@ namespace Tests
 			{
 				var emp = new EmployeeInt() { FirstName = "Whoever", LastName = "Nobody" };
 				provider.Save(cn, emp);
-				provider.Delete<EmployeeInt>(cn, emp.Id);				
+				provider.Delete<EmployeeInt>(cn, emp.Id);
 				Assert.IsTrue(!provider.Exists<EmployeeInt>(cn, emp.Id));
 			}
 		}
@@ -123,7 +123,7 @@ namespace Tests
 				e.FirstName = name;
 				provider.Save(cn, e);
 
-				e = provider.Find<EmployeeInt>(cn, 5);				
+				e = provider.Find<EmployeeInt>(cn, 5);
 				Assert.IsTrue(e.FirstName.Equals(name));
 			}
 		}
@@ -200,7 +200,7 @@ namespace Tests
 			using (var cn = GetConnection())
 			{
 				provider.Save(cn, e);
-				provider.Delete<EmployeeInt>(cn, e.Id);				
+				provider.Delete<EmployeeInt>(cn, e.Id);
 			}
 		}
 
@@ -224,7 +224,7 @@ namespace Tests
 		}
 
 		protected void ForeignKeyLookupBase()
-		{			
+		{
 			using (var cn = GetConnection())
 			{
 				var e = GetIntProvider().Find<EmployeeInt>(cn, 10);
@@ -291,7 +291,7 @@ namespace Tests
 		{
 			var provider = GetIntProvider();
 			using (var cn = GetConnection())
-			{			
+			{
 				var org = new Organization() { Name = "Test" };
 				var check = provider.FindWhere(cn, org);
 				if (check != null) provider.Delete<Organization>(cn, check.Id);
@@ -322,7 +322,6 @@ namespace Tests
 				await provider.MergeAsync(cn, orgMerge);
 				Assert.IsTrue(!provider.IsNew(orgMerge));
 			}
-
 		}
 
 		protected void EmployeeQueryLastNameBase()

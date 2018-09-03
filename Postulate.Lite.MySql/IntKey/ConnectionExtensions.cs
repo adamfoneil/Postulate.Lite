@@ -10,7 +10,7 @@ namespace Postulate.Lite.MySql.IntKey
 	{
 		private static MySqlProvider<int> GetProvider()
 		{
-			return new MySqlProvider<int>((obj) => Convert.ToInt32(obj), "auto_increment");
+			return new MySqlProvider<int>((obj) => Convert.ToInt32(obj));
 		}
 
 		public static bool Exists<TModel>(this IDbConnection connection, int id, IUser user = null)

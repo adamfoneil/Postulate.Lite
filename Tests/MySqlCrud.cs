@@ -6,7 +6,6 @@ using Postulate.Lite.MySql;
 using System;
 using System.Configuration;
 using System.Data;
-using System.Threading.Tasks;
 
 namespace Tests.MySql
 {
@@ -21,7 +20,7 @@ namespace Tests.MySql
 
 		protected override CommandProvider<int> GetIntProvider()
 		{
-			return new MySqlProvider<int>((obj) => Convert.ToInt32(obj), "auto_increment");
+			return new MySqlProvider<int>((obj) => Convert.ToInt32(obj));
 		}
 
 		private static IDbConnection GetMasterConnection()
