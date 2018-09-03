@@ -81,7 +81,7 @@ namespace Postulate.Lite.MySql
 
 				string dataType = (col.HasExplicitType()) ?
 					col.DataType :
-					typeMap[t];
+					typeMap[t].FormattedName;
 
 				if (isIdentity) dataType += " " + IdentityColumnSyntax();
 

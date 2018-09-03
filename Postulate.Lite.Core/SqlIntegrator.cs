@@ -17,7 +17,7 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Specifies the types and corresponding SQL syntax for CLR types supported in your ORM mapping
 		/// </summary>
-		public abstract Dictionary<Type, string> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
+		public abstract Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
 
 		/// <summary>
 		/// Returns the properties of a model class that are mapped to database columns
@@ -75,6 +75,24 @@ namespace Postulate.Lite.Core
 		private bool IsCalculated(PropertyInfo propertyInfo)
 		{
 			return propertyInfo.HasAttribute<CalculatedAttribute>();
+		}
+
+		public class SqlTypeInfo
+		{
+			public SqlTypeInfo(string baseName)
+			{
+				BaseName = baseName;
+				FormattedName = baseName;
+			}
+
+			public SqlTypeInfo(string baseName, string formattedName)
+			{
+				BaseName = baseName;
+				FormattedName = formattedName;
+			}
+
+			public string BaseName { get; private set; }
+			public string FormattedName { get; private set; }
 		}
 	}
 }

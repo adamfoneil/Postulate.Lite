@@ -6,24 +6,24 @@ namespace Postulate.Lite.SqlServer
 {
 	public class SqlServerIntegrator : SqlIntegrator
 	{
-		public override Dictionary<Type, string> SupportedTypes(int length, int precision, int scale)
+		public override Dictionary<Type, SqlTypeInfo> SupportedTypes(int length, int precision, int scale)
 		{
-			return new Dictionary<Type, string>()
+			return new Dictionary<Type, SqlTypeInfo>()
 			{
-				{ typeof(string), $"nvarchar({((length == 0) ? "max" : length.ToString())})" },
-				{ typeof(int), "int" },
-				{ typeof(DateTime), "datetime" },
-				{ typeof(bool), "bit" },
-				{ typeof(decimal), $"decimal({scale}, {precision})" },
-				{ typeof(long), $"bigint" },
-				{ typeof(short), "smallint" },
-				{ typeof(byte), "tinyint" },
-				{ typeof(TimeSpan), "time" },
-				{ typeof(double), "float" },
-				{ typeof(float), "float" },
-				{ typeof(Guid), "uniqueidentifier" },
-				{ typeof(char), "char(1)" },
-				{ typeof(byte[]), $"varbinary({length})" }
+				{ typeof(string), new SqlTypeInfo("nvarchar", $"nvarchar({((length == 0) ? "max" : length.ToString())})") },
+				{ typeof(int), new SqlTypeInfo("int") },
+				{ typeof(DateTime), new SqlTypeInfo("datetime") },
+				{ typeof(bool), new SqlTypeInfo("bit") },
+				{ typeof(decimal), new SqlTypeInfo("decimal", $"decimal({scale}, {precision})") },
+				{ typeof(long), new SqlTypeInfo("bigint") },
+				{ typeof(short), new SqlTypeInfo("smallint") },
+				{ typeof(byte), new SqlTypeInfo("tinyint") },
+				{ typeof(TimeSpan), new SqlTypeInfo("time") },
+				{ typeof(double), new SqlTypeInfo("float") },
+				{ typeof(float), new SqlTypeInfo("float") },
+				{ typeof(Guid), new SqlTypeInfo("uniqueidentifier") },
+				{ typeof(char), new SqlTypeInfo("char(1)") },
+				{ typeof(byte[]), new SqlTypeInfo("varbinary", $"varbinary({length})") }
 			};
 		}
 	}
