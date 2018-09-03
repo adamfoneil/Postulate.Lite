@@ -30,7 +30,7 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string InsertCommand<T>()
 		{
-			var columns = _integrator.EditableColumns<T>(SaveAction.Insert);
+			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Insert);
 			string columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
 			string valueList = string.Join(", ", columns.Select(c => $"@{c.PropertyName}"));
 			return $"INSERT INTO {ApplyDelimiter(TableName(typeof(T)))} ({columnList}) OUTPUT [inserted].[{typeof(T).GetIdentityName()}] VALUES ({valueList});";
@@ -38,14 +38,14 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string UpdateCommand<T>()
 		{
-			var columns = _integrator.EditableColumns<T>(SaveAction.Update);
+			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Update);
 			return $"UPDATE {ApplyDelimiter(TableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
 		protected override string DeleteCommand<T>()
 		{
 			return $"DELETE {ApplyDelimiter(TableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
-		}		
+		}
 
 		protected override string TableName(Type modelType)
 		{

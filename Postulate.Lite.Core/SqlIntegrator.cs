@@ -28,24 +28,24 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Returns true if the property is mapped to a database table column
-		/// </summary>
-		public bool IsMapped(PropertyInfo propertyInfo)
-		{
-			return !propertyInfo.HasAttribute<NotMappedAttribute>();
-		}
-
-		/// <summary>
 		/// Returns the properties of a model class that may be affected by an INSERT or UPDATE statement.
 		/// For example calculated and identity columns are omitted.
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
 		/// <param name="action">Indicates whether an insert or update is in effect</param>
-		public IEnumerable<ColumnInfo> EditableColumns<T>(SaveAction action)
+		public IEnumerable<ColumnInfo> GetEditableColumns(Type modelType, SaveAction action)
 		{
-			string identity = typeof(T).GetIdentityName().ToLower();
-			var props = typeof(T).GetProperties().Where(pi => !pi.GetColumnName().ToLower().Equals(identity)).ToArray();
+			string identity = modelType.GetIdentityName().ToLower();
+			var props = modelType.GetProperties().Where(pi => !pi.GetColumnName().ToLower().Equals(identity)).ToArray();
 			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi)).ToArray();
+		}
+
+		/// <summary>
+		/// Returns true if the property is mapped to a database table column
+		/// </summary>
+		private bool IsMapped(PropertyInfo propertyInfo)
+		{
+			return !propertyInfo.HasAttribute<NotMappedAttribute>();
 		}
 
 		private bool IsEditable(PropertyInfo pi, SaveAction action)

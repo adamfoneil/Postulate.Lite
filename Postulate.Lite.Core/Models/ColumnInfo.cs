@@ -88,7 +88,7 @@ namespace Postulate.Lite.Core.Models
 		public Type GetModelType()
 		{
 			return PropertyInfo.DeclaringType;
-		}		
+		}
 
 		public PropertyInfo PropertyInfo { get; private set; }
 
@@ -102,9 +102,9 @@ namespace Postulate.Lite.Core.Models
 			ColumnInfo test = obj as ColumnInfo;
 			if (test != null)
 			{
-				return 
-					test.Schema.ToLower().Equals(Schema.ToLower()) && 
-					test.TableName.ToLower().Equals(TableName.ToLower()) && 
+				return
+					test.Schema.ToLower().Equals(Schema.ToLower()) &&
+					test.TableName.ToLower().Equals(TableName.ToLower()) &&
 					test.ColumnName.ToLower().Equals(ColumnName.ToLower());
 			}
 
@@ -163,7 +163,7 @@ namespace Postulate.Lite.Core.Models
 
 				// note -- don't compare the ByteLength property because it's not reported by PropertyInfo
 			}
-			return false;		
+			return false;
 		}
 	}
 }

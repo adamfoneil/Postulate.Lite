@@ -6,7 +6,6 @@ using Postulate.Lite.MySql;
 using System;
 using System.Configuration;
 using System.Data;
-using System.Threading.Tasks;
 
 namespace Tests.MySql
 {

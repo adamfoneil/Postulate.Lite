@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Postulate.Lite.Core
 {
 	public abstract partial class CommandProvider<TKey>
-	{		
+	{
 		public abstract string CommentPrefix { get; }
 
 		/// <summary>
@@ -32,7 +32,7 @@ namespace Postulate.Lite.Core
 		public abstract string CreateTableCommand(Type modelType);
 
 		public abstract string CreateSchemaCommand(string schemaName);
-		
+
 		/// <summary>
 		/// Generatea a SQL command to drop a table from a database
 		/// </summary>
@@ -85,14 +85,16 @@ namespace Postulate.Lite.Core
 		/// </summary>
 		public abstract string DropColumnCommand(ColumnInfo columnInfo);
 
-		#endregion
+		#endregion command methods
 
 		#region reflection methods
+
 		public abstract TableInfo GetTableInfo(Type modelType);
 
-		#endregion
+		#endregion reflection methods
 
 		#region schema inspection
+
 		public abstract IEnumerable<ForeignKeyInfo> GetDependentForeignKeys(IDbConnection connection, TableInfo tableInfo);
 
 		public abstract bool SchemaExists(IDbConnection connection, string schemaName);
@@ -113,7 +115,7 @@ namespace Postulate.Lite.Core
 			return result;
 		}
 
-		#endregion
+		#endregion schema inspection
 
 		protected abstract string SchemaCriteria(string[] excludeSchemas);
 

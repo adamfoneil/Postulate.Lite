@@ -2,10 +2,8 @@
 using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Interfaces;
-using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -89,7 +87,6 @@ namespace Postulate.Lite.Core
 		{
 			return _identitySyntax;
 		}
-
 
 		/// <summary>
 		/// Returns true if the given model object has not been saved in the database yet

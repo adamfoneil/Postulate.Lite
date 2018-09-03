@@ -14,7 +14,7 @@ namespace Postulate.Lite.MySql
 	{
 		public override string CommentPrefix => "# ";
 		public override bool SupportsSchemas => false;
-		public override string DefaultSchema => throw new NotImplementedException();		
+		public override string DefaultSchema => throw new NotImplementedException();
 
 		public override string CreateTableCommand(Type modelType)
 		{

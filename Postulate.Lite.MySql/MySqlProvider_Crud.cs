@@ -42,7 +42,7 @@ namespace Postulate.Lite.MySql
 
 		protected override string InsertCommand<T>()
 		{
-			var columns = _integrator.EditableColumns<T>(SaveAction.Insert);
+			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Insert);
 			string columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
 			string valueList = string.Join(", ", columns.Select(c => $"@{c.PropertyName}"));
 			return $"INSERT INTO {ApplyDelimiter(TableName(typeof(T)))} ({columnList}) VALUES ({valueList}); SELECT LAST_INSERT_ID()";
@@ -50,7 +50,7 @@ namespace Postulate.Lite.MySql
 
 		protected override string UpdateCommand<T>()
 		{
-			var columns = _integrator.EditableColumns<T>(SaveAction.Update);
+			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Update);
 			return $"UPDATE {ApplyDelimiter(TableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
