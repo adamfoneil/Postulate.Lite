@@ -28,30 +28,11 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Determines whether a given Type is reflected in a database table
-		/// </summary>
-		protected bool IsSupportedType(Type type)
-		{
-			return
-				SupportedTypes().ContainsKey(type) ||
-				(type.IsEnum && type.GetEnumUnderlyingType().Equals(typeof(int))) ||
-				(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && IsSupportedType(type.GetGenericArguments()[0]));
-		}
-
-		/// <summary>
 		/// Returns true if the property is mapped to a database table column
 		/// </summary>
 		public bool IsMapped(PropertyInfo propertyInfo)
 		{
 			return !propertyInfo.HasAttribute<NotMappedAttribute>();
-		}
-
-		/// <summary>
-		/// Returns true if the property has a [Calculated] attribute
-		/// </summary>
-		protected bool IsCalculated(PropertyInfo propertyInfo)
-		{
-			return propertyInfo.HasAttribute<CalculatedAttribute>();
 		}
 
 		/// <summary>
@@ -75,6 +56,25 @@ namespace Postulate.Lite.Core
 
 			var colInfo = new ColumnInfo(pi);
 			return ((colInfo.SaveActions & action) == action);
+		}
+
+		/// <summary>
+		/// Determines whether a given Type is reflected in a database table
+		/// </summary>
+		private bool IsSupportedType(Type type)
+		{
+			return
+				SupportedTypes().ContainsKey(type) ||
+				(type.IsEnum && type.GetEnumUnderlyingType().Equals(typeof(int))) ||
+				(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && IsSupportedType(type.GetGenericArguments()[0]));
+		}
+
+		/// <summary>
+		/// Returns true if the property has a [Calculated] attribute
+		/// </summary>
+		private bool IsCalculated(PropertyInfo propertyInfo)
+		{
+			return propertyInfo.HasAttribute<CalculatedAttribute>();
 		}
 	}
 }
