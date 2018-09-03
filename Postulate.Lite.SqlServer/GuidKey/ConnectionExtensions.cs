@@ -10,7 +10,7 @@ namespace Postulate.Lite.SqlServer.GuidKey
 	{
 		private static SqlServerProvider<Guid> GetProvider()
 		{
-			return new SqlServerProvider<Guid>((obj) => Guid.Parse(obj.ToString()), "DEFAULT newid()");
+			return new SqlServerProvider<Guid>((obj) => Guid.Parse(obj.ToString()));
 		}
 
 		public static bool Exists<TModel>(this IDbConnection connection, Guid id, IUser user = null)

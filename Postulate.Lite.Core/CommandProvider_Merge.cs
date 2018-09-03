@@ -99,7 +99,6 @@ namespace Postulate.Lite.Core
 
 		public abstract bool IsTableEmpty(IDbConnection connection, Type modelType);
 
-		#endregion
 		protected IEnumerable<PropertyInfo> GetPrimaryKeyColumns(Type type, IEnumerable<PropertyInfo> columns, out bool identityIsPrimaryKey)
 		{
 			identityIsPrimaryKey = false;
@@ -113,6 +112,8 @@ namespace Postulate.Lite.Core
 
 			return result;
 		}
+
+		#endregion
 
 		protected abstract string SchemaCriteria(string[] excludeSchemas);
 

@@ -82,6 +82,7 @@
     <Compile Include="Query.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Models\TableInfo.cs" />
+    <Compile Include="SqlIntegrator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
