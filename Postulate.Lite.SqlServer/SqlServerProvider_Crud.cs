@@ -4,7 +4,6 @@ using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 
@@ -18,7 +17,7 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string ApplyDelimiter(string name)
 		{
-			return string.Join(".", name.Split('.').Select(part => $"[{part}]"));			
+			return string.Join(".", name.Split('.').Select(part => $"[{part}]"));
 		}
 
 		protected override string FindCommand<T>(string whereClause)
@@ -26,7 +25,7 @@ namespace Postulate.Lite.SqlServer
 			var type = typeof(T);
 			var props = GetMappedColumns(type);
 			var columns = props.Select(pi => new ColumnInfo(pi));
-			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {whereClause}";			
+			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {whereClause}";
 		}
 
 		protected override string InsertCommand<T>()
@@ -49,7 +48,7 @@ namespace Postulate.Lite.SqlServer
 		}
 
 		protected override Dictionary<Type, string> SupportedTypes(int length, int precision, int scale)
-		{			
+		{
 			return new Dictionary<Type, string>()
 			{
 				{ typeof(string), $"nvarchar({((length == 0) ? "max" : length.ToString())})" },
@@ -96,7 +95,7 @@ namespace Postulate.Lite.SqlServer
 				result += $" AS {calcAttr.Expression}";
 			}
 			else
-			{				
+			{
 				string nullSyntax = (col.AllowNull) ? "NULL" : "NOT NULL";
 
 				var typeMap = SupportedTypes(col.Length, col.Precision, col.Scale);
@@ -105,9 +104,9 @@ namespace Postulate.Lite.SqlServer
 				if (t.IsEnum) t = t.GetEnumUnderlyingType();
 				if (!typeMap.ContainsKey(t)) throw new KeyNotFoundException($"Type name {t.Name} not supported.");
 
-				string dataType = (col.HasExplicitType()) ? 
-					col.DataType : 
-					typeMap[t];				
+				string dataType = (col.HasExplicitType()) ?
+					col.DataType :
+					typeMap[t];
 
 				if (isIdentity) dataType += " " + IdentityColumnSyntax();
 

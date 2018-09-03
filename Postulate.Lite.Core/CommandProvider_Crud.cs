@@ -71,8 +71,7 @@ namespace Postulate.Lite.Core
 
 		/// <summary>
 		/// Gets the database table name for a given model class
-		/// </summary>
-		/// <typeparam name="T">Model class type</typeparam>
+		/// </summary>		
 		protected abstract string TableName(Type modelType);
 
 		/// <summary>
@@ -104,8 +103,7 @@ namespace Postulate.Lite.Core
 
 		/// <summary>
 		/// Returns the properties of a model class that are mapped to database columns
-		/// </summary>
-		/// <typeparam name="T">Model class type</typeparam>
+		/// </summary>		
 		public IEnumerable<PropertyInfo> GetMappedColumns(Type modelType)
 		{
 			return modelType.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
