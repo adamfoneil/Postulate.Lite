@@ -17,7 +17,24 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Specifies the types and corresponding SQL syntax for CLR types supported in your ORM mapping
 		/// </summary>
-		public abstract Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
+		public abstract Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0);		
+
+		public SqlTypeInfo FindTypeInfo(Type type)
+		{
+			var supportedTypes = SupportedTypes();
+
+			if (supportedTypes.ContainsKey(type)) return SupportedTypes()[type];
+
+			if (type.IsEnum && type.GetEnumUnderlyingType().Equals(typeof(int)) && supportedTypes.ContainsKey(typeof(int))) return supportedTypes[typeof(int)];
+
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				var genericType = type.GetGenericArguments()[0];
+				if (supportedTypes.ContainsKey(genericType)) return supportedTypes[genericType];
+			}
+					
+			return null;
+		}
 
 		/// <summary>
 		/// Returns the properties of a model class that are mapped to database columns
@@ -61,7 +78,7 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Determines whether a given Type is reflected in a database table
 		/// </summary>
-		private bool IsSupportedType(Type type)
+		public bool IsSupportedType(Type type)
 		{
 			return
 				SupportedTypes().ContainsKey(type) ||
