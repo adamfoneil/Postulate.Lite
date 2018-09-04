@@ -6,7 +6,7 @@ namespace Postulate.Lite.SqlServer
 {
 	public class SqlServerIntegrator : SqlIntegrator
 	{
-		public override Dictionary<Type, SqlTypeInfo> SupportedTypes(int length, int precision, int scale)
+		public override Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0)
 		{
 			return new Dictionary<Type, SqlTypeInfo>()
 			{
