@@ -62,16 +62,17 @@ namespace Postulate.Lite.Core
 		/// </summary>
 		private bool IsMapped(PropertyInfo propertyInfo)
 		{
-			return !propertyInfo.HasAttribute<NotMappedAttribute>();
+			return propertyInfo.CanWrite && !propertyInfo.HasAttribute<NotMappedAttribute>();
 		}
 
-		private bool IsEditable(PropertyInfo pi, SaveAction action)
+		private bool IsEditable(PropertyInfo propertyInfo, SaveAction action)
 		{
-			if (!IsSupportedType(pi.PropertyType)) return false;
-			if (!IsMapped(pi)) return false;
-			if (IsCalculated(pi)) return false;
+			if (!propertyInfo.CanWrite) return false;
+			if (!IsSupportedType(propertyInfo.PropertyType)) return false;
+			if (!IsMapped(propertyInfo)) return false;
+			if (IsCalculated(propertyInfo)) return false;
 
-			var colInfo = new ColumnInfo(pi);
+			var colInfo = new ColumnInfo(propertyInfo);
 			return ((colInfo.SaveActions & action) == action);
 		}
 
