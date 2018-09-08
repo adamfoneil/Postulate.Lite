@@ -7,7 +7,7 @@ using System.Data;
 
 namespace Tests.Models
 {
-	[Identity(nameof(Id))]
+	[Identity(nameof(Id), IdentityPosition.FirstColumn)]
 	[Table("Employee")]
 	public class EmployeeInt : Record
 	{
