@@ -41,7 +41,24 @@ namespace Postulate.Lite.Core
 		/// </summary>
 		public IEnumerable<PropertyInfo> GetMappedColumns(Type modelType)
 		{
-			return modelType.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
+			var properties = modelType.GetProperties().Where(pi => IsMapped(pi) && IsSupportedType(pi.PropertyType));
+			var identityAttr = modelType.GetAttribute<IdentityAttribute>();
+
+			if ((identityAttr?.Position ?? IdentityPosition.NotSet) != IdentityPosition.NotSet)
+			{
+				var identityProp = modelType.GetIdentityProperty();
+				var otherProps = properties.Where(pi => !pi.Equals(identityProp));
+
+				if (identityAttr.Position == IdentityPosition.FirstColumn) yield return identityProp;
+
+				foreach (var prop in otherProps) yield return prop;
+
+				if (identityAttr.Position == IdentityPosition.LastColumn) yield return identityProp;
+			}
+			else
+			{
+				foreach (var prop in properties) yield return prop;
+			}
 		}
 
 		/// <summary>
