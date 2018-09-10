@@ -53,6 +53,7 @@
     <Compile Include="Attributes\ColumnAccessAttribute.cs" />
     <Compile Include="Attributes\DatabaseTypeAttribute.cs" />
     <Compile Include="Attributes\DecimalPrecisionAttribute.cs" />
+    <Compile Include="Attributes\DefaultExpressionAttribute.cs" />
     <Compile Include="Attributes\IdentityAttribute.cs" />
     <Compile Include="Attributes\MergeExcludeSchemaAttribute.cs" />
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
