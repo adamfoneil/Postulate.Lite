@@ -23,14 +23,15 @@ namespace Postulate.Lite.Core
 		{
 			var supportedTypes = SupportedTypes();
 
-			if (supportedTypes.ContainsKey(type)) return SupportedTypes()[type];
+			if (supportedTypes.ContainsKey(type)) return supportedTypes[type];
 
 			if (type.IsEnum && type.GetEnumUnderlyingType().Equals(typeof(int)) && supportedTypes.ContainsKey(typeof(int))) return supportedTypes[typeof(int)];
 
 			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
-				var genericType = type.GetGenericArguments()[0];
-				if (supportedTypes.ContainsKey(genericType)) return supportedTypes[genericType];
+				var innerType = type.GetGenericArguments()[0];
+				if (innerType.IsEnum) return FindTypeInfo(innerType);
+				if (supportedTypes.ContainsKey(innerType)) return supportedTypes[innerType];
 			}
 					
 			return null;
