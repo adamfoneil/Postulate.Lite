@@ -65,6 +65,7 @@
     <Compile Include="Extensions\ConnectionExtensions.cs" />
     <Compile Include="Extensions\PropertyInfoExtensions.cs" />
     <Compile Include="Extensions\StringInternal.cs" />
+    <Compile Include="Interfaces\ISeedData.cs" />
     <Compile Include="Models\ColumnInfo.cs" />
     <Compile Include="CommandProvider_Merge.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
