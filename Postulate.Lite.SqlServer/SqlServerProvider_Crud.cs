@@ -47,7 +47,7 @@ namespace Postulate.Lite.SqlServer
 			return $"DELETE {ApplyDelimiter(TableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
-		protected override string TableName(Type modelType)
+		public override string TableName(Type modelType)
 		{
 			var tbl = GetTableInfo(modelType);
 			return $"{tbl.Schema}.{tbl.Name}";

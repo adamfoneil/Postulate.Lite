@@ -91,7 +91,7 @@ namespace Postulate.Lite.MySql
 			return result;
 		}
 
-		protected override string TableName(Type modelType)
+		public override string TableName(Type modelType)
 		{
 			string result = modelType.Name;
 

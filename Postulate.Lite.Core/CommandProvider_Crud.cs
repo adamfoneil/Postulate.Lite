@@ -72,7 +72,7 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Gets the database table name for a given model class
 		/// </summary>
-		protected abstract string TableName(Type modelType);
+		public abstract string TableName(Type modelType);
 
 		/// <summary>
 		/// Generates the syntax for column definition with a CREATE TABLE statement
