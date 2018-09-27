@@ -32,5 +32,16 @@ namespace Postulate.Lite.Core.Extensions
 			var attrs = provider.GetCustomAttributes(typeof(T), true).OfType<T>();
 			return (attrs?.Any() ?? false) ? attrs.FirstOrDefault() : null;
 		}
+
+		/// <summary>
+		/// Gets the intended mapping type of a given type, for example removing any nullable generic or getting the underlying type of an enum
+		/// </summary>
+		public static Type GetMappedType(this PropertyInfo propertyInfo)
+		{
+			Type result = propertyInfo.PropertyType;
+			if (result.IsGenericType) result = result.GenericTypeArguments[0];
+			if (result.IsEnum) result = result.GetEnumUnderlyingType();
+			return result;
+		}
 	}
 }
