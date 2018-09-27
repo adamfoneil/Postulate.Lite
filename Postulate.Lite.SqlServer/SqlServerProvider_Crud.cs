@@ -25,7 +25,7 @@ namespace Postulate.Lite.SqlServer
 			var type = typeof(T);
 			var props = _integrator.GetMappedColumns(type);
 			var columns = props.Select(pi => new ColumnInfo(pi));
-			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {whereClause}";
+			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} WHERE {whereClause}";
 		}
 
 		protected override string InsertCommand<T>()
@@ -33,24 +33,18 @@ namespace Postulate.Lite.SqlServer
 			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Insert);
 			string columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
 			string valueList = string.Join(", ", columns.Select(c => $"@{c.PropertyName}"));
-			return $"INSERT INTO {ApplyDelimiter(TableName(typeof(T)))} ({columnList}) OUTPUT [inserted].[{typeof(T).GetIdentityName()}] VALUES ({valueList});";
+			return $"INSERT INTO {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} ({columnList}) OUTPUT [inserted].[{typeof(T).GetIdentityName()}] VALUES ({valueList});";
 		}
 
 		protected override string UpdateCommand<T>()
 		{
 			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Update);
-			return $"UPDATE {ApplyDelimiter(TableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
+			return $"UPDATE {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
 		protected override string DeleteCommand<T>()
 		{
-			return $"DELETE {ApplyDelimiter(TableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
-		}
-
-		public override string TableName(Type modelType)
-		{
-			var tbl = GetTableInfo(modelType);
-			return $"{tbl.Schema}.{tbl.Name}";
+			return $"DELETE {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
 		private string UniqueIdSyntax(string constraintName, PropertyInfo propertyInfo)

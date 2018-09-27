@@ -85,13 +85,7 @@ namespace Postulate.Lite.Core
 		/// </summary>
 		public abstract string DropColumnCommand(ColumnInfo columnInfo);
 
-		#endregion command methods
-
-		#region reflection methods
-
-		public abstract TableInfo GetTableInfo(Type modelType);
-
-		#endregion reflection methods
+		#endregion command methods		
 
 		#region schema inspection
 

@@ -17,7 +17,13 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Specifies the types and corresponding SQL syntax for CLR types supported in your ORM mapping
 		/// </summary>
-		public abstract Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0);		
+		public abstract Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
+
+		public abstract string DefaultSchema { get; }
+
+		public abstract TableInfo GetTableInfo(Type type);
+
+		public abstract string GetTableName(Type type);
 
 		public SqlTypeInfo FindTypeInfo(Type type)
 		{

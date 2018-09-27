@@ -70,11 +70,6 @@ namespace Postulate.Lite.Core
 		protected abstract string ApplyDelimiter(string name);
 
 		/// <summary>
-		/// Gets the database table name for a given model class
-		/// </summary>
-		public abstract string TableName(Type modelType);
-
-		/// <summary>
 		/// Generates the syntax for column definition with a CREATE TABLE statement
 		/// </summary>
 		protected abstract string SqlColumnSyntax(PropertyInfo propertyInfo, bool isIdentity);
@@ -225,7 +220,7 @@ namespace Postulate.Lite.Core
 				return $"{ApplyDelimiter(pi.GetColumnName())}=@{propName}";
 			}));
 
-			string cmdText = $"UPDATE {ApplyDelimiter(TableName(type))} SET {setColumnExpr} WHERE {ApplyDelimiter(type.GetIdentityName())}=@id";
+			string cmdText = $"UPDATE {ApplyDelimiter(_integrator.GetTableName(type))} SET {setColumnExpr} WHERE {ApplyDelimiter(type.GetIdentityName())}=@id";
 			dp.Add("id", GetIdentity(@object));
 
 			return new CommandDefinition(cmdText, dp);

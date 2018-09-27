@@ -22,11 +22,6 @@ namespace Postulate.Lite.MySql
 			return $"`{name}`";
 		}
 
-		public override TableInfo GetTableInfo(Type modelType)
-		{
-			throw new NotImplementedException();
-		}
-
 		public override bool IsTableEmpty(IDbConnection connection, Type modelType)
 		{
 			throw new NotImplementedException();
@@ -37,7 +32,7 @@ namespace Postulate.Lite.MySql
 			var type = typeof(T);
 			var props = _integrator.GetMappedColumns(type);
 			var columns = props.Select(pi => new ColumnInfo(pi));
-			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {whereClause}";
+			return $"SELECT {string.Join(", ", columns.Select(col => ApplyDelimiter(col.ColumnName)))} FROM {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} WHERE {whereClause}";
 		}
 
 		protected override string InsertCommand<T>()
@@ -45,18 +40,18 @@ namespace Postulate.Lite.MySql
 			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Insert);
 			string columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
 			string valueList = string.Join(", ", columns.Select(c => $"@{c.PropertyName}"));
-			return $"INSERT INTO {ApplyDelimiter(TableName(typeof(T)))} ({columnList}) VALUES ({valueList}); SELECT LAST_INSERT_ID()";
+			return $"INSERT INTO {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} ({columnList}) VALUES ({valueList}); SELECT LAST_INSERT_ID()";
 		}
 
 		protected override string UpdateCommand<T>()
 		{
 			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Update);
-			return $"UPDATE {ApplyDelimiter(TableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
+			return $"UPDATE {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} SET {string.Join(", ", columns.Select(col => $"{ApplyDelimiter(col.ColumnName)}=@{col.PropertyName}"))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
 		protected override string DeleteCommand<T>()
 		{
-			return $"DELETE FROM {ApplyDelimiter(TableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
+			return $"DELETE FROM {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
 		protected override string SqlColumnSyntax(PropertyInfo propertyInfo, bool isIdentity)
@@ -89,18 +84,6 @@ namespace Postulate.Lite.MySql
 			return result;
 		}
 
-		public override string TableName(Type modelType)
-		{
-			string result = modelType.Name;
-
-			var tblAttr = modelType.GetCustomAttribute<TableAttribute>();
-			if (tblAttr != null && !string.IsNullOrEmpty(tblAttr.Name))
-			{
-				result = tblAttr.Name;
-			}
-
-			return result;
-		}
 
 		public override string AddColumnCommand(ColumnInfo columnInfo)
 		{

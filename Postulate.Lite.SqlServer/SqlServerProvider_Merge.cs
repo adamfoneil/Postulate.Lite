@@ -29,38 +29,20 @@ namespace Postulate.Lite.SqlServer
 			return connection.Exists("[sys].[schemas] WHERE [name]=@name", new { name = schemaName });
 		}
 
-		public override TableInfo GetTableInfo(Type modelType)
-		{
-			Dictionary<string, string> parts = new Dictionary<string, string>()
-			{
-				{ "schema", DefaultSchema },
-				{ "name", modelType.Name }
-			};
-
-			var tblAttr = modelType.GetCustomAttribute<TableAttribute>();
-			if (tblAttr != null)
-			{
-				if (!string.IsNullOrEmpty(tblAttr.Schema)) parts["schema"] = tblAttr.Schema;
-				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
-			}
-
-			return new TableInfo() { Name = parts["name"], Schema = parts["schema"], ModelType = modelType };
-		}
-
 		public override void MapProviderSpecificInfo(PropertyInfo pi, ColumnInfo col)
 		{
 			var fkAttr = pi.GetCustomAttribute<ReferencesAttribute>();
 			if (fkAttr != null)
 			{
 				Type referencedType = fkAttr.PrimaryType;
-				TableInfo tbl = GetTableInfo(referencedType);
+				TableInfo tbl = _integrator.GetTableInfo(referencedType);
 				col.ForeignKeyInfo = new ForeignKeyInfo();
 				col.ReferencedSchema = tbl.Schema;
 				col.ReferencedTable = tbl.Name;
 				col.ReferencedColumn = referencedType.GetIdentityName();
 			}
 
-			col.TableInfo = GetTableInfo(pi.DeclaringType);
+			col.TableInfo = _integrator.GetTableInfo(pi.DeclaringType);
 		}
 
 		public override bool IsTableEmpty(IDbConnection connection, Type modelType)
@@ -74,7 +56,7 @@ namespace Postulate.Lite.SqlServer
 			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
 			var identityName = modelType.GetIdentityName();
 
-			string constraintName = TableName(modelType).Replace(".", "_");
+			string constraintName = _integrator.GetTableName(modelType).Replace(".", "_");
 
 			List<string> members = new List<string>();
 			members.AddRange(columns.Select(pi => SqlColumnSyntax(pi, (identityName.Equals(pi.Name)))));
@@ -82,7 +64,7 @@ namespace Postulate.Lite.SqlServer
 			if (!identityIsPrimaryKey) members.Add(UniqueIdSyntax(constraintName, modelType.GetIdentityProperty()));
 
 			return
-				$"CREATE TABLE {ApplyDelimiter(TableName(modelType))} (" +
+				$"CREATE TABLE {ApplyDelimiter(_integrator.GetTableName(modelType))} (" +
 					string.Join(",\r\n\t", members) +
 				")";
 		}

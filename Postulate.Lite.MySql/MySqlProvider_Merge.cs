@@ -28,7 +28,7 @@ namespace Postulate.Lite.MySql
 			if (!identityIsPrimaryKey) members.Add(UniqueIdSyntax(modelType.GetIdentityProperty()));
 
 			return
-				$"CREATE TABLE {ApplyDelimiter(TableName(modelType))} (" +
+				$"CREATE TABLE {ApplyDelimiter(_integrator.GetTableName(modelType))} (" +
 					string.Join(",\r\n\t", members) +
 				")";
 		}

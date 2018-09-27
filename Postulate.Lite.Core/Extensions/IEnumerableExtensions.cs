@@ -33,8 +33,8 @@ namespace Postulate.Lite.Core.Extensions
 		}
 
 		private static DataTable DataTableFromType(Type type, SqlIntegrator integrator, out PropertyInfo[] properties)
-		{
-			DataTable result = new DataTable();
+		{						
+			DataTable result = new DataTable(integrator.GetTableName(type));
 			properties = integrator.GetMappedColumns(type).ToArray();
 			var identityProp = type.GetIdentityProperty();
 

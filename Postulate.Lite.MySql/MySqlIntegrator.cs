@@ -1,11 +1,16 @@
 ﻿using Postulate.Lite.Core;
+using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 
 namespace Postulate.Lite.MySql
 {
 	public class MySqlIntegrator : SqlIntegrator
 	{
+		public override string DefaultSchema => string.Empty;
+
 		public override Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0)
 		{
 			return new Dictionary<Type, SqlTypeInfo>()
@@ -24,6 +29,24 @@ namespace Postulate.Lite.MySql
 				{ typeof(char), new SqlTypeInfo("char(1)") },
 				{ typeof(byte[]), new SqlTypeInfo("varbinary", $"varbinary({length})") }
 			};
+		}
+
+		public override TableInfo GetTableInfo(Type type)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override string GetTableName(Type type)
+		{
+			string result = type.Name;
+
+			var tblAttr = type.GetCustomAttribute<TableAttribute>();
+			if (tblAttr != null && !string.IsNullOrEmpty(tblAttr.Name))
+			{
+				result = tblAttr.Name;
+			}
+
+			return result;
 		}
 	}
 }
