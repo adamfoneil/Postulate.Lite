@@ -15,9 +15,9 @@ namespace Postulate.Lite.Core.Extensions
 
 	public static class IEnumerableExtensions
 	{
-		public static DataTable ToDataTable<T>(this IEnumerable<T> enumerable, SqlIntegrator integrator) where T : class
+		public static DataTable ToDataTable<T>(this IEnumerable<T> enumerable, SqlIntegrator integrator, bool excludeIdentity = false) where T : class
 		{
-			DataTable result = DataTableFromType(typeof(T), integrator, out PropertyInfo[] properties);
+			DataTable result = DataTableFromType(typeof(T), integrator, excludeIdentity, properties: out PropertyInfo[] properties);
 			foreach (T item in enumerable) result.Rows.Add(ValuesFromItem(properties, result, item));
 			return result;
 		}
@@ -32,11 +32,15 @@ namespace Postulate.Lite.Core.Extensions
 			return values;
 		}
 
-		private static DataTable DataTableFromType(Type type, SqlIntegrator integrator, out PropertyInfo[] properties)
+		private static DataTable DataTableFromType(Type type, SqlIntegrator integrator, bool excludeIdentity, out PropertyInfo[] properties)
 		{						
 			DataTable result = new DataTable(integrator.GetTableName(type));
 			properties = integrator.GetMappedColumns(type).ToArray();
-			var identityProp = type.GetIdentityProperty();
+			if (excludeIdentity)
+			{
+				var identityProp = type.GetIdentityProperty();
+				if (identityProp != null) properties = properties.Except(new PropertyInfo[] { identityProp }).ToArray();
+			}
 
 			List<DataColumn> pkColumns = new List<DataColumn>();
 			foreach (PropertyInfo pi in properties)

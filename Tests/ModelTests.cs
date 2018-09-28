@@ -44,14 +44,27 @@ namespace Tests
 		[TestMethod]
 		public void OrgsToDataTable()
 		{
-			var orgs = new Organization[]
+			Organization[] orgs = GetSampleOrgs();
+			var table = orgs.ToDataTable(new SqlServerIntegrator());
+			Assert.IsTrue(table.Rows.Count == 3 && table.PrimaryKey.Length == 1 && table.TableName.Equals("dbo.Organization"));
+		}
+
+		[TestMethod]
+		public void OrgsExcludeIdentity()
+		{
+			var orgs = GetSampleOrgs();
+			var table = orgs.ToDataTable(new SqlServerIntegrator(), true);
+			Assert.IsTrue(table.Columns.Count == 2);
+		}
+
+		private static Organization[] GetSampleOrgs()
+		{
+			return new Organization[]
 			{
 				new Organization() { Name = "Whatever" },
 				new Organization() { Name = "Yes"},
 				new Organization() { Name = "Gonglethredix" }
 			};
-			var table = orgs.ToDataTable(new SqlServerIntegrator());
-			Assert.IsTrue(table.Rows.Count == 3 && table.PrimaryKey.Length == 1 && table.TableName.Equals("dbo.Organization"));
 		}
 	}
 }
