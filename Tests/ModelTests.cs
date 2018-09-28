@@ -38,7 +38,7 @@ namespace Tests
 				new EmployeeInt() { FirstName = "Roan", LastName = "Hastenmeyer", HireDate = new DateTime(2009, 1, 1) }
 			};
 			var table = employees.ToDataTable(new SqlServerIntegrator());
-			Assert.IsTrue(table.Rows.Count == 2);
+			Assert.IsTrue(table.Rows.Count == 2 && table.TableName.Equals("dbo.Employee"));
 		}
 
 		[TestMethod]
@@ -51,7 +51,7 @@ namespace Tests
 				new Organization() { Name = "Gonglethredix" }
 			};
 			var table = orgs.ToDataTable(new SqlServerIntegrator());
-			Assert.IsTrue(table.Rows.Count == 3 && table.PrimaryKey.Length == 1);
+			Assert.IsTrue(table.Rows.Count == 3 && table.PrimaryKey.Length == 1 && table.TableName.Equals("dbo.Organization"));
 		}
 	}
 }
