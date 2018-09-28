@@ -1,4 +1,5 @@
 ﻿using Postulate.Lite.Core;
+using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -52,6 +53,9 @@ namespace Postulate.Lite.SqlServer
 				if (!string.IsNullOrEmpty(tblAttr.Schema)) parts["schema"] = tblAttr.Schema;
 				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
 			}
+
+			var schemaAttr = type.GetCustomAttribute<SchemaAttribute>();
+			if (schemaAttr != null) parts["schema"] = schemaAttr.Name;
 
 			return new TableInfo() { Name = parts["name"], Schema = parts["schema"], ModelType = type };
 		}
