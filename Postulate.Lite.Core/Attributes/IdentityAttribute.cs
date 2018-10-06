@@ -15,13 +15,15 @@ namespace Postulate.Lite.Core.Attributes
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 	public class IdentityAttribute : Attribute
 	{
-		public IdentityAttribute(string propertyName, IdentityPosition position = IdentityPosition.NotSet)
+		public IdentityAttribute(string propertyName, IdentityPosition position = IdentityPosition.NotSet, string constraintName = null)
 		{
 			PropertyName = propertyName;
 			Position = position;
+			ConstraintName = constraintName;
 		}
 
 		public string PropertyName { get; }
 		public IdentityPosition? Position { get; }
+		public string ConstraintName { get; }
 	}
 }
