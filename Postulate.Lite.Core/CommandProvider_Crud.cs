@@ -269,7 +269,9 @@ namespace Postulate.Lite.Core
 			string cmd = UpdateCommand<TModel>();
 			try
 			{
+				var changes = GetChanges(connection, @object);
 				connection.Execute(cmd, @object);
+				SaveChanges(connection, changes);
 			}
 			catch (Exception exc)
 			{
@@ -299,7 +301,9 @@ namespace Postulate.Lite.Core
 			string cmd = UpdateCommand<TModel>();
 			try
 			{
+				var changes = await GetChangesAsync(connection, @object);
 				await connection.ExecuteAsync(cmd, @object);
+				await SaveChangesAsync(connection, changes);
 			}
 			catch (Exception exc)
 			{
