@@ -192,19 +192,23 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Performs a SQL update on select properties of an object
 		/// </summary>
-		public void Update<TModel>(IDbConnection connection, TModel @object, params Expression<Func<TModel, object>>[] setColumns)
+		public void Update<TModel>(IDbConnection connection, TModel @object, IUser user, params Expression<Func<TModel, object>>[] setColumns)
 		{
+			var changes = GetChanges(connection, @object);
 			CommandDefinition cmd = GetSetColumnsUpdateCommand(@object, setColumns);
 			connection.Execute(cmd);
+			SaveChanges<TModel>(connection, changes, user);
 		}
 
 		/// <summary>
 		/// Performs a SQL update on select properties of an object
 		/// </summary>
-		public async Task UpdateAsync<TModel>(IDbConnection connection, TModel @object, params Expression<Func<TModel, object>>[] setColumns)
+		public async Task UpdateAsync<TModel>(IDbConnection connection, TModel @object, IUser user, params Expression<Func<TModel, object>>[] setColumns)
 		{
+			var changes = await GetChangesAsync(connection, @object);
 			CommandDefinition cmd = GetSetColumnsUpdateCommand(@object, setColumns);
 			await connection.ExecuteAsync(cmd);
+			await SaveChangesAsync<TModel>(connection, changes, user);
 		}
 
 		private CommandDefinition GetSetColumnsUpdateCommand<TModel>(TModel @object, Expression<Func<TModel, object>>[] setColumns)
@@ -271,7 +275,7 @@ namespace Postulate.Lite.Core
 			{
 				var changes = GetChanges(connection, @object);
 				connection.Execute(cmd, @object);
-				SaveChanges(connection, changes);
+				SaveChanges<TModel>(connection, changes, user);
 			}
 			catch (Exception exc)
 			{
@@ -303,7 +307,7 @@ namespace Postulate.Lite.Core
 			{
 				var changes = await GetChangesAsync(connection, @object);
 				await connection.ExecuteAsync(cmd, @object);
-				await SaveChangesAsync(connection, changes);
+				await SaveChangesAsync<TModel>(connection, changes, user);
 			}
 			catch (Exception exc)
 			{

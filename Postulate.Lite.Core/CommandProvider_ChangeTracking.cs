@@ -1,5 +1,7 @@
-﻿using Postulate.Lite.Core.Attributes;
+﻿using Dapper;
+using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
+using Postulate.Lite.Core.Interfaces;
 using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -44,14 +46,25 @@ namespace Postulate.Lite.Core
 			return null;
 		}
 
-		private async Task SaveChangesAsync(IDbConnection connection, IEnumerable<PropertyChange> changes)
+		private async Task SaveChangesAsync<TModel>(IDbConnection connection, IEnumerable<PropertyChange> changes, IUser user)
 		{
+			if (user == null) return;
 			if (!changes?.Any() ?? false) return;
+
+			VerifyChangeTrackingObjects(connection, typeof(TModel));
 		}
 
-		private void SaveChanges(IDbConnection connection, IEnumerable<PropertyChange> changes)
+		private void SaveChanges<TModel>(IDbConnection connection, IEnumerable<PropertyChange> changes, IUser user)
 		{
+			if (user == null) return;
 			if (!changes?.Any() ?? false) return;
+
+			VerifyChangeTrackingObjects(connection, typeof(TModel));
+		}
+
+		private void VerifyChangeTrackingObjects(IDbConnection connection, Type type)
+		{
+			throw new NotImplementedException();
 		}
 
 		private IEnumerable<PropertyChange> GetPropertyChanges<TModel>(IDbConnection connection, TModel currentRecord, TModel newRecord, string[] ignoreProperties)
@@ -62,14 +75,24 @@ namespace Postulate.Lite.Core
 				.Select(col => new PropertyChange()
 				{
 					PropertyName = col.PropertyName,
-					OldValue = OnGetChangesPropertyValue(col.PropertyInfo, currentRecord, connection),
-					NewValue = OnGetChangesPropertyValue(col.PropertyInfo, newRecord, connection)
+					OldValue = GetPropertyValue(connection, col.PropertyInfo, currentRecord),
+					NewValue = GetPropertyValue(connection, col.PropertyInfo, newRecord)
 				}).Where(pc => pc.IsChanged());
 		}
-
-		protected virtual object OnGetChangesPropertyValue<TModel>(PropertyInfo propertyInfo, TModel record, IDbConnection connection)
+		
+		private object GetPropertyValue<TModel>(IDbConnection connection, PropertyInfo propertyInfo, TModel record)
 		{
-			return propertyInfo.GetValue(record);
+			object result = propertyInfo.GetValue(record);
+			if (result == null) return null;
+
+			var lookupQuery = propertyInfo.GetAttribute<ForeignKeyLookupAttribute>();
+			if (lookupQuery != null)
+			{
+				var lookup = connection.QuerySingleOrDefault<ForeignKeyLookup>(lookupQuery.Query, new { id = result });
+				if (lookup != null) result = lookup.Text;
+			}
+
+			return result;
 		}
 	}
 }

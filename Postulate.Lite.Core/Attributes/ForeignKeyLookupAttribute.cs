@@ -1,0 +1,20 @@
+﻿using System;
+
+namespace Postulate.Lite.Core.Attributes
+{
+	/// <summary>
+	/// Defines the query to execute to lookup the text value that maps to a foreign key value during <see cref="CommandProvider{TKey}.GetChanges{TModel}(System.Data.IDbConnection, TModel)"/>	
+	/// Query must accept an @id parameter that represents the FK value, and return a <see cref="Models.ForeignKeyLookup"/> model
+	/// Example: SELECT [Text] FROM [dbo].[Whatever] WHERE [Id]=@id
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+	public class ForeignKeyLookupAttribute : Attribute
+	{
+		public ForeignKeyLookupAttribute(string query)
+		{
+			Query = query;
+		}
+
+		public string Query { get; }
+	}
+}

@@ -140,7 +140,7 @@ namespace Tests
 			{
 				var e = provider.Find<EmployeeInt>(cn, 5);
 				e.FirstName = name;
-				provider.Update(cn, e, r => r.FirstName);
+				provider.Update(cn, e, null, r => r.FirstName);
 
 				e = provider.Find<EmployeeInt>(cn, 5);
 				Assert.IsTrue(e.FirstName.Equals(name));
@@ -178,7 +178,7 @@ namespace Tests
 			{
 				var e = await provider.FindAsync<EmployeeInt>(cn, 5);
 				e.FirstName = name;
-				await provider.UpdateAsync(cn, e, r => r.FirstName);
+				await provider.UpdateAsync(cn, e, null, r => r.FirstName);
 
 				e = await provider.FindAsync<EmployeeInt>(cn, 5);
 				Assert.IsTrue(e.FirstName.Equals(name));

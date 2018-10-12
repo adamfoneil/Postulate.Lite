@@ -93,14 +93,14 @@ namespace Postulate.Lite.SqlServer.LongKey
 			await GetProvider().UpdateAsync(connection, @object, user);
 		}
 
-		public static void Update<TModel>(this IDbConnection connection, TModel @object, params Expression<Func<TModel, object>>[] setColumns)
+		public static void Update<TModel>(this IDbConnection connection, TModel @object, IUser user, params Expression<Func<TModel, object>>[] setColumns)
 		{
-			GetProvider().Update(connection, @object, setColumns);
+			GetProvider().Update(connection, @object, user, setColumns);
 		}
 
-		public async static Task UpdateAsync<TModel>(this IDbConnection connection, TModel @object, params Expression<Func<TModel, object>>[] setColumns)
+		public async static Task UpdateAsync<TModel>(this IDbConnection connection, TModel @object, IUser user, params Expression<Func<TModel, object>>[] setColumns)
 		{
-			await GetProvider().UpdateAsync(connection, @object, setColumns);
+			await GetProvider().UpdateAsync(connection, @object, user, setColumns);
 		}
 
 		public static void Delete<TModel>(this IDbConnection connection, int id, IUser user = null)
