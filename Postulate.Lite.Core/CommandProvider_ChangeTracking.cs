@@ -35,7 +35,7 @@ namespace Postulate.Lite.Core
 			if (IsTrackingChanges<TModel>(out string[] ignoreProperties))
 			{
 				var existing = await FindAsync<TModel>(connection, GetIdentity(@object));
-				if (existing != null) return GetPropertyChanges(connection, existing, @object, ignoreProperties);
+				if (existing != null) return GetPropertyChanges(connection, existing, @object, ignoreProperties).ToArray();
 			}
 			return null;
 		}
@@ -45,14 +45,13 @@ namespace Postulate.Lite.Core
 			if (IsTrackingChanges<TModel>(out string[] ignoreProperties))
 			{
 				var existing = Find<TModel>(connection, GetIdentity(@object));
-				if (existing != null) return GetPropertyChanges(connection, existing, @object, ignoreProperties);
+				if (existing != null) return GetPropertyChanges(connection, existing, @object, ignoreProperties).ToArray();
 			}
 			return null;
 		}
 
 		private async Task SaveChangesAsync<TModel>(IDbConnection connection, TKey identity, IEnumerable<PropertyChange> changes, IUser user)
-		{
-			if (user == null) return;
+		{			
 			if (!changes?.Any() ?? false) return;
 
 			VerifyChangeTrackingObjects<TModel>(connection);
@@ -93,8 +92,7 @@ namespace Postulate.Lite.Core
 		}
 
 		private void SaveChanges<TModel>(IDbConnection connection, TKey identity, IEnumerable<PropertyChange> changes, IUser user)
-		{
-			if (user == null) return;
+		{			
 			if (!changes?.Any() ?? false) return;
 
 			VerifyChangeTrackingObjects<TModel>(connection);

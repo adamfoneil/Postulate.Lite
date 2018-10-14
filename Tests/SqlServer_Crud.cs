@@ -10,7 +10,7 @@ using System.Data.SqlClient;
 namespace Tests.SqlServer
 {
 	[TestClass]
-	public class SqlServerCrud : CrudBase
+	public partial class TestSqlServer : TestBase
 	{
 		protected override IDbConnection GetConnection()
 		{

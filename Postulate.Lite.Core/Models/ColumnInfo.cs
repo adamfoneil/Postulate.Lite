@@ -11,7 +11,7 @@ namespace Postulate.Lite.Core.Models
 	{
 		public ColumnInfo(PropertyInfo propertyInfo)
 		{
-			PropertyInfo = PropertyInfo;
+			PropertyInfo = propertyInfo;
 			PropertyName = propertyInfo.Name;
 			ColumnName = propertyInfo.Name;
 			AllowNull = propertyInfo.PropertyType.IsNullable();

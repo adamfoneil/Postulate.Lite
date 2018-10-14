@@ -10,7 +10,7 @@ using System.Data;
 namespace Tests.MySql
 {
 	[TestClass]
-	public class MySqlCrud : CrudBase
+	public class MySqlCrud : TestBase
 	{
 		protected override IDbConnection GetConnection()
 		{

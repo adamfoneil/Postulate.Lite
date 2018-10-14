@@ -11,7 +11,7 @@ using Tests.Queries;
 
 namespace Tests
 {
-	public abstract class CrudBase
+	public abstract partial class TestBase
 	{
 		protected abstract IDbConnection GetConnection();
 
