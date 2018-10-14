@@ -50,6 +50,7 @@
     <Compile Include="IntKey\ConnectionExtensions.cs" />
     <Compile Include="LongKey\ConnectionExtensions.cs" />
     <Compile Include="SqlServerIntegrator.cs" />
+    <Compile Include="SqlServerProvider_ChangeTracking.cs" />
     <Compile Include="SqlServerProvider_Crud.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServerProvider_Merge.cs" />

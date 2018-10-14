@@ -26,6 +26,10 @@ namespace Postulate.Lite.Core
 			return true;
 		}
 
+		protected abstract bool SchemaExists(IDbConnection connection, TableInfo table);
+		protected abstract bool TableExists(IDbConnection connection, TableInfo table);
+		protected abstract string CreateTableScript(TableInfo table, Type modelType);
+
 		private async Task<IEnumerable<PropertyChange>> GetChangesAsync<TModel>(IDbConnection connection, TModel @object)
 		{			
 			if (IsTrackingChanges<TModel>(out string[] ignoreProperties))
@@ -46,25 +50,91 @@ namespace Postulate.Lite.Core
 			return null;
 		}
 
-		private async Task SaveChangesAsync<TModel>(IDbConnection connection, IEnumerable<PropertyChange> changes, IUser user)
+		private async Task SaveChangesAsync<TModel>(IDbConnection connection, TKey identity, IEnumerable<PropertyChange> changes, IUser user)
 		{
 			if (user == null) return;
 			if (!changes?.Any() ?? false) return;
 
-			VerifyChangeTrackingObjects(connection, typeof(TModel));
+			VerifyChangeTrackingObjects<TModel>(connection);
+
+			int version = await GetNextRecordVersionAsync<TModel>(connection);
+
+			foreach (var change in changes)
+			{
+				PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
+				await InsertAsync(connection, history);
+			}
 		}
 
-		private void SaveChanges<TModel>(IDbConnection connection, IEnumerable<PropertyChange> changes, IUser user)
+		private static PropertyChangeHistory<TKey> GetChangeHistoryRecord(TKey identity, IUser user, int version, PropertyChange change)
 		{
-			if (user == null) return;
-			if (!changes?.Any() ?? false) return;
-
-			VerifyChangeTrackingObjects(connection, typeof(TModel));
+			return new PropertyChangeHistory<TKey>()
+			{
+				RecordId = identity,
+				Version = version,
+				ColumnName = change.PropertyName,
+				UserName = user?.UserName ?? "<unknown>",
+				DateTime = user?.LocalTime ?? DateTime.UtcNow,
+				OldValue = CleanMinDate(change.OldValue)?.ToString() ?? "<null>",
+				NewValue = CleanMinDate(change.NewValue)?.ToString() ?? "<null>"
+			};
 		}
 
-		private void VerifyChangeTrackingObjects(IDbConnection connection, Type type)
+		private static object CleanMinDate(object value)
+		{
+			// prevents DateTime.MinValue from getting passed to SQL Server as a parameter, where it fails
+			if (value is DateTime && value.Equals(default(DateTime))) return null;
+			return value;
+		}
+
+		private Task<int> GetNextRecordVersionAsync<TModel>(IDbConnection connection)
 		{
 			throw new NotImplementedException();
+		}
+
+		private void SaveChanges<TModel>(IDbConnection connection, TKey identity, IEnumerable<PropertyChange> changes, IUser user)
+		{
+			if (user == null) return;
+			if (!changes?.Any() ?? false) return;
+
+			VerifyChangeTrackingObjects<TModel>(connection);
+
+			int version = GetNextRecordVersion<TModel>(connection);
+
+			foreach (var change in changes)
+			{
+				PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
+				Insert(connection, history);
+			}
+		}
+
+		private int GetNextRecordVersion<TModel>(IDbConnection connection)
+		{
+			throw new NotImplementedException();
+		}
+
+		private void VerifyChangeTrackingObjects<TModel>(IDbConnection connection)
+		{
+			var table = _integrator.GetTableInfo(typeof(TModel));
+
+			const string changesSchema = "changes";
+
+			if (!SchemaExists(connection, changesSchema)) connection.Execute(CreateSchemaCommand(changesSchema));
+			
+			TableInfo historyTbl = new TableInfo(changesSchema, $"{table.Schema}_{table.Name}_History");
+			CreateTableIfNotExists(connection, historyTbl, typeof(PropertyChangeHistory<TKey>));
+
+			TableInfo versionTbl = new TableInfo(changesSchema, $"{table.Schema}_{table.Name}_Version");
+			CreateTableIfNotExists(connection, versionTbl, typeof(RowVersion<TKey>));
+		}
+
+		private void CreateTableIfNotExists(IDbConnection connection, TableInfo table, Type modelType)
+		{
+			if (!TableExists(connection, table))
+			{
+				var script = CreateTableScript(table, modelType);
+				connection.Execute(script);
+			}
 		}
 
 		private IEnumerable<PropertyChange> GetPropertyChanges<TModel>(IDbConnection connection, TModel currentRecord, TModel newRecord, string[] ignoreProperties)

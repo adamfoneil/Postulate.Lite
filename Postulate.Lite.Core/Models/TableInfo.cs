@@ -35,6 +35,11 @@ namespace Postulate.Lite.Core.Models
 			return false;
 		}
 
+		public override string ToString()
+		{
+			return $"{Schema}.{Name}";
+		}
+
 		public override int GetHashCode()
 		{
 			return Schema.GetHashCode() + Name.GetHashCode();

@@ -5,7 +5,6 @@ using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -50,23 +49,29 @@ namespace Postulate.Lite.SqlServer
 			throw new NotImplementedException();
 		}
 
-		public override string CreateTableCommand(Type modelType)
+		protected string CreateTableCommandInner(Type modelType, string tableName)
 		{
+			string constraintName = tableName.Replace(".", "_");
+
 			var columns = _integrator.GetMappedColumns(modelType);
 			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
 			var identityName = modelType.GetIdentityName();
-
-			string constraintName = _integrator.GetTableName(modelType).Replace(".", "_");
-
+			
 			List<string> members = new List<string>();
 			members.AddRange(columns.Select(pi => SqlColumnSyntax(pi, (identityName.Equals(pi.Name)))));
 			members.Add(PrimaryKeySyntax(constraintName, pkColumns));
 			if (!identityIsPrimaryKey) members.Add(UniqueIdSyntax(constraintName, modelType.GetIdentityProperty()));
 
 			return
-				$"CREATE TABLE {ApplyDelimiter(_integrator.GetTableName(modelType))} (" +
+				$"CREATE TABLE {ApplyDelimiter(tableName)} (" +
 					string.Join(",\r\n\t", members) +
 				")";
+		}
+
+		public override string CreateTableCommand(Type modelType)
+		{			
+			string tableName = _integrator.GetTableName(modelType);					
+			return CreateTableCommandInner(modelType, tableName);
 		}
 
 		public override string AddForeignKeyCommand(PropertyInfo propertyInfo)

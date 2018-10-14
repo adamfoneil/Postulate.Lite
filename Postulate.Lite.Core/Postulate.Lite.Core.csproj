@@ -77,6 +77,8 @@
     <Compile Include="CommandProvider_Crud.cs" />
     <Compile Include="Models\ForeignKeyLookup.cs" />
     <Compile Include="Models\PropertyChange.cs" />
+    <Compile Include="Models\PropertyChangeHistory.cs" />
+    <Compile Include="Models\RowVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="Record.cs" />
