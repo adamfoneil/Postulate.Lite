@@ -197,7 +197,7 @@ namespace Postulate.Lite.Core
 			var changes = GetChanges(connection, @object);
 			CommandDefinition cmd = GetSetColumnsUpdateCommand(@object, setColumns);
 			connection.Execute(cmd);
-			SaveChanges<TModel>(connection, changes, user);
+			SaveChanges<TModel>(connection, GetIdentity(@object), changes, user);
 		}
 
 		/// <summary>
@@ -208,7 +208,7 @@ namespace Postulate.Lite.Core
 			var changes = await GetChangesAsync(connection, @object);
 			CommandDefinition cmd = GetSetColumnsUpdateCommand(@object, setColumns);
 			await connection.ExecuteAsync(cmd);
-			await SaveChangesAsync<TModel>(connection, changes, user);
+			await SaveChangesAsync<TModel>(connection, GetIdentity(@object), changes, user);
 		}
 
 		private CommandDefinition GetSetColumnsUpdateCommand<TModel>(TModel @object, Expression<Func<TModel, object>>[] setColumns)
@@ -275,7 +275,7 @@ namespace Postulate.Lite.Core
 			{
 				var changes = GetChanges(connection, @object);
 				connection.Execute(cmd, @object);
-				SaveChanges<TModel>(connection, changes, user);
+				SaveChanges<TModel>(connection, GetIdentity(@object), changes, user);
 			}
 			catch (Exception exc)
 			{
@@ -307,7 +307,7 @@ namespace Postulate.Lite.Core
 			{
 				var changes = await GetChangesAsync(connection, @object);
 				await connection.ExecuteAsync(cmd, @object);
-				await SaveChangesAsync<TModel>(connection, changes, user);
+				await SaveChangesAsync<TModel>(connection, GetIdentity(@object), changes, user);
 			}
 			catch (Exception exc)
 			{

@@ -122,5 +122,20 @@ namespace Postulate.Lite.MySql
 		{
 			throw new NotImplementedException();
 		}
+
+		protected override string CreateTableScript(TableInfo table, Type modelType)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override bool SchemaExists(IDbConnection connection, TableInfo table)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override bool TableExists(IDbConnection connection, TableInfo table)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
