@@ -49,18 +49,29 @@ namespace Postulate.Lite.SqlServer
 			throw new NotImplementedException();
 		}
 
-		protected string CreateTableCommandInner(Type modelType, string tableName)
+		protected string CreateTableCommandInner(Type modelType, string tableName, bool requireIdentity = true)
 		{
 			string constraintName = tableName.Replace(".", "_");
 
 			var columns = _integrator.GetMappedColumns(modelType);
 			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
-			var identityName = modelType.GetIdentityName();
-			
+
+			string identityName = null;
+			bool hasIdentity = false;
+			if (requireIdentity)
+			{
+				identityName = modelType.GetIdentityName();
+				hasIdentity = true;
+			}
+			else
+			{
+				identityName = modelType.TryGetIdentityName(string.Empty, ref hasIdentity);
+			}
+						
 			List<string> members = new List<string>();
 			members.AddRange(columns.Select(pi => SqlColumnSyntax(pi, (identityName.Equals(pi.Name)))));
 			members.Add(PrimaryKeySyntax(constraintName, pkColumns));
-			if (!identityIsPrimaryKey) members.Add(UniqueIdSyntax(constraintName, modelType.GetIdentityProperty()));
+			if (!identityIsPrimaryKey && hasIdentity) members.Add(UniqueIdSyntax(constraintName, modelType.GetIdentityProperty()));
 
 			return
 				$"CREATE TABLE {ApplyDelimiter(tableName)} (" +

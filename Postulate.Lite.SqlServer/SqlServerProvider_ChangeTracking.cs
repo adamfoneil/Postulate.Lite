@@ -20,7 +20,7 @@ namespace Postulate.Lite.SqlServer
 
 		protected override string CreateTableScript(TableInfo tableName, Type modelType)
 		{
-			return CreateTableCommandInner(modelType, tableName.ToString());
+			return CreateTableCommandInner(modelType, tableName.ToString(), requireIdentity:false);
 		}
 
 		protected override string SqlSelectNextVersion(string tableName)

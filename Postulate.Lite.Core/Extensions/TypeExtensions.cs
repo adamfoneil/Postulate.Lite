@@ -35,6 +35,21 @@ namespace Postulate.Lite.Core.Extensions
 			return GetColumnName(property);
 		}
 
+		public static string TryGetIdentityName(this Type type, string defaultValue, ref bool hasIdentity)
+		{
+			try
+			{
+				string result = GetIdentityName(type);
+				hasIdentity = true;
+				return result;
+			}
+			catch
+			{
+				hasIdentity = false;
+				return defaultValue;
+			}
+		}
+
 		public static string GetColumnName(this PropertyInfo propertyInfo)
 		{
 			ColumnAttribute attr = propertyInfo.GetCustomAttribute<ColumnAttribute>();
