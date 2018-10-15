@@ -22,5 +22,15 @@ namespace Postulate.Lite.SqlServer
 		{
 			return CreateTableCommandInner(modelType, tableName.ToString());
 		}
+
+		protected override string SqlSelectNextVersion(string tableName)
+		{
+			return $"SELECT MAX([NextVersion]) FROM {tableName} WHERE [RecordId]=@id";
+		}
+
+		protected override string SqlUpdateNextVersion(string tableName)
+		{
+			return $"UPDATE {tableName} SET [NextVersion]=[NextVersion]+1 WHERE [RecordId]=@id";
+		}
 	}
 }

@@ -87,5 +87,15 @@ namespace Postulate.Lite.MySql
 		{
 			throw new NotImplementedException();
 		}
+
+		protected override string SqlSelectNextVersion(string tableName)
+		{
+			return $"SELECT MAX(`NextVersion`) FROM {tableName} WHERE `RecordId`=@id";
+		}
+
+		protected override string SqlUpdateNextVersion(string tableName)
+		{
+			return $"UPDATE `RowVersion` SET `NextVersion`=`NextVersion`+1 WHERE `RecordId`=@id";
+		}
 	}
 }

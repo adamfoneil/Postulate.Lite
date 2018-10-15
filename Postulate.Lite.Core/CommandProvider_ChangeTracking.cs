@@ -26,9 +26,18 @@ namespace Postulate.Lite.Core
 			return true;
 		}
 
+		const string changesSchema = "changes";
+
 		protected abstract bool SchemaExists(IDbConnection connection, TableInfo table);
 		protected abstract bool TableExists(IDbConnection connection, TableInfo table);
 		protected abstract string CreateTableScript(TableInfo table, Type modelType);
+
+		/// <summary>
+		/// Query that returns the max version number for a given RecordId (must use parameter @id)
+		/// </summary>
+		protected abstract string SqlSelectNextVersion(string tableName);
+
+		protected abstract string SqlUpdateNextVersion(string tableName);
 
 		private async Task<IEnumerable<PropertyChange>> GetChangesAsync<TModel>(IDbConnection connection, TModel @object)
 		{			
@@ -50,19 +59,50 @@ namespace Postulate.Lite.Core
 			return null;
 		}
 
-		private async Task SaveChangesAsync<TModel>(IDbConnection connection, TKey identity, IEnumerable<PropertyChange> changes, IUser user)
+		private async Task SaveChangesAsync<TModel>(IDbConnection connection, TModel @object, IEnumerable<PropertyChange> changes, IUser user)
 		{			
 			if (!changes?.Any() ?? false) return;
 
-			VerifyChangeTrackingObjects<TModel>(connection);
+			var trackedRecord = @object as ITrackedRecord;
+			bool useHistoryTable = trackedRecord?.UseDefaultHistoryTable ?? true;
+			VerifyChangeTrackingObjects<TModel>(connection, useHistoryTable);
 
-			int version = await GetNextRecordVersionAsync<TModel>(connection);
+			TKey identity = GetIdentity(@object);
+			int version = await IncrementNextRecordVersionAsync<TModel>(connection, identity);
 
-			foreach (var change in changes)
-			{
-				PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
-				await InsertAsync(connection, history);
+			if (useHistoryTable)
+			{				
+				foreach (var change in changes)
+				{
+					PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
+					await InsertAsync(connection, history);
+				}
 			}
+			
+			trackedRecord?.TrackChanges(connection, version, changes, user);
+		}
+
+		private void SaveChanges<TModel>(IDbConnection connection, TModel @object, IEnumerable<PropertyChange> changes, IUser user)
+		{
+			if (!changes?.Any() ?? false) return;
+
+			var trackedRecord = @object as ITrackedRecord;
+			bool useHistoryTable = trackedRecord?.UseDefaultHistoryTable ?? true;
+			VerifyChangeTrackingObjects<TModel>(connection, useHistoryTable);
+
+			TKey identity = GetIdentity(@object);
+			int version = IncrementNextRecordVersion<TModel>(connection, identity);
+
+			if (useHistoryTable)
+			{				
+				foreach (var change in changes)
+				{
+					PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
+					Insert(connection, history);
+				}
+			}
+
+			trackedRecord?.TrackChanges(connection, version, changes, user);
 		}
 
 		private static PropertyChangeHistory<TKey> GetChangeHistoryRecord(TKey identity, IUser user, int version, PropertyChange change)
@@ -86,44 +126,77 @@ namespace Postulate.Lite.Core
 			return value;
 		}
 
-		private Task<int> GetNextRecordVersionAsync<TModel>(IDbConnection connection)
-		{
-			throw new NotImplementedException();
-		}
-
-		private void SaveChanges<TModel>(IDbConnection connection, TKey identity, IEnumerable<PropertyChange> changes, IUser user)
-		{			
-			if (!changes?.Any() ?? false) return;
-
-			VerifyChangeTrackingObjects<TModel>(connection);
-
-			int version = GetNextRecordVersion<TModel>(connection);
-
-			foreach (var change in changes)
-			{
-				PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
-				Insert(connection, history);
-			}
-		}
-
-		private int GetNextRecordVersion<TModel>(IDbConnection connection)
-		{
-			throw new NotImplementedException();
-		}
-
-		private void VerifyChangeTrackingObjects<TModel>(IDbConnection connection)
+		private async Task<int> IncrementNextRecordVersionAsync<TModel>(IDbConnection connection, TKey identity)
 		{
 			var table = _integrator.GetTableInfo(typeof(TModel));
+			var versionTbl = GetVersionTableInfo(table, changesSchema);
 
-			const string changesSchema = "changes";
+			var param = new { id = identity };
+			string tableName = ApplyDelimiter(versionTbl.ToString());
+
+			int result = await connection.QuerySingleOrDefaultAsync<int?>(SqlSelectNextVersion(tableName), param) ?? 0;
+
+			if (result == 0)
+			{
+				RowVersion<TKey> initialVersion = new RowVersion<TKey>()
+				{
+					RecordId = identity,
+					NextVersion = 1
+				};
+				await SaveAsync(connection, initialVersion);
+				result = 1;
+			}
+
+			await connection.ExecuteAsync(SqlUpdateNextVersion(tableName), param);
+
+			return result;
+		}
+
+		private int IncrementNextRecordVersion<TModel>(IDbConnection connection, TKey identity)
+		{
+			var table = _integrator.GetTableInfo(typeof(TModel));
+			var versionTbl = GetVersionTableInfo(table, changesSchema);
+
+			var param = new { id = identity };
+			string tableName = ApplyDelimiter(versionTbl.ToString());
+
+			int result = connection.QuerySingleOrDefault<int?>(SqlSelectNextVersion(tableName), param) ?? 0;
+
+			if (result == 0)
+			{
+				RowVersion<TKey> initialVersion = new RowVersion<TKey>()
+				{
+					RecordId = identity,
+					NextVersion = 1
+				};
+				Save(connection, initialVersion);
+				result = 1;
+			}
+
+			connection.Execute(SqlUpdateNextVersion(tableName), param);
+
+			return result;
+		}
+
+		private void VerifyChangeTrackingObjects<TModel>(IDbConnection connection, bool createHistoryTable)
+		{
+			var targetTable = _integrator.GetTableInfo(typeof(TModel));			
 
 			if (!SchemaExists(connection, changesSchema)) connection.Execute(CreateSchemaCommand(changesSchema));
-			
-			TableInfo historyTbl = new TableInfo(changesSchema, $"{table.Schema}_{table.Name}_History");
-			CreateTableIfNotExists(connection, historyTbl, typeof(PropertyChangeHistory<TKey>));
 
-			TableInfo versionTbl = new TableInfo(changesSchema, $"{table.Schema}_{table.Name}_Version");
+			if (createHistoryTable)
+			{
+				TableInfo historyTbl = new TableInfo(changesSchema, $"{targetTable.Schema}_{targetTable.Name}_History");
+				CreateTableIfNotExists(connection, historyTbl, typeof(PropertyChangeHistory<TKey>));
+			}
+
+			TableInfo versionTbl = GetVersionTableInfo(targetTable, changesSchema);
 			CreateTableIfNotExists(connection, versionTbl, typeof(RowVersion<TKey>));
+		}
+
+		private static TableInfo GetVersionTableInfo(TableInfo table, string changesSchema)
+		{
+			return new TableInfo(changesSchema, $"{table.Schema}_{table.Name}_Version");
 		}
 
 		private void CreateTableIfNotExists(IDbConnection connection, TableInfo table, Type modelType)
