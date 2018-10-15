@@ -32,5 +32,10 @@ namespace Postulate.Lite.SqlServer
 		{
 			return $"UPDATE {tableName} SET [NextVersion]=[NextVersion]+1 WHERE [RecordId]=@id";
 		}
+
+		protected override string SqlInsertRowVersion(string tableName)
+		{
+			return $"INSERT INTO {tableName} ([RecordId], [NextVersion]) VALUES (@recordId, @nextVersion)";
+		}
 	}
 }

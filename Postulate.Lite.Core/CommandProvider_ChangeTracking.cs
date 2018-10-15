@@ -39,6 +39,8 @@ namespace Postulate.Lite.Core
 
 		protected abstract string SqlUpdateNextVersion(string tableName);
 
+		protected abstract string SqlInsertRowVersion(string tableName);
+
 		private async Task<IEnumerable<PropertyChange>> GetChangesAsync<TModel>(IDbConnection connection, TModel @object)
 		{			
 			if (IsTrackingChanges<TModel>(out string[] ignoreProperties))
@@ -98,6 +100,7 @@ namespace Postulate.Lite.Core
 				foreach (var change in changes)
 				{
 					PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
+					// needs to be reworked as ordinary insert since there's not identity property on PropertyChangeHistory
 					Insert(connection, history);
 				}
 			}
@@ -169,7 +172,7 @@ namespace Postulate.Lite.Core
 					RecordId = identity,
 					NextVersion = 1
 				};
-				Save(connection, initialVersion);
+				connection.Execute(SqlInsertRowVersion(tableName), initialVersion);
 				result = 1;
 			}
 

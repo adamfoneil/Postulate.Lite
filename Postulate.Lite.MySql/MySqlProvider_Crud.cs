@@ -97,5 +97,10 @@ namespace Postulate.Lite.MySql
 		{
 			return $"UPDATE `RowVersion` SET `NextVersion`=`NextVersion`+1 WHERE `RecordId`=@id";
 		}
+
+		protected override string SqlInsertRowVersion(string tableName)
+		{
+			return $"INSERT INTO {tableName} (`RecordId`, `NextVersion`) VALUES (@recordId, @nextVersion)";
+		}
 	}
 }
