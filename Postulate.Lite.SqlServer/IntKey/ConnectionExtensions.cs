@@ -73,6 +73,16 @@ namespace Postulate.Lite.SqlServer.IntKey
 			return await GetProvider().SaveAsync(connection, @object, user);
 		}
 
+		public static void PlainInsert<TModel>(this IDbConnection connection, TModel @object, string tableName = null, IUser user = null)
+		{
+			GetProvider().PlainInsert(connection, @object, tableName, user);
+		}
+
+		public static async Task PlainInsertAsync<TModel>(this IDbConnection connection, TModel @object, string tableName = null, IUser user = null)
+		{
+			await GetProvider().PlainInsertAsync(connection, @object, tableName, user);
+		}
+
 		public static int Insert<TModel>(this IDbConnection connection, TModel @object, IUser user = null)
 		{
 			return GetProvider().Insert(connection, @object, user);
