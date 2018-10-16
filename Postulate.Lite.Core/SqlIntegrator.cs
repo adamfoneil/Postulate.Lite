@@ -76,7 +76,8 @@ namespace Postulate.Lite.Core
 		/// <param name="action">Indicates whether an insert or update is in effect</param>
 		public IEnumerable<ColumnInfo> GetEditableColumns(Type modelType, SaveAction action)
 		{
-			string identity = modelType.GetIdentityName().ToLower();
+			bool hasIdentity = false;
+			string identity = modelType.TryGetIdentityName(string.Empty, ref hasIdentity).ToLower();
 			var props = modelType.GetProperties().Where(pi => !pi.GetColumnName().ToLower().Equals(identity)).ToArray();
 			return props.Where(pi => IsEditable(pi, action)).Select(pi => new ColumnInfo(pi)).ToArray();
 		}

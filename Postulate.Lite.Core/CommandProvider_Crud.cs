@@ -31,10 +31,16 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Generates a SQL insert statement for a given model class
+		/// Generates a SQL insert statement for a given model class that returns a generated identity value
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
 		protected abstract string InsertCommand<T>();
+
+		/// <summary>
+		/// Generates a SQL insert statement for a given model class without retrieving identity value
+		/// </summary>
+		/// <typeparam name="T">Model class type</typeparam>	
+		protected abstract string PlainInsertCommand<T>(string tableName = null);
 
 		/// <summary>
 		/// Generates a SQL update statement for a given model class
@@ -128,13 +134,7 @@ namespace Postulate.Lite.Core
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public TKey Insert<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
-			var record = @object as Record;
-			record?.Validate(connection);
-			if (user != null)
-			{
-				record?.CheckSavePermission(connection, user);
-				record?.BeforeSave(connection, SaveAction.Insert, user);
-			}
+			var record = PreSave<TModel>(connection, @object, user);
 
 			TKey result = default(TKey);
 
@@ -156,6 +156,30 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
+		/// Performs a SQL insert without returning an identity value
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
+		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
+		public void PlainInsert<TModel>(IDbConnection connection, TModel @object, string tableName = null, IUser user = null)
+		{
+			var record = PreSave(connection, @object, user);
+
+			string cmd = PlainInsertCommand<TModel>(tableName);
+			try
+			{
+				connection.Execute(cmd, @object);
+			}
+			catch (Exception exc)
+			{
+				throw new CrudException(SaveAction.Insert, exc, cmd, @object);
+			}
+
+			record?.AfterSave(connection, SaveAction.Insert);
+		}
+
+		/// <summary>
 		/// Performs a SQL insert and returns the generated identity value
 		/// </summary>
 		/// <typeparam name="TModel">Model class type</typeparam>
@@ -164,13 +188,7 @@ namespace Postulate.Lite.Core
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public async Task<TKey> InsertAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
-			var record = @object as Record;
-			record?.Validate(connection);
-			if (user != null)
-			{
-				record?.CheckSavePermission(connection, user);
-				record?.BeforeSave(connection, SaveAction.Insert, user);
-			}
+			var record = PreSave(connection, @object, user);
 
 			string cmd = InsertCommand<TModel>();
 
@@ -187,6 +205,45 @@ namespace Postulate.Lite.Core
 			SetIdentity(@object, result);
 			record?.AfterSave(connection, SaveAction.Insert);
 			return result;
+		}
+
+		/// <summary>
+		/// Performs a SQL insert without returning an identity value
+		/// </summary>
+		/// <typeparam name="TModel">Model class type</typeparam>
+		/// <param name="connection">Open connection</param>
+		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
+		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
+		public async Task PlainInsertAsync<TModel>(IDbConnection connection, TModel @object, string tableName = null, IUser user = null)
+		{
+			var record = PreSave(connection, @object, user);
+
+			string cmd = PlainInsertCommand<TModel>(tableName);
+			try
+			{
+				await connection.ExecuteAsync(cmd, @object);
+			}
+			catch (Exception exc)
+			{
+				throw new CrudException(SaveAction.Insert, exc, cmd, @object);
+			}
+
+			record?.AfterSave(connection, SaveAction.Insert);
+		}
+
+		/// <summary>
+		/// Executes validation, permission checks, and BeforeSave override on <see cref="Record"/> objects
+		/// </summary>
+		private Record PreSave<TModel>(IDbConnection connection, TModel @object, IUser user)
+		{
+			var record = @object as Record;
+			record?.Validate(connection);
+			if (user != null)
+			{
+				record?.CheckSavePermission(connection, user);
+				record?.BeforeSave(connection, SaveAction.Insert, user);
+			}
+			return record;
 		}
 
 		/// <summary>
@@ -262,13 +319,7 @@ namespace Postulate.Lite.Core
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public void Update<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
-			var record = @object as Record;
-			record?.Validate(connection);
-			if (user != null)
-			{
-				record?.CheckSavePermission(connection, user);
-				record?.BeforeSave(connection, SaveAction.Update, user);
-			}
+			var record = PreSave(connection, @object, user);
 
 			string cmd = UpdateCommand<TModel>();
 			try
@@ -294,13 +345,7 @@ namespace Postulate.Lite.Core
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public async Task UpdateAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
-			var record = @object as Record;
-			record?.Validate(connection);
-			if (user != null)
-			{
-				record?.CheckSavePermission(connection, user);
-				record?.BeforeSave(connection, SaveAction.Update, user);
-			}
+			var record = PreSave(connection, @object, user);
 
 			string cmd = UpdateCommand<TModel>();
 			try
@@ -613,6 +658,13 @@ namespace Postulate.Lite.Core
 		{
 			string cmd = CreateTableCommand(typeof(TModel));
 			connection.Execute(cmd);
+		}
+
+		protected void GetInsertComponents<T>(out string columnList, out string valueList)
+		{
+			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Insert);
+			columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
+			valueList = string.Join(", ", columns.Select(c => $"@{c.PropertyName}"));
 		}
 	}
 }

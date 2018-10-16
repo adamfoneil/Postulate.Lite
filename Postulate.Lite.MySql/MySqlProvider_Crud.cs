@@ -36,10 +36,15 @@ namespace Postulate.Lite.MySql
 
 		protected override string InsertCommand<T>()
 		{
-			var columns = _integrator.GetEditableColumns(typeof(T), SaveAction.Insert);
-			string columnList = string.Join(", ", columns.Select(c => ApplyDelimiter(c.ColumnName)));
-			string valueList = string.Join(", ", columns.Select(c => $"@{c.PropertyName}"));
+			GetInsertComponents<T>(out string columnList, out string valueList);
 			return $"INSERT INTO {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} ({columnList}) VALUES ({valueList}); SELECT LAST_INSERT_ID()";
+		}
+
+		protected override string PlainInsertCommand<T>(string tableName = null)
+		{
+			string insertTable = (string.IsNullOrEmpty(tableName)) ? _integrator.GetTableName(typeof(T)) : tableName;
+			GetInsertComponents<T>(out string columnList, out string valueList);
+			return $"INSERT INTO {ApplyDelimiter(insertTable)} ({columnList}) VALUES ({valueList});";
 		}
 
 		protected override string UpdateCommand<T>()

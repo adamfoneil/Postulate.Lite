@@ -63,11 +63,11 @@ namespace Postulate.Lite.Core
 
 		private async Task SaveChangesAsync<TModel>(IDbConnection connection, TModel @object, IEnumerable<PropertyChange> changes, IUser user)
 		{			
-			if (!changes?.Any() ?? false) return;
+			if (!changes?.Any() ?? true) return;
 
 			var trackedRecord = @object as ITrackedRecord;
 			bool useHistoryTable = trackedRecord?.UseDefaultHistoryTable ?? true;
-			VerifyChangeTrackingObjects<TModel>(connection, useHistoryTable);
+			VerifyChangeTrackingObjects<TModel>(connection, useHistoryTable, out string historyTableName);
 
 			TKey identity = GetIdentity(@object);
 			int version = await IncrementNextRecordVersionAsync<TModel>(connection, identity);
@@ -77,7 +77,7 @@ namespace Postulate.Lite.Core
 				foreach (var change in changes)
 				{
 					PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
-					await InsertAsync(connection, history);
+					await PlainInsertAsync(connection, history, historyTableName);
 				}
 			}
 			
@@ -86,11 +86,11 @@ namespace Postulate.Lite.Core
 
 		private void SaveChanges<TModel>(IDbConnection connection, TModel @object, IEnumerable<PropertyChange> changes, IUser user)
 		{
-			if (!changes?.Any() ?? false) return;
+			if (!changes?.Any() ?? true) return;
 
 			var trackedRecord = @object as ITrackedRecord;
 			bool useHistoryTable = trackedRecord?.UseDefaultHistoryTable ?? true;
-			VerifyChangeTrackingObjects<TModel>(connection, useHistoryTable);
+			VerifyChangeTrackingObjects<TModel>(connection, useHistoryTable, out string historyTableName);
 
 			TKey identity = GetIdentity(@object);
 			int version = IncrementNextRecordVersion<TModel>(connection, identity);
@@ -99,9 +99,8 @@ namespace Postulate.Lite.Core
 			{				
 				foreach (var change in changes)
 				{
-					PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);
-					// needs to be reworked as ordinary insert since there's not identity property on PropertyChangeHistory
-					Insert(connection, history);
+					PropertyChangeHistory<TKey> history = GetChangeHistoryRecord(identity, user, version, change);					
+					PlainInsert(connection, history, historyTableName);
 				}
 			}
 
@@ -135,7 +134,7 @@ namespace Postulate.Lite.Core
 			var versionTbl = GetVersionTableInfo(table, changesSchema);
 
 			var param = new { id = identity };
-			string tableName = ApplyDelimiter(versionTbl.ToString());
+			string tableName = versionTbl.ToString();
 
 			int result = await connection.QuerySingleOrDefaultAsync<int?>(SqlSelectNextVersion(tableName), param) ?? 0;
 
@@ -146,7 +145,7 @@ namespace Postulate.Lite.Core
 					RecordId = identity,
 					NextVersion = 1
 				};
-				await SaveAsync(connection, initialVersion);
+				await PlainInsertAsync(connection, initialVersion, tableName);
 				result = 1;
 			}
 
@@ -161,7 +160,7 @@ namespace Postulate.Lite.Core
 			var versionTbl = GetVersionTableInfo(table, changesSchema);
 
 			var param = new { id = identity };
-			string tableName = ApplyDelimiter(versionTbl.ToString());
+			string tableName = versionTbl.ToString();
 
 			int result = connection.QuerySingleOrDefault<int?>(SqlSelectNextVersion(tableName), param) ?? 0;
 
@@ -172,7 +171,7 @@ namespace Postulate.Lite.Core
 					RecordId = identity,
 					NextVersion = 1
 				};
-				connection.Execute(SqlInsertRowVersion(tableName), initialVersion);
+				PlainInsert(connection, initialVersion, tableName);				
 				result = 1;
 			}
 
@@ -181,8 +180,9 @@ namespace Postulate.Lite.Core
 			return result;
 		}
 
-		private void VerifyChangeTrackingObjects<TModel>(IDbConnection connection, bool createHistoryTable)
+		private void VerifyChangeTrackingObjects<TModel>(IDbConnection connection, bool createHistoryTable, out string historyTableName)
 		{
+			historyTableName = null;
 			var targetTable = _integrator.GetTableInfo(typeof(TModel));			
 
 			if (!SchemaExists(connection, changesSchema)) connection.Execute(CreateSchemaCommand(changesSchema));
@@ -190,6 +190,7 @@ namespace Postulate.Lite.Core
 			if (createHistoryTable)
 			{
 				TableInfo historyTbl = new TableInfo(changesSchema, $"{targetTable.Schema}_{targetTable.Name}_History");
+				historyTableName = historyTbl.ToString();
 				CreateTableIfNotExists(connection, historyTbl, typeof(PropertyChangeHistory<TKey>));
 			}
 
