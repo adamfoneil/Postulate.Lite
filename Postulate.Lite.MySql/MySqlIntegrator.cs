@@ -19,7 +19,7 @@ namespace Postulate.Lite.MySql
 				{ typeof(int), new SqlTypeInfo("int") },
 				{ typeof(DateTime), new SqlTypeInfo("datetime") },
 				{ typeof(bool), new SqlTypeInfo("bit") },
-				{ typeof(decimal), new SqlTypeInfo("decimal", $"decimal({scale}, {precision})") },
+				{ typeof(decimal), new SqlTypeInfo("decimal", $"decimal({precision}, {scale})") },
 				{ typeof(long), new SqlTypeInfo("bigint") },
 				{ typeof(short), new SqlTypeInfo("smallint") },
 				{ typeof(byte), new SqlTypeInfo("tinyint") },

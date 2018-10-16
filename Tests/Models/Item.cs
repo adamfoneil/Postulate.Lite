@@ -1,7 +1,9 @@
-﻿using Postulate.Lite.Core.Attributes;
+﻿using MySql.Data.MySqlClient;
+using Postulate.Lite.Core.Attributes;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.SqlClient;
 
 namespace Tests.Models
 {
@@ -26,14 +28,16 @@ namespace Tests.Models
 		/// </summary>
 		public bool IsMade { get; set; }
 
-		[Column(TypeName = "money")]
+		//[Column(TypeName = "money")] doesn't work in MySql
+		[DecimalPrecision(10, 2)]
 		public decimal Cost { get; set; }
 
 		public DateTime? EffectiveDate { get; set; }
 	}
 
 	[Identity(nameof(Id))]
-	[DereferenceId("SELECT [Name] FROM [dbo].[ItemType] WHERE [Id]=@id")]
+	[DereferenceId(typeof(SqlConnection), "SELECT [Name] FROM [ItemType] WHERE [Id]=@id")]
+	[DereferenceId(typeof(MySqlConnection), "SELECT `Name` FROM `ItemType` WHERE `Id`=@id")]
 	public class ItemType
 	{
 		public int Id { get; set; }

@@ -230,7 +230,7 @@ namespace Postulate.Lite.Core
 			object result = propertyInfo.GetValue(record);
 			if (result == null) return null;
 
-			if (DereferenceId(propertyInfo, out DereferenceIdAttribute attr))
+			if (DereferenceId(connection, propertyInfo, out DereferenceIdAttribute attr))
 			{
 				var lookup = connection.QuerySingleOrDefault<IdLookup>(attr.Query, new { id = result });
 				if (lookup != null) result = lookup.Name;
@@ -239,12 +239,16 @@ namespace Postulate.Lite.Core
 			return result;
 		}
 
-		private bool DereferenceId(PropertyInfo propertyInfo, out DereferenceIdAttribute attr)
+		private bool DereferenceId(IDbConnection connection, PropertyInfo propertyInfo, out DereferenceIdAttribute attr)
 		{			
 			var fk = propertyInfo.GetAttribute<ReferencesAttribute>();
 			if (fk != null)
 			{
-				attr = fk.PrimaryType.GetAttribute<DereferenceIdAttribute>();
+				var attributes = fk.PrimaryType.GetCustomAttributes<DereferenceIdAttribute>();
+				attr = attributes.FirstOrDefault(a => a.ConnectionType?.Equals(connection.GetType()) ?? false);
+				if (attr != null) return true;
+
+				attr = attributes.FirstOrDefault();
 				return (attr != null);
 			}
 

@@ -7,7 +7,7 @@ namespace Postulate.Lite.Core.Attributes
 	/// Query must accept an @id parameter that represents the FK value, and return a <see cref="Models.IdLookup"/> model
 	/// Example: SELECT [Name] FROM [dbo].[Whatever] WHERE [Id]=@id
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 	public class DereferenceIdAttribute : Attribute
 	{
 		public DereferenceIdAttribute(string query)
@@ -15,6 +15,13 @@ namespace Postulate.Lite.Core.Attributes
 			Query = query;
 		}
 
+		public DereferenceIdAttribute(Type connectionType, string query)
+		{
+			Query = query;
+			ConnectionType = connectionType;
+		}
+
 		public string Query { get; }
+		public Type ConnectionType { get; }
 	}
 }

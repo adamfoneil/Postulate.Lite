@@ -166,6 +166,12 @@ namespace Tests.MySql
 			EmployeeQueryLastNameBase();
 		}
 
+		[TestMethod]
+		public void TrackItemChanges()
+		{
+			TrackItemChangesBase();
+		}
+
 		protected override string GetEmployeeQueryByLastNameSyntax()
 		{
 			return "SELECT * FROM `Employee` WHERE `LastName` LIKE @lastName";
