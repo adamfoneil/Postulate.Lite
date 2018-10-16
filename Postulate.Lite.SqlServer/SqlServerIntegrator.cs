@@ -32,32 +32,5 @@ namespace Postulate.Lite.SqlServer
 				{ typeof(byte[]), new SqlTypeInfo("varbinary", $"varbinary({length})") }
 			};
 		}
-
-		public override string GetTableName(Type type)
-		{
-			var tbl = GetTableInfo(type);
-			return $"{tbl.Schema}.{tbl.Name}";
-		}
-
-		public override TableInfo GetTableInfo(Type type)
-		{
-			Dictionary<string, string> parts = new Dictionary<string, string>()
-			{
-				{ "schema", DefaultSchema },
-				{ "name", type.Name }
-			};
-
-			var tblAttr = type.GetCustomAttribute<TableAttribute>();
-			if (tblAttr != null)
-			{
-				if (!string.IsNullOrEmpty(tblAttr.Schema)) parts["schema"] = tblAttr.Schema;
-				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
-			}
-
-			var schemaAttr = type.GetCustomAttribute<SchemaAttribute>();
-			if (schemaAttr != null) parts["schema"] = schemaAttr.Name;
-
-			return new TableInfo() { Name = parts["name"], Schema = parts["schema"], ModelType = type };
-		}
 	}
 }

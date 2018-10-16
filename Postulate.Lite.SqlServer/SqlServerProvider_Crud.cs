@@ -52,12 +52,12 @@ namespace Postulate.Lite.SqlServer
 			return $"DELETE {ApplyDelimiter(_integrator.GetTableName(typeof(T)))} WHERE {ApplyDelimiter(typeof(T).GetIdentityName())}=@id";
 		}
 
-		private string UniqueIdSyntax(string constraintName, PropertyInfo propertyInfo)
+		protected override string UniqueIdSyntax(string constraintName, PropertyInfo propertyInfo)
 		{
-			return $"CONSTRAINT [U_{constraintName}] UNIQUE ({string.Join(", ", ApplyDelimiter(propertyInfo.GetColumnName()))})";
+			return $"CONSTRAINT [U_{constraintName}] UNIQUE ({ApplyDelimiter(propertyInfo.GetColumnName())})";
 		}
 
-		private string PrimaryKeySyntax(string constraintName, IEnumerable<PropertyInfo> pkColumns)
+		protected override string PrimaryKeySyntax(string constraintName, IEnumerable<PropertyInfo> pkColumns)
 		{
 			return $"CONSTRAINT [PK_{constraintName}] PRIMARY KEY ({string.Join(", ", pkColumns.Select(pi => ApplyDelimiter(pi.GetColumnName())))})";
 		}

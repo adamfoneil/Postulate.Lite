@@ -27,8 +27,7 @@ namespace Postulate.Lite.Core
 		}
 
 		const string changesSchema = "changes";
-
-		protected abstract bool SchemaExists(IDbConnection connection, TableInfo table);
+		
 		protected abstract bool TableExists(IDbConnection connection, TableInfo table);
 		protected abstract string CreateTableScript(TableInfo table, Type modelType);
 

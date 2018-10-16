@@ -37,7 +37,7 @@ namespace Postulate.Lite.Core.Models
 
 		public override string ToString()
 		{
-			return $"{Schema}.{Name}";
+			return (!string.IsNullOrEmpty(Schema)) ? $"{Schema}.{Name}" : Name;
 		}
 
 		public override int GetHashCode()

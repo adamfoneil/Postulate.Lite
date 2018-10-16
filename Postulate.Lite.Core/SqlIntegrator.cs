@@ -21,9 +21,33 @@ namespace Postulate.Lite.Core
 
 		public abstract string DefaultSchema { get; }
 
-		public abstract TableInfo GetTableInfo(Type type);
+		public TableInfo GetTableInfo(Type type)
+		{
+			Dictionary<string, string> parts = new Dictionary<string, string>()
+			{
+				{ "schema", DefaultSchema },
+				{ "name", type.Name }
+			};
 
-		public abstract string GetTableName(Type type);
+			var tblAttr = type.GetCustomAttribute<TableAttribute>();
+			if (tblAttr != null)
+			{
+				if (!string.IsNullOrEmpty(tblAttr.Schema)) parts["schema"] = tblAttr.Schema;
+				if (!string.IsNullOrEmpty(tblAttr.Name)) parts["name"] = tblAttr.Name;
+			}
+
+			var schemaAttr = type.GetCustomAttribute<SchemaAttribute>();
+			if (schemaAttr != null) parts["schema"] = schemaAttr.Name;
+
+			return new TableInfo() { Name = parts["name"], Schema = parts["schema"], ModelType = type };
+
+		}
+
+		public string GetTableName(Type type)
+		{
+			var tbl = GetTableInfo(type);
+			return (!string.IsNullOrEmpty(tbl.Schema)) ? $"{tbl.Schema}.{tbl.Name}" : tbl.Name;
+		}
 
 		public SqlTypeInfo FindTypeInfo(Type type)
 		{

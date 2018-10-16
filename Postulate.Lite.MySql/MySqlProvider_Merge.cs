@@ -95,12 +95,12 @@ namespace Postulate.Lite.MySql
 
 		public override string CreateSchemaCommand(string schemaName)
 		{
-			throw new NotImplementedException();
+			return $"CREATE SCHEMA `{schemaName}`";
 		}
 
 		public override bool SchemaExists(IDbConnection connection, string schemaName)
 		{
-			throw new NotImplementedException();
+			return connection.Exists("`information_schema`.`schemata` WHERE `schema_name`=@schema", new { schema = schemaName });
 		}
 
 		public override void MapProviderSpecificInfo(PropertyInfo pi, ColumnInfo col)
@@ -125,17 +125,22 @@ namespace Postulate.Lite.MySql
 
 		protected override string CreateTableScript(TableInfo table, Type modelType)
 		{
-			throw new NotImplementedException();
-		}
-
-		protected override bool SchemaExists(IDbConnection connection, TableInfo table)
-		{
-			throw new NotImplementedException();
+			return CreateTableCommandInner(modelType, table.ToString(), requireIdentity: false);
 		}
 
 		protected override bool TableExists(IDbConnection connection, TableInfo table)
 		{
-			throw new NotImplementedException();
+			return connection.Exists("`information_schema`.`tables` WHERE `table_name`=@table AND `table_schema`=@schema", new { table = table.Name, schema = table.Schema });
+		}
+
+		protected override string PrimaryKeySyntax(string constraintName, IEnumerable<PropertyInfo> pkColumns)
+		{
+			return $"PRIMARY KEY ({string.Join(", ", pkColumns.Select(pi => ApplyDelimiter(pi.GetColumnName())))})";
+		}
+
+		protected override string UniqueIdSyntax(string constraintName, PropertyInfo identityProperty)
+		{
+			return $"UNIQUE ({ApplyDelimiter(identityProperty.GetColumnName())}";
 		}
 	}
 }

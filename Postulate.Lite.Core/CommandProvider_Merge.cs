@@ -116,5 +116,39 @@ namespace Postulate.Lite.Core
 		public abstract Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection, string[] excludeSchemas);
 
 		public abstract Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection, string[] excludeSchemas);
+
+		protected abstract string PrimaryKeySyntax(string constraintName, IEnumerable<PropertyInfo> pkColumns);
+
+		protected abstract string UniqueIdSyntax(string constraintName, PropertyInfo identityProperty);
+
+		protected string CreateTableCommandInner(Type modelType, string tableName, bool requireIdentity = true)
+		{
+			string constraintName = tableName.Replace(".", "_");
+
+			var columns = _integrator.GetMappedColumns(modelType);
+			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
+
+			string identityName = null;
+			bool hasIdentity = false;
+			if (requireIdentity)
+			{
+				identityName = modelType.GetIdentityName();
+				hasIdentity = true;
+			}
+			else
+			{
+				identityName = modelType.TryGetIdentityName(string.Empty, ref hasIdentity);
+			}
+
+			List<string> members = new List<string>();
+			members.AddRange(columns.Select(pi => SqlColumnSyntax(pi, (identityName.Equals(pi.Name)))));
+			members.Add(PrimaryKeySyntax(constraintName, pkColumns));
+			if (!identityIsPrimaryKey && hasIdentity) members.Add(UniqueIdSyntax(constraintName, modelType.GetIdentityProperty()));
+
+			return
+				$"CREATE TABLE {ApplyDelimiter(tableName)} (" +
+					string.Join(",\r\n\t", members) +
+				")";
+		}
 	}
 }

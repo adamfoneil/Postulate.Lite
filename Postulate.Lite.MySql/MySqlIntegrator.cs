@@ -1,9 +1,6 @@
 ﻿using Postulate.Lite.Core;
-using Postulate.Lite.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
 
 namespace Postulate.Lite.MySql
 {
@@ -15,7 +12,7 @@ namespace Postulate.Lite.MySql
 		{
 			return new Dictionary<Type, SqlTypeInfo>()
 			{
-				{ typeof(string), new SqlTypeInfo("varchar", $"varchar({length})") },
+				{ typeof(string), new SqlTypeInfo((length == 0) ? "text" : "varchar", (length == 0) ? "text" : $"varchar({length})") },
 				{ typeof(int), new SqlTypeInfo("int") },
 				{ typeof(DateTime), new SqlTypeInfo("datetime") },
 				{ typeof(bool), new SqlTypeInfo("bit") },
@@ -29,24 +26,6 @@ namespace Postulate.Lite.MySql
 				{ typeof(char), new SqlTypeInfo("char(1)") },
 				{ typeof(byte[]), new SqlTypeInfo("varbinary", $"varbinary({length})") }
 			};
-		}
-
-		public override TableInfo GetTableInfo(Type type)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string GetTableName(Type type)
-		{
-			string result = type.Name;
-
-			var tblAttr = type.GetCustomAttribute<TableAttribute>();
-			if (tblAttr != null && !string.IsNullOrEmpty(tblAttr.Name))
-			{
-				result = tblAttr.Name;
-			}
-
-			return result;
 		}
 	}
 }
