@@ -54,7 +54,7 @@
     <Compile Include="Attributes\DatabaseTypeAttribute.cs" />
     <Compile Include="Attributes\DecimalPrecisionAttribute.cs" />
     <Compile Include="Attributes\DefaultExpressionAttribute.cs" />
-    <Compile Include="Attributes\ForeignKeyLookupAttribute.cs" />
+    <Compile Include="Attributes\DereferenceIdAttribute.cs" />
     <Compile Include="Attributes\IdentityAttribute.cs" />
     <Compile Include="Attributes\MergeExcludeSchemaAttribute.cs" />
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
@@ -76,7 +76,7 @@
     <Compile Include="Models\ForeignKeyInfo.cs" />
     <Compile Include="Interfaces\IUser.cs" />
     <Compile Include="CommandProvider_Crud.cs" />
-    <Compile Include="Models\ForeignKeyLookup.cs" />
+    <Compile Include="Models\IdLookup.cs" />
     <Compile Include="Models\PropertyChange.cs" />
     <Compile Include="Models\PropertyChangeHistory.cs" />
     <Compile Include="Models\RowVersion.cs" />

@@ -24,8 +24,9 @@ namespace Tests
 			{
 				GetIntProvider().Save(cn, item);
 				item.Cost = 12;
+				item.TypeId = 2;
 				GetIntProvider().Save(cn, item);
-			}				
+			}
 		}
 
 		private void InitItemTables()

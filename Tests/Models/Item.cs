@@ -33,7 +33,7 @@ namespace Tests.Models
 	}
 
 	[Identity(nameof(Id))]
-	[ForeignKeyLookup("SELECT [Name] AS [Text] FROM [dbo].[ItemType] WHERE [Id]=@id")]
+	[DereferenceId("SELECT [Name] FROM [dbo].[ItemType] WHERE [Id]=@id")]
 	public class ItemType
 	{
 		public int Id { get; set; }

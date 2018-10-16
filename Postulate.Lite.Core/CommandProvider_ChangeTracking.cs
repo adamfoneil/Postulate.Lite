@@ -230,14 +230,26 @@ namespace Postulate.Lite.Core
 			object result = propertyInfo.GetValue(record);
 			if (result == null) return null;
 
-			var lookupQuery = propertyInfo.GetAttribute<ForeignKeyLookupAttribute>();
-			if (lookupQuery != null)
+			if (DereferenceId(propertyInfo, out DereferenceIdAttribute attr))
 			{
-				var lookup = connection.QuerySingleOrDefault<ForeignKeyLookup>(lookupQuery.Query, new { id = result });
-				if (lookup != null) result = lookup.Text;
+				var lookup = connection.QuerySingleOrDefault<IdLookup>(attr.Query, new { id = result });
+				if (lookup != null) result = lookup.Name;
 			}
 
 			return result;
+		}
+
+		private bool DereferenceId(PropertyInfo propertyInfo, out DereferenceIdAttribute attr)
+		{			
+			var fk = propertyInfo.GetAttribute<ReferencesAttribute>();
+			if (fk != null)
+			{
+				attr = fk.PrimaryType.GetAttribute<DereferenceIdAttribute>();
+				return (attr != null);
+			}
+
+			attr = null;
+			return false;
 		}
 	}
 }
