@@ -1,4 +1,4 @@
-# Postulate.Lite
+# Postulate.Lite ORM
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ug7499knw4ut33yj/branch/master?svg=true)](https://ci.appveyor.com/project/adamosoftware/postulate-lite/branch/master)
 
