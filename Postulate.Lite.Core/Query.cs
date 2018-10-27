@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Postulate.Lite.Core
 {
+	/// <summary>
+	/// Encapsulates a SQL SELECT query with dynamic criteria that returns TResult
+	/// </summary>	
 	public class Query<TResult>
 	{
 		public Query(string sql)

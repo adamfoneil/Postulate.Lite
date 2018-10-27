@@ -11,6 +11,9 @@ namespace Postulate.Lite.Core
 		Update = 2
 	}
 
+	/// <summary>
+	/// Optionally use this as the basis for your model classes to add permission checks, validation, events, and foreign key lookups to your data access layer	
+	/// </summary>
 	public abstract class Record
 	{
 		public virtual void LookupIntForeignKeys(IDbConnection connection, CommandProvider<int> commandProvider)
