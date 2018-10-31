@@ -2,10 +2,11 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ug7499knw4ut33yj/branch/master?svg=true)](https://ci.appveyor.com/project/adamosoftware/postulate-lite/branch/master)
 
-Postulate.Lite is an ORM that performs CRUD operations on your model types that is built around [Dapper](https://github.com/StackExchange/Dapper). It's an evolution of my [Postulate.Orm](https://github.com/adamosoftware/Postulate.Orm) project that is
+Postulate.Lite is an ORM built around [Dapper](https://github.com/StackExchange/Dapper) that performs CRUD operations on your model types. It's an evolution of my [Postulate.Orm](https://github.com/adamosoftware/Postulate.Orm) project that is
 - more POCO-friendly, having no base type dependency
 - easier to use thanks to extension methods (inspired by [Dapper.SimpleCRUD](https://github.com/ericdc1/Dapper.SimpleCRUD))
 - has a more robust, general-purpose schema merge capability, using my [SchemaSync project](https://github.com/adamosoftware/SchemaSync)
+- has a free app [Postulate Query Helper](https://github.com/adamosoftware/Postulate.Zinger) and a commercial app SQL Model Merge for merging model class and database changes
 
 Postulate.Lite is not a Linq replacement. In my applications, I use inline SQL with Postulate.Lite's [Query&lt;T&gt;](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Query.cs) type. Please see the [wiki](https://github.com/adamosoftware/Postulate.Lite/wiki/Using-the-Query-class) page on this.
 
