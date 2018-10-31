@@ -7,7 +7,7 @@ Postulate.Lite is an ORM that performs CRUD operations on your model types that 
 - easier to use thanks to extension methods (inspired by [Dapper.SimpleCRUD](https://github.com/ericdc1/Dapper.SimpleCRUD))
 - has a more robust, general-purpose schema merge capability, using my [SchemaSync project](https://github.com/adamosoftware/SchemaSync)
 
-Postulate.Lite is not a Linq replacement. In my applications, I use inline SQL with Postulate.Lite's [Query&lt;T&gt;](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Query.cs) type.
+Postulate.Lite is not a Linq replacement. In my applications, I use inline SQL with Postulate.Lite's [Query&lt;T&gt;](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Query.cs) type. Please see the [wiki](https://github.com/adamosoftware/Postulate.Lite/wiki/Using-the-Query-class) page on this.
 
 ## Nuget
 
