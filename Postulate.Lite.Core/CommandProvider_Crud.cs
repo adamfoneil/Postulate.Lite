@@ -5,6 +5,7 @@ using Postulate.Lite.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -167,6 +168,8 @@ namespace Postulate.Lite.Core
 			var record = PreSave(connection, @object, user);
 
 			string cmd = PlainInsertCommand<TModel>(tableName);
+			Trace.WriteLine($"PlainInsert: {cmd}");
+
 			try
 			{
 				connection.Execute(cmd, @object);
@@ -191,6 +194,7 @@ namespace Postulate.Lite.Core
 			var record = PreSave(connection, @object, user);
 
 			string cmd = InsertCommand<TModel>();
+			Trace.WriteLine($"InsertAsync: {cmd}");
 
 			TKey result = default(TKey);
 			try
@@ -219,8 +223,10 @@ namespace Postulate.Lite.Core
 			var record = PreSave(connection, @object, user);
 
 			string cmd = PlainInsertCommand<TModel>(tableName);
+			Trace.WriteLine($"PlainInsertAsync: {cmd}");
+
 			try
-			{
+			{				
 				await connection.ExecuteAsync(cmd, @object);
 			}
 			catch (Exception exc)
@@ -253,6 +259,7 @@ namespace Postulate.Lite.Core
 		{
 			var changes = GetChanges(connection, @object);
 			CommandDefinition cmd = GetSetColumnsUpdateCommand(@object, setColumns);
+			Trace.WriteLine($"Update: {cmd}");
 			connection.Execute(cmd);
 			SaveChanges(connection, @object, changes, user);
 		}
@@ -264,6 +271,7 @@ namespace Postulate.Lite.Core
 		{
 			var changes = await GetChangesAsync(connection, @object);
 			CommandDefinition cmd = GetSetColumnsUpdateCommand(@object, setColumns);
+			Trace.WriteLine($"UpdateAsync: {cmd}");
 			await connection.ExecuteAsync(cmd);
 			await SaveChangesAsync(connection, @object, changes, user);
 		}
@@ -322,6 +330,8 @@ namespace Postulate.Lite.Core
 			var record = PreSave(connection, @object, user);
 
 			string cmd = UpdateCommand<TModel>();
+			Trace.WriteLine($"Update: {cmd}");
+
 			try
 			{
 				var changes = GetChanges(connection, @object);
@@ -348,6 +358,8 @@ namespace Postulate.Lite.Core
 			var record = PreSave(connection, @object, user);
 
 			string cmd = UpdateCommand<TModel>();
+			Trace.WriteLine($"UpdateAsync: {cmd}");
+
 			try
 			{
 				var changes = await GetChangesAsync(connection, @object);
@@ -478,6 +490,7 @@ namespace Postulate.Lite.Core
 		{
 			string identityCol = typeof(TModel).GetIdentityName();
 			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
+			Trace.WriteLine($"Find: {cmd}");
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });
 			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
@@ -494,6 +507,7 @@ namespace Postulate.Lite.Core
 		{
 			string identityCol = typeof(TModel).GetIdentityName();
 			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
+			Trace.WriteLine($"FindAsync: {cmd}");
 			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, new { id = identity });
 			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
@@ -541,6 +555,7 @@ namespace Postulate.Lite.Core
 		{
 			string whereClause = WhereClauseFromObject(criteria);
 			string cmd = FindCommand<TModel>(whereClause);
+			Trace.WriteLine($"FindWhereAsync: {cmd}");
 			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);
 			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
@@ -561,6 +576,7 @@ namespace Postulate.Lite.Core
 		private TModel FindWhereInternal<TModel>(IDbConnection connection, string whereClause, TModel criteria, IUser user = null)
 		{
 			string cmd = FindCommand<TModel>(whereClause);
+			Trace.WriteLine($"FindWhereInternal: {cmd}");
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);
 			LookupForeignKeys(connection, result);
 			return FindInner(connection, result, user);
@@ -632,6 +648,8 @@ namespace Postulate.Lite.Core
 			if (user != null) record?.CheckDeletePermission(connection, user);
 
 			string cmd = DeleteCommand<TModel>();
+			Trace.WriteLine($"Delete: {cmd}");
+
 			connection.Execute(cmd, new { id = identity });
 
 			record?.AfterDelete(connection);
@@ -657,6 +675,7 @@ namespace Postulate.Lite.Core
 		public void CreateTable<TModel>(IDbConnection connection)
 		{
 			string cmd = CreateTableCommand(typeof(TModel));
+			Trace.WriteLine($"CreateTable: {cmd}");
 			connection.Execute(cmd);
 		}
 
