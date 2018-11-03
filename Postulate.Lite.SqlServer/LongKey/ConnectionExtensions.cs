@@ -23,12 +23,12 @@ namespace Postulate.Lite.SqlServer.LongKey
 			return await GetProvider().ExistsAsync<TModel>(connection, id, user);
 		}
 
-		public static bool ExistsWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
+		public static bool ExistsWhere<TModel>(this IDbConnection connection, object criteria, IUser user = null)
 		{
 			return GetProvider().ExistsWhere<TModel>(connection, criteria, user);
 		}
 
-		public async static Task<bool> ExistsWhereAsync<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
+		public async static Task<bool> ExistsWhereAsync<TModel>(this IDbConnection connection, object criteria, IUser user = null)
 		{
 			return await GetProvider().ExistsWhereAsync<TModel>(connection, criteria, user);
 		}
@@ -43,12 +43,12 @@ namespace Postulate.Lite.SqlServer.LongKey
 			return await GetProvider().FindAsync<TModel>(connection, id, user);
 		}
 
-		public static TModel FindWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
+		public static TModel FindWhere<TModel>(this IDbConnection connection, object criteria, IUser user = null)
 		{
 			return GetProvider().FindWhere<TModel>(connection, criteria, user);
 		}
 
-		public async static Task<TModel> FindWhereAsync<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
+		public async static Task<TModel> FindWhereAsync<TModel>(this IDbConnection connection, object criteria, IUser user = null)
 		{
 			return await GetProvider().FindWhereAsync<TModel>(connection, criteria, user);
 		}

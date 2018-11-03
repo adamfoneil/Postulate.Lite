@@ -48,7 +48,7 @@ namespace Postulate.Lite.SqlServer.GuidKey
 			return GetProvider().FindWhere<TModel>(connection, criteria, user);
 		}
 
-		public async static Task<TModel> FindWhereAsync<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
+		public async static Task<TModel> FindWhereAsync<TModel>(this IDbConnection connection, object criteria, IUser user = null)
 		{
 			return await GetProvider().FindWhereAsync<TModel>(connection, criteria, user);
 		}
