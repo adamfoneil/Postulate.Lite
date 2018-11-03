@@ -25,12 +25,12 @@ namespace Postulate.Lite.SqlServer.LongKey
 
 		public static bool ExistsWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
 		{
-			return GetProvider().ExistsWhere(connection, criteria, user);
+			return GetProvider().ExistsWhere<TModel>(connection, criteria, user);
 		}
 
 		public async static Task<bool> ExistsWhereAsync<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
 		{
-			return await GetProvider().ExistsWhereAsync(connection, criteria, user);
+			return await GetProvider().ExistsWhereAsync<TModel>(connection, criteria, user);
 		}
 
 		public static TModel Find<TModel>(this IDbConnection connection, int id, IUser user = null)
@@ -45,12 +45,12 @@ namespace Postulate.Lite.SqlServer.LongKey
 
 		public static TModel FindWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
 		{
-			return GetProvider().FindWhere(connection, criteria, user);
+			return GetProvider().FindWhere<TModel>(connection, criteria, user);
 		}
 
 		public async static Task<TModel> FindWhereAsync<TModel>(this IDbConnection connection, TModel criteria, IUser user = null)
 		{
-			return await GetProvider().FindWhereAsync(connection, criteria, user);
+			return await GetProvider().FindWhereAsync<TModel>(connection, criteria, user);
 		}
 
 		public static long Merge<TModel>(this IDbConnection connection, TModel @object, IUser user = null)

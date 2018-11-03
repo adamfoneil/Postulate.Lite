@@ -248,7 +248,7 @@ namespace Tests
 			using (var cn = GetConnection())
 			{
 				// there has to be an Id = 3 in there, I'm sure
-				var e = GetIntProvider().FindWhere(cn, new EmployeeInt() { Id = 3 });
+				var e = GetIntProvider().FindWhere<EmployeeInt>(cn, new { Id = 3 });
 				Assert.IsTrue(e.Id == 3);
 			}
 		}
@@ -260,7 +260,7 @@ namespace Tests
 			using (var cn = GetConnection())
 			{
 				// there has to be an Id = 3 in there, I'm sure
-				var e = await GetIntProvider().FindWhereAsync(cn, new EmployeeInt() { Id = 3 });
+				var e = await GetIntProvider().FindWhereAsync<EmployeeInt>(cn, new { Id = 3 });
 				Assert.IsTrue(e.Id == 3);
 			}
 		}
@@ -293,7 +293,7 @@ namespace Tests
 			using (var cn = GetConnection())
 			{
 				var org = new Organization() { Name = "Test" };
-				var check = provider.FindWhere(cn, org);
+				var check = provider.FindWhere<Organization>(cn, org);
 				if (check != null) provider.Delete<Organization>(cn, check.Id);
 
 				provider.Save(cn, org);
@@ -313,7 +313,7 @@ namespace Tests
 			using (var cn = GetConnection())
 			{
 				var org = new Organization() { Name = "Test" };
-				var check = await provider.FindWhereAsync(cn, org);
+				var check = await provider.FindWhereAsync<Organization>(cn, org);
 				if (check != null) await provider.DeleteAsync<Organization>(cn, check.Id);
 
 				await provider.SaveAsync(cn, org);

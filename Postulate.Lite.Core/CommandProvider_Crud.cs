@@ -467,15 +467,15 @@ namespace Postulate.Lite.Core
 			return (record != null);
 		}
 
-		public bool ExistsWhere<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		public bool ExistsWhere<TModel>(IDbConnection connection, object criteria, IUser user = null)
 		{
-			var record = FindWhere(connection, criteria, user);
+			var record = FindWhere<TModel>(connection, criteria, user);
 			return (record != null);
 		}
 
-		public async Task<bool> ExistsWhereAsync<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		public async Task<bool> ExistsWhereAsync<TModel>(IDbConnection connection, object criteria, IUser user = null)
 		{
-			var record = await FindWhereAsync(connection, criteria, user);
+			var record = await FindWhereAsync<TModel>(connection, criteria, user);
 			return (record != null);
 		}
 
@@ -538,10 +538,10 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="criteria">Object specifying the criteria to search for</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public TModel FindWhere<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		public TModel FindWhere<TModel>(IDbConnection connection, object criteria, IUser user = null)
 		{
 			string whereClause = WhereClauseFromObject(criteria);
-			return FindWhereInternal(connection, whereClause, criteria, user);
+			return FindWhereInternal<TModel>(connection, whereClause, criteria, user);
 		}
 
 		/// <summary>
@@ -551,7 +551,7 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="criteria">Object specifying the criteria to search for</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public async Task<TModel> FindWhereAsync<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		public async Task<TModel> FindWhereAsync<TModel>(IDbConnection connection, object criteria, IUser user = null)
 		{
 			string whereClause = WhereClauseFromObject(criteria);
 			string cmd = FindCommand<TModel>(whereClause);
@@ -564,7 +564,7 @@ namespace Postulate.Lite.Core
 		private TModel FindByPrimaryKey<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
 		{
 			string whereClause = PrimaryKeyWhereClauseFromObject(criteria);
-			return FindWhereInternal(connection, whereClause, criteria, user);
+			return FindWhereInternal<TModel>(connection, whereClause, criteria, user);
 		}
 
 		private async Task<TModel> FindByPrimaryKeyAsync<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
@@ -573,7 +573,7 @@ namespace Postulate.Lite.Core
 			return await FindWhereInternalAsync(connection, whereClause, criteria, user);
 		}
 
-		private TModel FindWhereInternal<TModel>(IDbConnection connection, string whereClause, TModel criteria, IUser user = null)
+		private TModel FindWhereInternal<TModel>(IDbConnection connection, string whereClause, object criteria, IUser user = null)
 		{
 			string cmd = FindCommand<TModel>(whereClause);
 			Trace.WriteLine($"FindWhereInternal: {cmd}");
@@ -590,9 +590,9 @@ namespace Postulate.Lite.Core
 			return FindInner(connection, result, user);
 		}
 
-		private string WhereClauseFromObject<TModel>(TModel criteria)
+		private string WhereClauseFromObject(object criteria)
 		{
-			var props = typeof(TModel).GetProperties().Where(pi => HasValue(pi, criteria));
+			var props = criteria.GetType().GetProperties().Where(pi => HasValue(pi, criteria));
 			return WhereClauseFromProperties(props);
 		}
 
@@ -605,7 +605,7 @@ namespace Postulate.Lite.Core
 
 		private string WhereClauseFromProperties(IEnumerable<PropertyInfo> properties)
 		{
-			return string.Join(" AND ", properties.Select(pi => $"{ApplyDelimiter(pi.GetColumnName())}=@{pi.Name}"));
+			return string.Join(" AND ", properties.Select(pi => $"{ApplyDelimiter(pi.Name)}=@{pi.Name}"));
 		}
 
 		private bool HasValue(PropertyInfo pi, object @object)
