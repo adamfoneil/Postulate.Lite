@@ -45,7 +45,7 @@ Find using criteria with the [FindWhere](https://github.com/adamosoftware/Postul
 ```
 using (var cn = GetConnection())
 {
-  var e = cn.FindWhere(new Employee() { OrganizationId = 12, Number = 3988 });
+  var e = cn.FindWhere(new { OrganizationId = 12, Number = 3988 });
   Console.WriteLine(e.FirstName);
 }
 ```
