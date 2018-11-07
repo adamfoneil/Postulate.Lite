@@ -43,56 +43,6 @@ namespace Postulate.Lite.MySql
 			return $"PRIMARY KEY ({string.Join(", ", pkColumns.Select(pi => ApplyDelimiter(pi.GetColumnName())))})";
 		}
 
-		public override string DropColumnCommand(ColumnInfo columnInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string DropForeignKeyCommand(ForeignKeyInfo foreignKeyInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string DropPrimaryKeyCommand(Type modelType)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string DropTableCommand(TableInfo tableInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override IEnumerable<ForeignKeyInfo> GetDependentForeignKeys(IDbConnection connection, TableInfo tableInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string AddColumnCommand(PropertyInfo propertyInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string AddForeignKeyCommand(PropertyInfo propertyInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string AddForeignKeyCommand(ForeignKeyInfo foreignkeyInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string AddPrimaryKeyCommand(Type modelType)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override string AlterColumnCommand(PropertyInfo propertyInfo)
-		{
-			throw new NotImplementedException();
-		}
-
 		public override string CreateSchemaCommand(string schemaName)
 		{
 			return $"CREATE SCHEMA `{schemaName}`";
@@ -101,26 +51,6 @@ namespace Postulate.Lite.MySql
 		public override bool SchemaExists(IDbConnection connection, string schemaName)
 		{
 			return connection.Exists("`information_schema`.`schemata` WHERE `schema_name`=@schema", new { schema = schemaName });
-		}
-
-		public override void MapProviderSpecificInfo(PropertyInfo pi, ColumnInfo col)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection, string[] excludeSchemas)
-		{
-			throw new NotImplementedException();
-		}
-
-		protected override string SchemaCriteria(string[] excludeSchemas)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection, string[] excludeSchemas)
-		{
-			throw new NotImplementedException();
 		}
 
 		protected override string CreateTableScript(TableInfo table, Type modelType)

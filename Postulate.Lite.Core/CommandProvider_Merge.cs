@@ -33,67 +33,11 @@ namespace Postulate.Lite.Core
 
 		public abstract string CreateSchemaCommand(string schemaName);
 
-		/// <summary>
-		/// Generatea a SQL command to drop a table from a database
-		/// </summary>
-		public abstract string DropTableCommand(TableInfo tableInfo);
-
-		/// <summary>
-		/// Generates a SQL command to add a foreign key to a column
-		/// </summary>
-		public abstract string AddForeignKeyCommand(PropertyInfo propertyInfo);
-
-		public abstract string AddForeignKeyCommand(ForeignKeyInfo foreignkeyInfo);
-
-		/// <summary>
-		/// Generates a SQL command to drop a table's primary key
-		/// </summary>
-		public abstract string DropPrimaryKeyCommand(Type modelType);
-
-		/// <summary>
-		/// Generates a SQL command to add a primary key to a table
-		/// </summary>
-		public abstract string AddPrimaryKeyCommand(Type modelType);
-
-		/// <summary>
-		/// Generates a SQL command to remove a foreign key from a column
-		/// </summary>
-		public abstract string DropForeignKeyCommand(ForeignKeyInfo foreignKeyInfo);
-
-		/// <summary>
-		/// Generates a SQL command to add a column to a table
-		/// </summary>
-		public abstract string AddColumnCommand(PropertyInfo propertyInfo);
-
-		/// <summary>
-		/// Generates a SQL command to add a column to a table
-		/// </summary>
-		public abstract string AddColumnCommand(ColumnInfo columnInfo);
-
-		/// <summary>
-		/// Generates a SQL command to alter the type, nullability, or size of a column
-		/// </summary>
-		public abstract string AlterColumnCommand(PropertyInfo propertyInfo);
-
-		/// <summary>
-		/// Copies provider-specific information about a foreign key to its corresponding ColumnInfo
-		/// </summary>
-		public abstract void MapProviderSpecificInfo(PropertyInfo pi, ColumnInfo col);
-
-		/// <summary>
-		/// Generates a SQL command to remove a column from a table
-		/// </summary>
-		public abstract string DropColumnCommand(ColumnInfo columnInfo);
-
 		#endregion command methods		
 
 		#region schema inspection
-
-		public abstract IEnumerable<ForeignKeyInfo> GetDependentForeignKeys(IDbConnection connection, TableInfo tableInfo);
-
-		public abstract bool SchemaExists(IDbConnection connection, string schemaName);
-
-		public abstract bool IsTableEmpty(IDbConnection connection, Type modelType);
+	
+		public abstract bool SchemaExists(IDbConnection connection, string schemaName);		
 
 		protected IEnumerable<PropertyInfo> GetPrimaryKeyColumns(Type type, IEnumerable<PropertyInfo> columns, out bool identityIsPrimaryKey)
 		{
@@ -109,13 +53,7 @@ namespace Postulate.Lite.Core
 			return result;
 		}
 
-		#endregion schema inspection
-
-		protected abstract string SchemaCriteria(string[] excludeSchemas);
-
-		public abstract Task<IEnumerable<ColumnInfo>> GetSchemaColumnsAsync(IDbConnection connection, string[] excludeSchemas);
-
-		public abstract Task<IEnumerable<TableInfo>> GetSchemaTablesAsync(IDbConnection connection, string[] excludeSchemas);
+		#endregion schema inspection		
 
 		protected abstract string PrimaryKeySyntax(string constraintName, IEnumerable<PropertyInfo> pkColumns);
 
