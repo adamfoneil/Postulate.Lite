@@ -17,7 +17,9 @@ Postulate.Lite is not a Linq replacement. In my applications, I use inline SQL w
 
 ## How to Use
 
-- Create any number of model classes that correspond to your database tables. They can be POCO, but added functionality is available if you inherit from [Postulate.Lite.Core.Record](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Record.cs). The only design requirement for Postulate.Lite model classes is that either they have an [[Identity]](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Attributes/IdentityAttribute.cs) attribute that defines the primary key property, or they have a property called **Id** with no particular attribute decoration.
+- Create any number of model classes that correspond to your database tables. They can be POCO, but added functionality is available if you inherit from [Postulate.Lite.Core.Record](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Record.cs). The only design requirement for Postulate.Lite model classes is that either they have an [[Identity]](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Attributes/IdentityAttribute.cs) attribute that defines the primary key property, or they have a property called **Id** with no particular attribute decoration. You can also use the [[PrimaryKey]](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Attributes/PrimaryKeyAttribute.cs) attribute on select properties to define an explicit primary key.
+
+- Use the [[References]](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Attributes/ReferencesAttribute.cs) attribute to define foreign keys on select properties.
 
 - For Sql Server, Postulate.Lite supports `int`, `Guid`, and `long` identity types. MySql currently supports `int`. When creating your model classes, decide on an identity type and be consistent across all your model classes.
 
@@ -29,7 +31,7 @@ Postulate.Lite is not a Linq replacement. In my applications, I use inline SQL w
 
 ## Examples
 
-A simple find using the [Find](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L262) method:
+A simple find using the [Find](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L489) method:
 
 ```
 using (var cn = GetConnection())
@@ -39,7 +41,7 @@ using (var cn = GetConnection())
 }
 ```
 
-Find using criteria with the [FindWhere](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L296) method:
+Find using criteria with the [FindWhere](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L541) method:
 ```
 using (var cn = GetConnection())
 {
@@ -48,7 +50,7 @@ using (var cn = GetConnection())
 }
 ```
 
-Create and save a record with the [Save](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L229) method.
+Create and save a record with the [Save](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/CommandProvider_Crud.cs#L425) method.
 ```
 using (var cn = GetConnection())
 {
