@@ -1,4 +1,5 @@
 ﻿using Postulate.Lite.Core.Attributes;
+using Postulate.Lite.Core.Enums;
 using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Models;
 using System;
@@ -20,6 +21,8 @@ namespace Postulate.Lite.Core
 		public abstract Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0);
 
 		public abstract string DefaultSchema { get; }
+
+		public abstract SupportedPlatform SupportedPlatform { get; }
 
 		public TableInfo GetTableInfo(Type type)
 		{

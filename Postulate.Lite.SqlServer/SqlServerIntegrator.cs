@@ -1,16 +1,15 @@
 ﻿using Postulate.Lite.Core;
-using Postulate.Lite.Core.Attributes;
-using Postulate.Lite.Core.Models;
+using Postulate.Lite.Core.Enums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
 
 namespace Postulate.Lite.SqlServer
 {
 	public class SqlServerIntegrator : SqlIntegrator
 	{
 		public override string DefaultSchema => "dbo";
+
+		public override SupportedPlatform SupportedPlatform => SupportedPlatform.SqlServer;
 
 		public override Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0)
 		{

@@ -65,6 +65,7 @@
     <Compile Include="Attributes\WhereAttribute.cs" />
     <Compile Include="CommandProvider_ChangeTracking.cs" />
     <Compile Include="CrudException.cs" />
+    <Compile Include="Enums\SupportedPlatform.cs" />
     <Compile Include="Extensions\ConnectionExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\PropertyInfoExtensions.cs" />

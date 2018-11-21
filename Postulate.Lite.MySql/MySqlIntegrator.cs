@@ -1,4 +1,5 @@
 ﻿using Postulate.Lite.Core;
+using Postulate.Lite.Core.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -7,6 +8,8 @@ namespace Postulate.Lite.MySql
 	public class MySqlIntegrator : SqlIntegrator
 	{
 		public override string DefaultSchema => string.Empty;
+
+		public override SupportedPlatform SupportedPlatform => SupportedPlatform.MySql;
 
 		public override Dictionary<Type, SqlTypeInfo> SupportedTypes(int length = 0, int precision = 0, int scale = 0)
 		{
