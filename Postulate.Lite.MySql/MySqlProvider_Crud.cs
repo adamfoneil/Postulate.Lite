@@ -21,11 +21,6 @@ namespace Postulate.Lite.MySql
 			return string.Join(".", name.Split('.').Select(s => $"`{s}`"));			
 		}
 
-		public override bool IsTableEmpty(IDbConnection connection, Type modelType)
-		{
-			throw new NotImplementedException();
-		}
-
 		protected override string FindCommand<T>(string whereClause)
 		{
 			var type = typeof(T);
@@ -86,11 +81,6 @@ namespace Postulate.Lite.MySql
 			}
 
 			return result;
-		}
-
-		public override string AddColumnCommand(ColumnInfo columnInfo)
-		{
-			throw new NotImplementedException();
 		}
 
 		protected override string SqlSelectNextVersion(string tableName)
