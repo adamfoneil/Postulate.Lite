@@ -70,6 +70,7 @@
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\PropertyInfoExtensions.cs" />
     <Compile Include="Extensions\StringInternal.cs" />
+    <Compile Include="Interfaces\ITestableQuery.cs" />
     <Compile Include="Interfaces\ITrackedRecord.cs" />
     <Compile Include="Models\ColumnInfo.cs" />
     <Compile Include="CommandProvider_Merge.cs" />

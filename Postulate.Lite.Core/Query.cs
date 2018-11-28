@@ -131,5 +131,14 @@ namespace Postulate.Lite.Core
 
 			return queryProps;
 		}
+
+		/// <summary>
+		/// Intended for implementing <see cref="Interfaces.ITestableQuery"/>, not intended for use on its own
+		/// </summary>
+		public IEnumerable<dynamic> TestExecuteHelper(IDbConnection connection)
+		{
+			ResolvedSql = ResolveQuery(this, out DynamicParameters queryParams);
+			return connection.Query(ResolvedSql, queryParams);
+		}
 	}
 }
