@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Postulate.Lite.Core.Attributes;
 using Postulate.Lite.Core.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -133,12 +134,19 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Intended for implementing <see cref="Interfaces.ITestableQuery"/>, not intended for use on its own
+		/// Intended for implementing <see cref="Interfaces.ITestableQuery"/> for unit testing, not intended for use on its own
 		/// </summary>
 		public IEnumerable<dynamic> TestExecuteHelper(IDbConnection connection)
 		{
-			ResolvedSql = ResolveQuery(this, out DynamicParameters queryParams);
-			return connection.Query(ResolvedSql, queryParams);
+			try
+			{
+				ResolvedSql = ResolveQuery(this, out DynamicParameters queryParams);
+				return connection.Query(ResolvedSql, queryParams);
+			}
+			catch (Exception exc)
+			{
+				throw new Exception($"Query {GetType().Name} failed: {exc.Message}", exc);
+			}
 		}
 	}
 }
