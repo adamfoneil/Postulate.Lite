@@ -84,6 +84,7 @@
     <Compile Include="Models\RowVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query.cs" />
+    <Compile Include="QueryTesting.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Models\TableInfo.cs" />
     <Compile Include="SqlIntegrator.cs" />
