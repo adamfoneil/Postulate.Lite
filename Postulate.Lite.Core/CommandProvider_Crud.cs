@@ -605,8 +605,8 @@ namespace Postulate.Lite.Core
 		{
 			var record = result as Record;
 
-			var lookup = result as IReferenceLookup<TKey>;
-			if (lookup != null) lookup.FindReferences(connection, this);
+			var lookup = result as IFindRelated<TKey>;
+			if (lookup != null) lookup.FindRelated(connection, this);
 
 			if (user != null)
 			{

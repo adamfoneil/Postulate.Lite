@@ -10,7 +10,7 @@ namespace Tests.Models
 {
 	[Identity(nameof(Id), IdentityPosition.FirstColumn)]
 	[Table("Employee")]
-	public class EmployeeInt : Record, IReferenceLookup<int>
+	public class EmployeeInt : Record, IFindRelated<int>
 	{
 		[References(typeof(Organization))]
 		public int OrganizationId { get; set; }
@@ -37,7 +37,7 @@ namespace Tests.Models
 
 		public int Id { get; set; }
 
-		public void FindReferences(IDbConnection connection, CommandProvider<int> commandProvider)
+		public void FindRelated(IDbConnection connection, CommandProvider<int> commandProvider)
 		{
 			Organization = commandProvider.Find<Organization>(connection, OrganizationId);
 		}
@@ -45,7 +45,7 @@ namespace Tests.Models
 
 	[Identity(nameof(Id))]
 	[Table("Employee")]
-	public class EmployeeLong : Record, IReferenceLookup<long>
+	public class EmployeeLong : Record, IFindRelated<long>
 	{
 		[References(typeof(Organization))]
 		public int OrganizationId { get; set; }
@@ -70,7 +70,7 @@ namespace Tests.Models
 
 		public long Id { get; set; }
 
-		public void FindReferences(IDbConnection connection, CommandProvider<long> commandProvider)
+		public void FindRelated(IDbConnection connection, CommandProvider<long> commandProvider)
 		{
 			Organization = commandProvider.Find<Organization>(connection, OrganizationId);
 		}
