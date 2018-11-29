@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ug7499knw4ut33yj/branch/master?svg=true)](https://ci.appveyor.com/project/adamosoftware/postulate-lite/branch/master)
 
-Postulate.Lite is an ORM built around [Dapper](https://github.com/StackExchange/Dapper) that performs CRUD operations on your model types. It's an evolution of my [Postulate.Orm](https://github.com/adamosoftware/Postulate.Orm) project that is
+Postulate.Lite is a code-first ORM built around [Dapper](https://github.com/StackExchange/Dapper) that performs CRUD operations on your model types. It's an evolution of my [Postulate.Orm](https://github.com/adamosoftware/Postulate.Orm) project that is
 - more POCO-friendly, having no base type dependency
 - easier to use thanks to extension methods (inspired by [Dapper.SimpleCRUD](https://github.com/ericdc1/Dapper.SimpleCRUD))
 - has a more robust, general-purpose schema merge capability, using my [SchemaSync project](https://github.com/adamosoftware/SchemaSync)
@@ -28,6 +28,14 @@ Postulate.Lite is not a Linq replacement. In my applications, I use inline SQL w
 - Use any of the Postulate.Lite Crud extension methods of `IDbConnection`: Find, FindWhere, Save, Insert, Update, Delete, Exists, and ExistsWhere. They all accept a `TModel` generic argument corresponding to your model class. In the SQL Server package, there are three different namespaces with a static `ConnectionExtensions` class that provides the crud methods: [Postulate.Lite.SqlServer.IntKey](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/IntKey/ConnectionExtensions.cs), [LongKey](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/LongKey/ConnectionExtensions.cs), and [GuidKey](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.SqlServer/GuidKey/ConnectionExtensions.cs), so use the namespace appropriate to the identity type you chose above.
 
 - All of the Crud methods accept an `IUser` optional argument you can use to pass the current user name and access to the user's local time. This argument takes effect if your model class is based on `Record` (see above), which offers a number of overrides for checking permissions and executing row-level events, looking up foreign keys, among other things.
+
+## Code-first Migration
+
+There are two ways to merge your model class code to a database:
+
+- Use the free command line tool available [here](https://github.com/adamosoftware/Postulate.Merge). This tool merges only from C# to SQL Server, not from database to database.
+
+- Use my commercial GUI app [SQL Model Merge](https://aosoftware.net/Project/SqlModelMerge). There's more product info and a demo video at that link.
 
 ## Examples
 
