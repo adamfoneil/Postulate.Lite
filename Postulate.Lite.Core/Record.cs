@@ -1,5 +1,6 @@
 ﻿using Postulate.Lite.Core.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace Postulate.Lite.Core
@@ -12,29 +13,14 @@ namespace Postulate.Lite.Core
 	}
 
 	/// <summary>
-	/// Optionally use this as the basis for your model classes to add permission checks, validation, events, and foreign key lookups to your data access layer	
+	/// Optionally use this as the basis for your model classes to add permission checks, validation, events, and foreign key lookups to your data access layer
 	/// </summary>
 	public abstract class Record
 	{
-		public virtual void LookupIntForeignKeys(IDbConnection connection, CommandProvider<int> commandProvider)
-		{
-			// do nothing
-		}
-
-		public virtual void LookupLongForeignKeys(IDbConnection connection, CommandProvider<long> commandProvider)
-		{
-			// do nothing
-		}
-
-		public virtual void LookupGuidForeignKeys(IDbConnection connection, CommandProvider<Guid> commandProvider)
-		{
-			// do nothing
-		}
-
 		/// <summary>
 		/// Override this to verify a record may be saved.
 		/// Throws <see cref="Exceptions.ValidationException"/> on failed validation
-		/// </summary>		
+		/// </summary>
 		public virtual void Validate(IDbConnection connection)
 		{
 			// do nothing by default, but throw ValidationException on error

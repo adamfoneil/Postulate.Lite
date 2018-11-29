@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Postulate.Lite.Core.Attributes;
+using Postulate.Lite.Core.Exceptions;
 using Postulate.Lite.Core.Extensions;
 using Postulate.Lite.Core.Interfaces;
 using System;
@@ -491,8 +492,7 @@ namespace Postulate.Lite.Core
 			string identityCol = typeof(TModel).GetIdentityName();
 			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
 			Trace.WriteLine($"Find: {cmd}");
-			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });
-			LookupForeignKeys(connection, result);
+			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });			
 			return FindInner(connection, result, user);
 		}
 
@@ -508,27 +508,8 @@ namespace Postulate.Lite.Core
 			string identityCol = typeof(TModel).GetIdentityName();
 			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
 			Trace.WriteLine($"FindAsync: {cmd}");
-			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, new { id = identity });
-			LookupForeignKeys(connection, result);
+			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, new { id = identity });			
 			return FindInner(connection, result, user);
-		}
-
-		private void LookupForeignKeys<TModel>(IDbConnection connection, TModel result)
-		{
-			if (typeof(TKey) == typeof(int))
-			{
-				(result as Record)?.LookupIntForeignKeys(connection, this as CommandProvider<int>);
-			}
-
-			if (typeof(TKey) == typeof(long))
-			{
-				(result as Record)?.LookupLongForeignKeys(connection, this as CommandProvider<long>);
-			}
-
-			if (typeof(TKey) == typeof(Guid))
-			{
-				(result as Record)?.LookupGuidForeignKeys(connection, this as CommandProvider<Guid>);
-			}
 		}
 
 		/// <summary>
@@ -556,8 +537,7 @@ namespace Postulate.Lite.Core
 			string whereClause = WhereClauseFromObject(criteria);
 			string cmd = FindCommand<TModel>(whereClause);
 			Trace.WriteLine($"FindWhereAsync: {cmd}");
-			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);
-			LookupForeignKeys(connection, result);
+			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);			
 			return FindInner(connection, result, user);
 		}
 
@@ -577,16 +557,14 @@ namespace Postulate.Lite.Core
 		{
 			string cmd = FindCommand<TModel>(whereClause);
 			Trace.WriteLine($"FindWhereInternal: {cmd}");
-			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);
-			LookupForeignKeys(connection, result);
+			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);			
 			return FindInner(connection, result, user);
 		}
 
 		private async Task<TModel> FindWhereInternalAsync<TModel>(IDbConnection connection, string whereClause, TModel criteria, IUser user = null)
 		{
 			string cmd = FindCommand<TModel>(whereClause);
-			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);
-			LookupForeignKeys(connection, result);
+			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);			
 			return FindInner(connection, result, user);
 		}
 
@@ -623,9 +601,13 @@ namespace Postulate.Lite.Core
 			return false;
 		}
 
-		private static TModel FindInner<TModel>(IDbConnection connection, TModel result, IUser user)
+		private TModel FindInner<TModel>(IDbConnection connection, TModel result, IUser user)
 		{
 			var record = result as Record;
+
+			var lookup = result as IReferenceLookup<TKey>;
+			if (lookup != null) lookup.FindReferences(connection, this);
+
 			if (user != null)
 			{
 				record?.CheckFindPermission(connection, user);
