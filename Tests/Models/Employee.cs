@@ -41,6 +41,36 @@ namespace Tests.Models
 		{
 			Organization = commandProvider.Find<Organization>(connection, OrganizationId);
 		}
+
+		public override bool CheckFindPermission(IDbConnection connection, IUser user)
+		{
+			return (!user.UserName.Equals("adamo"));
+		}
+
+		public override bool CheckDeletePermission(IDbConnection connection, IUser user)
+		{
+			return (!user.UserName.Equals("adamo"));
+		}
+
+		public override bool CheckSavePermission(IDbConnection connection, IUser user)
+		{
+			return (!user.UserName.Equals("adamo"));
+		}
+
+		public const string InvalidMessage = "That was too long ago";
+
+		public override bool Validate(IDbConnection connection, out string message)
+		{
+			message = null;
+
+			if (HireDate < new DateTime(1970, 1, 1))
+			{
+				message = InvalidMessage;
+				return false;
+			}
+
+			return true;
+		}
 	}
 
 	[Identity(nameof(Id))]

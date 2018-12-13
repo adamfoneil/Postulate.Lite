@@ -136,7 +136,7 @@ namespace Postulate.Lite.Core
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
 		public TKey Insert<TModel>(IDbConnection connection, TModel @object, IUser user = null)
 		{
-			var record = PreSave<TModel>(connection, @object, user);
+			var record = PreSave(connection, @object, user);
 
 			TKey result = default(TKey);
 
@@ -244,10 +244,13 @@ namespace Postulate.Lite.Core
 		private Record PreSave<TModel>(IDbConnection connection, TModel @object, IUser user)
 		{
 			var record = @object as Record;
-			record?.Validate(connection);
+
+			string message = null;
+			if (!record?.Validate(connection, out message) ?? false) throw new ValidationException(message);
+
 			if (user != null)
 			{
-				record?.CheckSavePermission(connection, user);
+				if (!record?.CheckSavePermission(connection, user) ?? false) throw new PermissionException($"User {user.UserName} does not have save permission on {typeof(TModel).Name}.");				
 				record?.BeforeSave(connection, SaveAction.Insert, user);
 			}
 			return record;
@@ -610,7 +613,10 @@ namespace Postulate.Lite.Core
 
 			if (user != null)
 			{
-				record?.CheckFindPermission(connection, user);
+				if (!record?.CheckFindPermission(connection, user) ?? false)
+				{
+					throw new PermissionException($"User {user.UserName} does not have find permission on a record of {typeof(TModel).Name}.");
+				}
 			}
 
 			return result;
@@ -627,7 +633,7 @@ namespace Postulate.Lite.Core
 		{
 			var deleteMe = Find<TModel>(connection, identity, user);
 			var record = deleteMe as Record;
-			if (user != null) record?.CheckDeletePermission(connection, user);
+			CheckDeletePermissionInternal<TModel>(connection, user, record);
 
 			string cmd = DeleteCommand<TModel>();
 			Trace.WriteLine($"Delete: {cmd}");
@@ -637,11 +643,19 @@ namespace Postulate.Lite.Core
 			record?.AfterDelete(connection);
 		}
 
+		private void CheckDeletePermissionInternal<TModel>(IDbConnection connection, IUser user, Record record)
+		{
+			if (user != null)
+			{
+				if (!record?.CheckDeletePermission(connection, user) ?? false) throw new PermissionException($"User {user.UserName} does not have delete permission on {typeof(TModel).Name}.");
+			}
+		}
+
 		public async Task DeleteAsync<TModel>(IDbConnection connection, TKey identity, IUser user = null)
 		{
 			var deleteMe = Find<TModel>(connection, identity, user);
 			var record = deleteMe as Record;
-			if (user != null) record?.CheckDeletePermission(connection, user);
+			CheckDeletePermissionInternal<TModel>(connection, user, record);
 
 			string cmd = DeleteCommand<TModel>();
 			await connection.ExecuteAsync(cmd, new { id = identity });

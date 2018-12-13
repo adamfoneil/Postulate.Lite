@@ -21,18 +21,19 @@ namespace Postulate.Lite.Core
 		/// Override this to verify a record may be saved.
 		/// Throws <see cref="Exceptions.ValidationException"/> on failed validation
 		/// </summary>
-		public virtual void Validate(IDbConnection connection)
+		public virtual bool Validate(IDbConnection connection, out string message)
 		{
-			// do nothing by default, but throw ValidationException on error
+			message = null;
+			return true;
 		}
 
 		/// <summary>
 		/// Override this to verify the current user has permission to perform requested action
 		/// Throws <see cref="Exceptions.PermissionException"/> when permissino denied
 		/// </summary>
-		public virtual void CheckSavePermission(IDbConnection connection, IUser user)
+		public virtual bool CheckSavePermission(IDbConnection connection, IUser user)
 		{
-			// do nothing by default, but throw PermissionException on error
+			return true;
 		}
 
 		/// <summary>
@@ -52,9 +53,9 @@ namespace Postulate.Lite.Core
 		/// Override this to verify that the user has permission to view the record that was just found
 		/// Throws <see cref="Exceptions.PermissionException"/> when permission denied
 		/// </summary>
-		public virtual void CheckFindPermission(IDbConnection connection, IUser user)
+		public virtual bool CheckFindPermission(IDbConnection connection, IUser user)
 		{
-			// do nothing by default
+			return true;
 		}
 
 		public virtual void FindReferenced(IDbConnection connection)
@@ -66,9 +67,9 @@ namespace Postulate.Lite.Core
 		/// Override this to verify the user has permission to delete this record
 		/// Throws <see cref="Exceptions.PermissionException"/> when permission denied
 		/// </summary>
-		public virtual void CheckDeletePermission(IDbConnection connection, IUser user)
+		public virtual bool CheckDeletePermission(IDbConnection connection, IUser user)
 		{
-			// do nothing by default
+			return true;
 		}
 
 		public virtual void BeforeDelete(IDbConnection connection)

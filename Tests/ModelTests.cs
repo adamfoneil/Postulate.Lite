@@ -1,8 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Postulate.Lite.Core;
+using Postulate.Lite.Core.Exceptions;
 using Postulate.Lite.Core.Extensions;
+using Postulate.Lite.Core.Interfaces;
+using Postulate.Lite.SqlServer.IntKey;
 using Postulate.Lite.SqlServer;
 using System;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using Tests.Models;
 
@@ -66,5 +72,74 @@ namespace Tests
 				new Organization() { Name = "Gonglethredix" }
 			};
 		}
+
+		[TestMethod]
+		public void InvalidEmpShouldFail()
+		{
+			EmployeeInt e = new EmployeeInt() { FirstName = "Whoever", HireDate = new DateTime(1960, 1, 1) };
+			using (var cn = GetConnection())
+			{
+				string message;
+				Assert.IsTrue(!e.Validate(cn, out message));
+				Assert.IsTrue(message.Equals(EmployeeInt.InvalidMessage));
+			}
+		}
+
+		[TestMethod]
+		public void CheckFindPermission()
+		{
+			using (var cn = GetConnection())
+			{
+				var e = new EmployeeInt() { FirstName = "Whatever", LastName = "Nobody", HireDate = new DateTime(1980, 1, 1) };
+				int empId = cn.Save(e);
+
+				try
+				{
+					var eFind = cn.Find<EmployeeInt>(empId, new TestUser() { UserName = "adamo" });
+				}
+				catch (PermissionException exc)
+				{
+					Assert.IsTrue(exc.Message.Equals("User adamo does not have find permission on a record of EmployeeInt."));
+					return;
+				}
+
+				Assert.Fail("Find operation should have thrown exception.");
+			}
+		}
+
+		[TestMethod]
+		public void CheckSavePermission()
+		{
+			using (var cn = GetConnection())
+			{
+				var e = new EmployeeInt() { FirstName = "Whatever", LastName = "Nobody", HireDate = new DateTime(1980, 1, 1) };
+
+				try
+				{
+					int empId = cn.Save(e, new TestUser() { UserName = "adamo" });
+				}
+				catch (PermissionException exc)
+				{
+					Assert.IsTrue(exc.Message.Equals("User adamo does not have save permission on EmployeeInt."));
+					return;
+				}
+
+				Assert.Fail("Save operation should have thrown exception.");
+			}
+
+		}
+
+		protected IDbConnection GetConnection()
+		{
+			string connectionString = ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString;
+			return new SqlConnection(connectionString);
+		}
+	}
+
+	public class TestUser : IUser
+	{
+		public string UserName { get; set; }
+
+		public DateTime LocalTime { get { return DateTime.Now; } }
 	}
 }

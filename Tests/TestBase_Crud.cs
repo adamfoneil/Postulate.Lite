@@ -335,7 +335,7 @@ namespace Tests
 				var results = qry.Execute(cn);
 				Assert.IsTrue(results.All(r => r.LastName.ToLower().StartsWith("a")));
 			}
-		}
+		}		
 
 		/// <summary>
 		/// Query EmployeeInt table with single param WHERE LastName LIKE @lastName
