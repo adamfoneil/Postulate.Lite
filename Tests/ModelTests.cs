@@ -11,6 +11,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using Tests.Models;
+using Dapper;
 
 namespace Tests
 {
@@ -133,6 +134,29 @@ namespace Tests
 		{
 			string connectionString = ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString;
 			return new SqlConnection(connectionString);
+		}
+
+		private static IDbConnection GetMasterConnection()
+		{
+			string masterConnection = ConfigurationManager.ConnectionStrings["SqlServerMaster"].ConnectionString;
+			return new SqlConnection(masterConnection);
+		}
+
+		[ClassInitialize]
+		public static void InitDb(TestContext context)
+		{
+			try
+			{
+				using (var cn = GetMasterConnection())
+				{
+					cn.Execute("CREATE DATABASE [PostulateLite]");
+				}
+			}
+			catch (Exception exc)
+			{
+				Console.WriteLine("InitDb: " + exc.Message);
+				// do nothing, db already exists or something else out of scope is wrong
+			}
 		}
 	}
 
