@@ -29,7 +29,7 @@ namespace Postulate.Lite.Core
 
 		/// <summary>
 		/// Override this to verify the current user has permission to perform requested action
-		/// Throws <see cref="Exceptions.PermissionException"/> when permissino denied
+		/// Throws <see cref="Exceptions.PermissionException"/> when permission denied
 		/// </summary>
 		public virtual bool CheckSavePermission(IDbConnection connection, IUser user)
 		{
@@ -37,13 +37,16 @@ namespace Postulate.Lite.Core
 		}
 
 		/// <summary>
-		/// Override this to apply any changes to a record immediately before it's saved
+		/// Override this to apply any changes to a record immediately before it's saved, such as audit tracking fields
 		/// </summary>
 		public virtual void BeforeSave(IDbConnection connection, SaveAction action, IUser user)
 		{
 			// do nothing by default
 		}
 
+		/// <summary>
+		/// Override this to execute logic after a record is successfully saved
+		/// </summary>
 		public virtual void AfterSave(IDbConnection connection, SaveAction action)
 		{
 			// do nothing by default
@@ -58,6 +61,10 @@ namespace Postulate.Lite.Core
 			return true;
 		}
 
+		/// <summary>
+		/// Override this to lookup related records
+		/// see https://github.com/adamosoftware/Postulate.Lite/wiki/Using-IFindRelated-to-implement-navigation-properties
+		/// </summary>		
 		public virtual void FindReferenced(IDbConnection connection)
 		{
 			// do nothing by default
