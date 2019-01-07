@@ -1,4 +1,5 @@
 ﻿using Postulate.Lite.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,8 +30,17 @@ namespace Postulate.Lite.Core
 
 		private static Assembly FindReferencedAssembly(Assembly executing, string assemblyName)
 		{
-			var name = executing.GetReferencedAssemblies().Single(a => a.Name.Equals(assemblyName));
-			return Assembly.Load(name);
+			var referenced = executing.GetReferencedAssemblies().ToArray();
+			try
+			{
+				var name = referenced.Single(a => a.Name.Equals(assemblyName));
+				return Assembly.Load(name);
+			}
+			catch (InvalidOperationException)
+			{
+				string available = string.Join(", ", referenced.Select(r => r.Name));
+				throw new Exception($"Couldn't find assembly '{assemblyName}' among these: {available}");
+			}
 		}
 	}
 }
