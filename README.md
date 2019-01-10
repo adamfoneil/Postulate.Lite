@@ -10,6 +10,8 @@ Postulate.Lite is a code-first ORM built around [Dapper](https://github.com/Stac
 
 Postulate.Lite is not a Linq replacement. In my applications, I use inline SQL with Postulate.Lite's [Query&lt;T&gt;](https://github.com/adamosoftware/Postulate.Lite/blob/master/Postulate.Lite.Core/Query.cs) type. Please see the [wiki](https://github.com/adamosoftware/Postulate.Lite/wiki/Using-the-Query-class) page on this.
 
+Check out my [Medium.com post](https://medium.com/@adamosoftware/postulate-lite-orm-2cf9205d0cb3), which has more background.
+
 ## Nuget
 
 - SQL Server package: **Postulate.Lite.SqlServer**
