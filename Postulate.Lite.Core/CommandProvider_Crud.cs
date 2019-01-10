@@ -668,9 +668,9 @@ namespace Postulate.Lite.Core
 		/// </summary>
 		/// <typeparam name="TModel">Model class type</typeparam>
 		/// <param name="connection">Open connection</param>
-		public void CreateTable<TModel>(IDbConnection connection)
+		public void CreateTable<TModel>(IDbConnection connection, string tableName = null)
 		{
-			string cmd = CreateTableCommand(typeof(TModel));
+			string cmd = CreateTableCommand(typeof(TModel), tableName);
 			Trace.WriteLine($"CreateTable: {cmd}");
 			connection.Execute(cmd);
 		}

@@ -29,7 +29,7 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Generates a SQL create table statement for a given model class
 		/// </summary>
-		public abstract string CreateTableCommand(Type modelType);
+		public abstract string CreateTableCommand(Type modelType, string tableName = null);
 
 		public abstract string CreateSchemaCommand(string schemaName);
 

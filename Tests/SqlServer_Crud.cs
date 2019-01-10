@@ -229,6 +229,14 @@ namespace Tests.SqlServer
 				Assert.Fail("Save operation should have thrown exception.");
 			}
 		}
+
+		protected override string CustomTableName => "dbo.HelloOrg";
+
+		[TestMethod]
+		public void CreateOrgTableWithCustomName()
+		{
+			CreateOrgTableWithCustomNameBase();
+		}
 	}
 
 	public class TestUser : IUser

@@ -324,6 +324,22 @@ namespace Tests
 			}
 		}
 
+		protected void CreateOrgTableWithCustomNameBase()
+		{
+			using (var cn = GetConnection())
+			{
+				try
+				{
+					cn.Execute($"DROP TABLE {CustomTableName}");
+				}
+				catch
+				{
+					// do nothing
+				}
+				GetIntProvider().CreateTable<Organization>(cn, CustomTableName);
+			}
+		}
+
 		protected void EmployeeQueryLastNameBase()
 		{
 			InsertEmployeesBase();
@@ -335,12 +351,14 @@ namespace Tests
 				var results = qry.Execute(cn);
 				Assert.IsTrue(results.All(r => r.LastName.ToLower().StartsWith("a")));
 			}
-		}		
+		}
 
 		/// <summary>
 		/// Query EmployeeInt table with single param WHERE LastName LIKE @lastName
 		/// </summary>
 		/// <returns></returns>
 		protected abstract string GetEmployeeQueryByLastNameSyntax();
+
+		protected abstract string CustomTableName { get; }
 	}
 }

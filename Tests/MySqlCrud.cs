@@ -172,6 +172,14 @@ namespace Tests.MySql
 			TrackItemChangesBase();
 		}
 
+		protected override string CustomTableName => "hello_org";
+
+		[TestMethod]
+		public void CreateOrgTableWithCustomName()
+		{
+			CreateOrgTableWithCustomNameBase();
+		}
+
 		protected override string GetEmployeeQueryByLastNameSyntax()
 		{
 			return "SELECT * FROM `Employee` WHERE `LastName` LIKE @lastName";

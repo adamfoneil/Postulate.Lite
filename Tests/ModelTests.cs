@@ -73,7 +73,5 @@ namespace Tests
 				new Organization() { Name = "Gonglethredix" }
 			};
 		}
-
-
 	}
 }

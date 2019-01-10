@@ -21,10 +21,10 @@ namespace Postulate.Lite.SqlServer
 			return connection.Exists("[sys].[schemas] WHERE [name]=@name", new { name = schemaName });
 		}
 
-		public override string CreateTableCommand(Type modelType)
+		public override string CreateTableCommand(Type modelType, string tableName = null)
 		{
-			string tableName = _integrator.GetTableName(modelType);
-			return CreateTableCommandInner(modelType, tableName);
+			string name = tableName ?? _integrator.GetTableName(modelType);
+			return CreateTableCommandInner(modelType, name);
 		}
 	}
 }

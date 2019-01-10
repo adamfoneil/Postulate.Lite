@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Postulate.Lite.MySql
 {
@@ -16,7 +15,7 @@ namespace Postulate.Lite.MySql
 		public override bool SupportsSchemas => false;
 		public override string DefaultSchema => throw new NotImplementedException();
 
-		public override string CreateTableCommand(Type modelType)
+		public override string CreateTableCommand(Type modelType, string tableName = null)
 		{
 			var columns = _integrator.GetMappedColumns(modelType);
 			var pkColumns = GetPrimaryKeyColumns(modelType, columns, out bool identityIsPrimaryKey);
@@ -27,8 +26,10 @@ namespace Postulate.Lite.MySql
 			members.Add(PrimaryKeySyntax(pkColumns));
 			if (!identityIsPrimaryKey) members.Add(UniqueIdSyntax(modelType.GetIdentityProperty()));
 
+			string name = tableName ?? _integrator.GetTableName(modelType);
+
 			return
-				$"CREATE TABLE {ApplyDelimiter(_integrator.GetTableName(modelType))} (" +
+				$"CREATE TABLE {ApplyDelimiter(name)} (" +
 					string.Join(",\r\n\t", members) +
 				")";
 		}
