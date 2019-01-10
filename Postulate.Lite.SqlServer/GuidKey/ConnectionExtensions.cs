@@ -123,9 +123,9 @@ namespace Postulate.Lite.SqlServer.GuidKey
 			await GetProvider().DeleteAsync<TModel>(connection, id, user);
 		}
 
-		public static void CreateTable<TModel>(this IDbConnection connection)
+		public static void CreateTable<TModel>(this IDbConnection connection, string tableName = null)
 		{
-			GetProvider().CreateTable<TModel>(connection);
+			GetProvider().CreateTable<TModel>(connection, tableName);
 		}
 	}
 }
