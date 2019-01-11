@@ -23,12 +23,12 @@ namespace Postulate.Lite.SqlServer.LongKey
 			return await GetProvider().ExistsAsync<TModel>(connection, id, user, tableName);
 		}
 
-		public static bool ExistsWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null, string tableName = null)
+		public static bool ExistsWhere<TModel>(this IDbConnection connection, object criteria, IUser user = null, string tableName = null)
 		{
 			return GetProvider().ExistsWhere<TModel>(connection, criteria, user, tableName);
 		}
 
-		public async static Task<bool> ExistsWhereAsync<TModel>(this IDbConnection connection, TModel criteria, IUser user = null, string tableName = null)
+		public async static Task<bool> ExistsWhereAsync<TModel>(this IDbConnection connection, object criteria, IUser user = null, string tableName = null)
 		{
 			return await GetProvider().ExistsWhereAsync<TModel>(connection, criteria, user, tableName);
 		}
