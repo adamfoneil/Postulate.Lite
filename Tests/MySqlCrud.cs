@@ -180,6 +180,18 @@ namespace Tests.MySql
 			CreateOrgTableWithCustomNameBase();
 		}
 
+		[TestMethod]
+		public void CommonCrudWithCustomTable()
+		{
+			CommonCrudWithCustomTableBase();
+		}
+
+		[TestMethod]
+		public void CommonAsyncCrudWithCustomTable()
+		{
+			CommonAsyncCrudWithCustomTableBase();
+		}
+
 		protected override string GetEmployeeQueryByLastNameSyntax()
 		{
 			return "SELECT * FROM `Employee` WHERE `LastName` LIKE @lastName";

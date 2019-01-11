@@ -23,7 +23,7 @@ namespace Postulate.Lite.SqlServer
 
 		public override string CreateTableCommand(Type modelType, string tableName = null)
 		{
-			string name = tableName ?? _integrator.GetTableName(modelType);
+			string name = GetTableName(modelType, tableName);
 			return CreateTableCommandInner(modelType, name);
 		}
 	}

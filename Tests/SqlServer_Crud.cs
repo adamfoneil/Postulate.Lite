@@ -237,6 +237,18 @@ namespace Tests.SqlServer
 		{
 			CreateOrgTableWithCustomNameBase();
 		}
+
+		[TestMethod]
+		public void CommonCrudWithCustomTable()
+		{
+			CommonCrudWithCustomTableBase();
+		}
+
+		[TestMethod]
+		public void CommonAsyncCrudWithCustomTable()
+		{
+			CommonAsyncCrudWithCustomTableBase();
+		}
 	}
 
 	public class TestUser : IUser

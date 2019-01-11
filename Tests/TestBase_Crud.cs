@@ -328,15 +328,60 @@ namespace Tests
 		{
 			using (var cn = GetConnection())
 			{
-				try
-				{
-					cn.Execute($"DROP TABLE {CustomTableName}");
-				}
-				catch
-				{
-					// do nothing
-				}
+				DropTable(cn, CustomTableName);
 				GetIntProvider().CreateTable<Organization>(cn, CustomTableName);
+			}
+		}		
+
+		protected void CommonCrudWithCustomTableBase()
+		{
+			const string customEmpTable = "EmpSample";
+			var provider = GetIntProvider();
+
+			using (var cn = GetConnection())
+			{
+				DropTable(cn, customEmpTable);
+				provider.CreateTable<EmployeeInt>(cn, customEmpTable);
+
+				// save
+				var e = new EmployeeInt() { FirstName = "Nobody", LastName = "Name", Email = "Whatever@Nowhere.org" };
+				provider.Save(cn, e, tableName: customEmpTable);
+				int id = e.Id;
+
+				// find
+				e = provider.Find<EmployeeInt>(cn, id);
+				Assert.IsTrue(e.Id == id);
+
+				// should really do FindWhere and Merge
+
+				// delete
+				provider.Delete<EmployeeInt>(cn, e.Id, tableName: customEmpTable);
+				Assert.IsTrue(!provider.Exists<EmployeeInt>(cn, id, tableName: customEmpTable));
+			}
+		}
+
+		protected void CommonAsyncCrudWithCustomTableBase()
+		{
+			const string customEmpTable = "EmpSample";
+			var provider = GetIntProvider();
+
+			using (var cn = GetConnection())
+			{
+				DropTable(cn, customEmpTable);
+				provider.CreateTable<EmployeeInt>(cn, customEmpTable);
+
+				// save
+				var e = new EmployeeInt() { FirstName = "Nobody", LastName = "Name", Email = "Whatever@Nowhere.org" };
+				provider.SaveAsync(cn, e, tableName: customEmpTable).Wait();
+				int id = e.Id;
+
+				// find
+				e = provider.FindAsync<EmployeeInt>(cn, id).Result;
+				Assert.IsTrue(e.Id == id);
+
+				// delete
+				provider.DeleteAsync<EmployeeInt>(cn, e.Id, tableName: customEmpTable).Wait();
+				Assert.IsTrue(!provider.ExistsAsync<EmployeeInt>(cn, id, tableName: customEmpTable).Result);
 			}
 		}
 

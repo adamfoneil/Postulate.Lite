@@ -32,11 +32,21 @@ namespace Postulate.Lite.Core
 			_identitySyntax = identitySyntax;
 		}
 
+		protected string GetTableName<T>(string customName)
+		{
+			return GetTableName(typeof(T), customName);
+		}
+
+		protected string GetTableName(Type type, string customName)
+		{
+			return (string.IsNullOrEmpty(customName)) ? _integrator.GetTableName(type) : customName;
+		}
+
 		/// <summary>
 		/// Generates a SQL insert statement for a given model class that returns a generated identity value
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
-		protected abstract string InsertCommand<T>();
+		protected abstract string InsertCommand<T>(string tableName = null);
 
 		/// <summary>
 		/// Generates a SQL insert statement for a given model class without retrieving identity value
@@ -48,20 +58,20 @@ namespace Postulate.Lite.Core
 		/// Generates a SQL update statement for a given model class
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
-		protected abstract string UpdateCommand<T>();
+		protected abstract string UpdateCommand<T>(string tableName = null);
 
 		/// <summary>
 		/// Generates a SQL delete statement for a given model class
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
-		protected abstract string DeleteCommand<T>();
+		protected abstract string DeleteCommand<T>(string tableName = null);
 
 		/// <summary>
 		/// Generates a SQL select statement for a given model class
 		/// </summary>
 		/// <typeparam name="T">Model class type</typeparam>
 		/// <param name="whereClause">WHERE clause to append</param>
-		protected abstract string FindCommand<T>(string whereClause);
+		protected abstract string FindCommand<T>(string whereClause, string tableName = null);
 
 		/// <summary>
 		/// Returns a type-specific identity value from an object
@@ -134,13 +144,13 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public TKey Insert<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		public TKey Insert<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			var record = PreSave(connection, @object, user);
 
 			TKey result = default(TKey);
 
-			string cmd = InsertCommand<TModel>();
+			string cmd = InsertCommand<TModel>(tableName);
 			try
 			{
 				result = connection.QuerySingleOrDefault<TKey>(cmd, @object);
@@ -164,7 +174,7 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public void PlainInsert<TModel>(IDbConnection connection, TModel @object, string tableName = null, IUser user = null)
+		public void PlainInsert<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			var record = PreSave(connection, @object, user);
 
@@ -190,11 +200,11 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public async Task<TKey> InsertAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		public async Task<TKey> InsertAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			var record = PreSave(connection, @object, user);
 
-			string cmd = InsertCommand<TModel>();
+			string cmd = InsertCommand<TModel>(tableName);
 			Trace.WriteLine($"InsertAsync: {cmd}");
 
 			TKey result = default(TKey);
@@ -219,7 +229,7 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public async Task PlainInsertAsync<TModel>(IDbConnection connection, TModel @object, string tableName = null, IUser user = null)
+		public async Task PlainInsertAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			var record = PreSave(connection, @object, user);
 
@@ -329,11 +339,11 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public void Update<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		public void Update<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			var record = PreSave(connection, @object, user);
 
-			string cmd = UpdateCommand<TModel>();
+			string cmd = UpdateCommand<TModel>(tableName);
 			Trace.WriteLine($"Update: {cmd}");
 
 			try
@@ -357,11 +367,11 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public async Task UpdateAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		public async Task UpdateAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			var record = PreSave(connection, @object, user);
 
-			string cmd = UpdateCommand<TModel>();
+			string cmd = UpdateCommand<TModel>(tableName);
 			Trace.WriteLine($"UpdateAsync: {cmd}");
 
 			try
@@ -381,11 +391,11 @@ namespace Postulate.Lite.Core
 		/// <summary>
 		/// Searches for an existing record by its primary key, and updates the existing record or inserts the new one
 		/// </summary>
-		public TKey Merge<TModel>(IDbConnection connection, TModel @object, out SaveAction action, IUser user = null)
+		public TKey Merge<TModel>(IDbConnection connection, TModel @object, out SaveAction action, IUser user = null, string tableName = null)
 		{
 			if (IsNew(@object))
 			{
-				var existing = FindByPrimaryKey(connection, @object, user);
+				var existing = FindByPrimaryKey(connection, @object, user, tableName);
 				if (existing != null) SetIdentity(@object, GetIdentity(existing));
 				action = (existing != null) ? SaveAction.Update : SaveAction.Insert;
 			}
@@ -394,29 +404,29 @@ namespace Postulate.Lite.Core
 				action = SaveAction.Update;
 			}
 
-			return Save(connection, @object, user);
+			return Save(connection, @object, user, tableName);
 		}
 
 		/// <summary>
 		/// Searches for an existing record by its primary key, and updates the existing record or inserts the new one
 		/// </summary>
-		public TKey Merge<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		public TKey Merge<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
-			return Merge(connection, @object, out SaveAction action, user);
+			return Merge(connection, @object, out SaveAction action, user, tableName);
 		}
 
 		/// <summary>
 		/// Searches for an existing record by its primary key, and updates the existing record or inserts the new one
 		/// </summary>
-		public async Task<TKey> MergeAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		public async Task<TKey> MergeAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			if (IsNew(@object))
 			{
-				var existing = await FindByPrimaryKeyAsync(connection, @object, user);
+				var existing = await FindByPrimaryKeyAsync(connection, @object, user, tableName);
 				if (existing != null) SetIdentity(@object, GetIdentity(existing));
 			}
 
-			return await SaveAsync(connection, @object, user);
+			return await SaveAsync(connection, @object, user, tableName);
 		}
 
 		/// <summary>
@@ -426,15 +436,15 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public TKey Save<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		public TKey Save<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			if (IsNew(@object))
 			{
-				return Insert(connection, @object, user);
+				return Insert(connection, @object, user, tableName);
 			}
 			else
 			{
-				Update(connection, @object, user);
+				Update(connection, @object, user, tableName);
 				return GetIdentity(@object);
 			}
 		}
@@ -446,11 +456,11 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="object">Model object. If based on <see cref="Record"/>, then permission checks and row-level events are triggered</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public async Task<TKey> SaveAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null)
+		public async Task<TKey> SaveAsync<TModel>(IDbConnection connection, TModel @object, IUser user = null, string tableName = null)
 		{
 			if (IsNew(@object))
 			{
-				return await InsertAsync(connection, @object, user);
+				return await InsertAsync(connection, @object, user, tableName);
 			}
 			else
 			{
@@ -459,27 +469,27 @@ namespace Postulate.Lite.Core
 			}
 		}
 
-		public bool Exists<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		public bool Exists<TModel>(IDbConnection connection, TKey identity, IUser user = null, string tableName = null)
 		{
-			var record = Find<TModel>(connection, identity, user);
+			var record = Find<TModel>(connection, identity, user, tableName);
 			return (record != null);
 		}
 
-		public async Task<bool> ExistsAsync<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		public async Task<bool> ExistsAsync<TModel>(IDbConnection connection, TKey identity, IUser user = null, string tableName = null)
 		{
-			var record = await FindAsync<TModel>(connection, identity, user);
+			var record = await FindAsync<TModel>(connection, identity, user, tableName);
 			return (record != null);
 		}
 
-		public bool ExistsWhere<TModel>(IDbConnection connection, object criteria, IUser user = null)
+		public bool ExistsWhere<TModel>(IDbConnection connection, object criteria, IUser user = null, string tableName = null)
 		{
-			var record = FindWhere<TModel>(connection, criteria, user);
+			var record = FindWhere<TModel>(connection, criteria, user, tableName);
 			return (record != null);
 		}
 
-		public async Task<bool> ExistsWhereAsync<TModel>(IDbConnection connection, object criteria, IUser user = null)
+		public async Task<bool> ExistsWhereAsync<TModel>(IDbConnection connection, object criteria, IUser user = null, string tableName = null)
 		{
-			var record = await FindWhereAsync<TModel>(connection, criteria, user);
+			var record = await FindWhereAsync<TModel>(connection, criteria, user, tableName);
 			return (record != null);
 		}
 
@@ -490,10 +500,10 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="identity">Primary key value</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public TModel Find<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		public TModel Find<TModel>(IDbConnection connection, TKey identity, IUser user = null, string tableName = null)
 		{
 			string identityCol = typeof(TModel).GetIdentityName();
-			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
+			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id", tableName);
 			Trace.WriteLine($"Find: {cmd}");
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, new { id = identity });			
 			return FindInner(connection, result, user);
@@ -506,10 +516,10 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="identity">Primary key value</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public async Task<TModel> FindAsync<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		public async Task<TModel> FindAsync<TModel>(IDbConnection connection, TKey identity, IUser user = null, string tableName = null)
 		{
 			string identityCol = typeof(TModel).GetIdentityName();
-			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id");
+			string cmd = FindCommand<TModel>($"{ApplyDelimiter(identityCol)}=@id", tableName);
 			Trace.WriteLine($"FindAsync: {cmd}");
 			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, new { id = identity });			
 			return FindInner(connection, result, user);
@@ -522,10 +532,10 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="criteria">Object specifying the criteria to search for</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public TModel FindWhere<TModel>(IDbConnection connection, object criteria, IUser user = null)
+		public TModel FindWhere<TModel>(IDbConnection connection, object criteria, IUser user = null, string tableName = null)
 		{
 			string whereClause = WhereClauseFromObject(criteria);
-			return FindWhereInternal<TModel>(connection, whereClause, criteria, user);
+			return FindWhereInternal<TModel>(connection, whereClause, criteria, user, tableName);
 		}
 
 		/// <summary>
@@ -535,38 +545,38 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="criteria">Object specifying the criteria to search for</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public async Task<TModel> FindWhereAsync<TModel>(IDbConnection connection, object criteria, IUser user = null)
+		public async Task<TModel> FindWhereAsync<TModel>(IDbConnection connection, object criteria, IUser user = null, string tableName = null)
 		{
 			string whereClause = WhereClauseFromObject(criteria);
-			string cmd = FindCommand<TModel>(whereClause);
+			string cmd = FindCommand<TModel>(whereClause, tableName);
 			Trace.WriteLine($"FindWhereAsync: {cmd}");
 			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);			
 			return FindInner(connection, result, user);
 		}
 
-		private TModel FindByPrimaryKey<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		private TModel FindByPrimaryKey<TModel>(IDbConnection connection, TModel criteria, IUser user = null, string tableName = null)
 		{
 			string whereClause = PrimaryKeyWhereClauseFromObject(criteria);
-			return FindWhereInternal<TModel>(connection, whereClause, criteria, user);
+			return FindWhereInternal<TModel>(connection, whereClause, criteria, user, tableName);
 		}
 
-		private async Task<TModel> FindByPrimaryKeyAsync<TModel>(IDbConnection connection, TModel criteria, IUser user = null)
+		private async Task<TModel> FindByPrimaryKeyAsync<TModel>(IDbConnection connection, TModel criteria, IUser user = null, string tableName = null)
 		{
 			string whereClause = PrimaryKeyWhereClauseFromObject(criteria);
-			return await FindWhereInternalAsync(connection, whereClause, criteria, user);
+			return await FindWhereInternalAsync(connection, whereClause, criteria, user, tableName);
 		}
 
-		private TModel FindWhereInternal<TModel>(IDbConnection connection, string whereClause, object criteria, IUser user = null)
+		private TModel FindWhereInternal<TModel>(IDbConnection connection, string whereClause, object criteria, IUser user = null, string tableName = null)
 		{
-			string cmd = FindCommand<TModel>(whereClause);
+			string cmd = FindCommand<TModel>(whereClause, tableName);
 			Trace.WriteLine($"FindWhereInternal: {cmd}");
 			TModel result = connection.QuerySingleOrDefault<TModel>(cmd, criteria);			
 			return FindInner(connection, result, user);
 		}
 
-		private async Task<TModel> FindWhereInternalAsync<TModel>(IDbConnection connection, string whereClause, TModel criteria, IUser user = null)
+		private async Task<TModel> FindWhereInternalAsync<TModel>(IDbConnection connection, string whereClause, TModel criteria, IUser user = null, string tableName = null)
 		{
-			string cmd = FindCommand<TModel>(whereClause);
+			string cmd = FindCommand<TModel>(whereClause, tableName);
 			TModel result = await connection.QuerySingleOrDefaultAsync<TModel>(cmd, criteria);			
 			return FindInner(connection, result, user);
 		}
@@ -629,13 +639,13 @@ namespace Postulate.Lite.Core
 		/// <param name="connection">Open connection</param>
 		/// <param name="identity">Primary key value</param>
 		/// <param name="user">Information about the current user, used when object is based on <see cref="Record"/></param>
-		public void Delete<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		public void Delete<TModel>(IDbConnection connection, TKey identity, IUser user = null, string tableName = null)
 		{
-			var deleteMe = Find<TModel>(connection, identity, user);
+			var deleteMe = Find<TModel>(connection, identity, user, tableName);
 			var record = deleteMe as Record;
 			CheckDeletePermissionInternal<TModel>(connection, user, record);
 
-			string cmd = DeleteCommand<TModel>();
+			string cmd = DeleteCommand<TModel>(tableName);
 			Trace.WriteLine($"Delete: {cmd}");
 
 			connection.Execute(cmd, new { id = identity });
@@ -651,13 +661,13 @@ namespace Postulate.Lite.Core
 			}
 		}
 
-		public async Task DeleteAsync<TModel>(IDbConnection connection, TKey identity, IUser user = null)
+		public async Task DeleteAsync<TModel>(IDbConnection connection, TKey identity, IUser user = null, string tableName = null)
 		{
-			var deleteMe = Find<TModel>(connection, identity, user);
+			var deleteMe = Find<TModel>(connection, identity, user, tableName);
 			var record = deleteMe as Record;
 			CheckDeletePermissionInternal<TModel>(connection, user, record);
 
-			string cmd = DeleteCommand<TModel>();
+			string cmd = DeleteCommand<TModel>(tableName);
 			await connection.ExecuteAsync(cmd, new { id = identity });
 
 			record?.AfterDelete(connection);
