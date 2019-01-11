@@ -43,7 +43,7 @@ namespace Postulate.Lite.SqlServer.LongKey
 			return await GetProvider().FindAsync<TModel>(connection, id, user, tableName);
 		}
 
-		public static TModel FindWhere<TModel>(this IDbConnection connection, TModel criteria, IUser user = null, string tableName = null)
+		public static TModel FindWhere<TModel>(this IDbConnection connection, object criteria, IUser user = null, string tableName = null)
 		{
 			return GetProvider().FindWhere<TModel>(connection, criteria, user, tableName);
 		}
